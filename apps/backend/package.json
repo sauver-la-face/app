@@ -14,8 +14,10 @@
     "@hono/zod-openapi": "^0.16.0",
     "@sauver-la-face/shared": "workspace:*",
     "better-auth": "^1.0.0",
+    "dotenv": "^17.4.1",
     "drizzle-orm": "^0.45.2",
     "hono": "^4.0.0",
+    "pg": "^8.20.0",
     "pino": "^9.0.0",
     "zod": "^3.0.0"
   },

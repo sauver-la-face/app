@@ -270,6 +270,23 @@
 
 ---
 
+## DEVOPS
+
+### DEVOPS-01 — Interface d'administration PostgreSQL (pgAdmin)
+`[ ]` `docker-compose.yml`
+
+**Comportement attendu :**
+- pgAdmin accessible sur `http://localhost:5050`
+- Connexion à la base PostgreSQL locale via l'interface web
+- Authentification par email/mot de passe définis dans les variables d'environnement
+
+**Règles de code :**
+- Ajouter le service `pgadmin` dans `docker-compose.yml`
+- Ajouter `PGADMIN_EMAIL` et `PGADMIN_PASSWORD` dans `.env.example` racine
+- Le service ne doit tourner qu'en développement — ne jamais déployer en production
+
+---
+
 ## WORKFLOW OBLIGATOIRE POUR LES AGENTS
 
 ### Démarrage d'une feature
