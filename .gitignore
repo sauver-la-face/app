@@ -1,0 +1,29 @@
+# Dépendances
+node_modules/
+.bun/
+
+# Environnement — ne jamais committer
+.env
+.env.local
+.env.*.local
+
+# Next.js
+apps/web/.next/
+apps/web/out/
+
+# Expo / React Native
+apps/mobile/.expo/
+apps/mobile/android/
+apps/mobile/ios/
+
+# Build
+dist/
+build/
+
+# Logs
+*.log
+pino.log
+
+# OS
+.DS_Store
+Thumbs.db

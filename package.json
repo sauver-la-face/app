@@ -1,0 +1,17 @@
+{
+  "name": "sauver-la-face",
+  "version": "0.0.1",
+  "private": true,
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev:backend": "bun run --cwd apps/backend dev",
+    "dev:web": "bun run --cwd apps/web dev",
+    "dev:mobile": "bun run --cwd apps/mobile start",
+    "lint": "biome check .",
+    "format": "biome format --write .",
+    "test": "bun test --recursive"
+  }
+}
