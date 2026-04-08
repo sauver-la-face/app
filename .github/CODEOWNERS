@@ -1,0 +1,12 @@
+# CODEOWNERS — Règles de review obligatoires
+#
+# Format : <pattern> <reviewer>
+# Les règles du bas ont priorité sur celles du haut.
+
+# Par défaut : tout le code nécessite une review CodeRabbit
+* @coderabbitai[bot]
+
+# Fichiers sensibles : review du chef de projet en plus
+.github/          @Johnn81100
+.ai/cdc.md        @Johnn81100
+docker-compose.yml @Johnn81100
