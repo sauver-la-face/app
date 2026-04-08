@@ -270,6 +270,21 @@
 
 ---
 
+## WORKFLOW OBLIGATOIRE POUR LES AGENTS
+
+### Démarrage d'une feature
+1. `git checkout dev && git pull origin dev`
+2. Créer la branche en respectant le format : `git checkout -b feature/XXX-00-nom`
+3. Le statut passe automatiquement de `[ ]` à `[~]` via GitHub Actions dès la création de la branche.
+
+### Clôture d'une feature (PR validée et mergée)
+Le statut passe automatiquement de `[~]` à `[x]` via GitHub Actions dès que la PR est mergée sur `dev`.
+
+> **Aucun push direct sur `dev` n'est autorisé.** Tout est automatisé via GitHub Actions.
+> Tout le code passe par une PR depuis une branche `feature/`.
+
+---
+
 ## RÈGLES GLOBALES (toutes les features)
 
 - **Types** : toujours importer depuis `@sauver-la-face/shared`, jamais redéfinir
