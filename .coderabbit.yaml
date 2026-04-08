@@ -42,10 +42,6 @@ reviews:
         Ce package est la source de vérité unique pour les types et schémas Zod.
         Vérifier qu'aucun type n'est redéfini dans les autres apps.
 
-  ignore_titles:
-    - "^chore:"
-    - "^docs:"
-
   auto_review:
     enabled: true
     drafts: false
