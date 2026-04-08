@@ -1,0 +1,56 @@
+language: "fr-FR"
+
+reviews:
+  request_changes_workflow: true
+  high_level_summary: true
+  poem: false
+  review_status: true
+  collapse_walkthrough: false
+
+  path_instructions:
+    - path: "apps/backend/src/features/**/*.service.ts"
+      instructions: |
+        Vérifier que la logique métier est bien dans le service et non dans le router ou le repository.
+        Vérifier la présence de tests TDD pour les services critiques (auth, sync, alerts, exports).
+        Vérifier l'utilisation de Pino pour les logs — aucun console.log autorisé.
+
+    - path: "apps/backend/src/features/sync/**"
+      instructions: |
+        Vérifier que la stratégie de résolution de conflits est bien server-wins.
+        Vérifier que les migrations Drizzle sont additives uniquement (colonnes nullable, pas de suppression).
+        Vérifier la gestion du flag MISSION_ACTIVE pour le gel des déploiements de schéma.
+
+    - path: "apps/backend/src/features/auth/**"
+      instructions: |
+        Vérifier que les codes patients sont bien sur 6 chiffres.
+        Vérifier la logique de soft delete après 48h si le code n'est pas utilisé.
+        Vérifier que BETTER_AUTH_SECRET n'est jamais exposé côté web.
+
+    - path: "apps/mobile/src/features/**"
+      instructions: |
+        Vérifier que toute donnée est d'abord écrite en SQLite avant tout appel réseau.
+        Vérifier que les tokens JWT transitent uniquement via expo-secure-store.
+        Vérifier que la sync_queue gère bien le retry avec backoff exponentiel (1s, 2s, 4s, 8s).
+
+    - path: "apps/web/src/**"
+      instructions: |
+        Vérifier que les appels API sont dans des hooks TanStack Query — pas de fetch direct dans les composants.
+        Vérifier l'absence de BETTER_AUTH_SECRET dans le code web.
+
+    - path: "packages/shared/src/**"
+      instructions: |
+        Ce package est la source de vérité unique pour les types et schémas Zod.
+        Vérifier qu'aucun type n'est redéfini dans les autres apps.
+
+  ignore_titles:
+    - "^chore:"
+    - "^docs:"
+
+  auto_review:
+    enabled: true
+    drafts: false
+    base_branches:
+      - dev
+
+chat:
+  auto_reply: true
