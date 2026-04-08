@@ -1,7 +1,7 @@
 # Contexte projet — Sauver la Face
 
 > Ce fichier est destiné aux assistants IA pour prendre connaissance du projet avant de générer du code.
-> Lire ce fichier en priorité, puis consulter `cdc.md` pour le détail complet.
+> Lire ce fichier en priorité, puis consulter `.ai/cdc.md` pour le détail complet.
 
 ---
 
