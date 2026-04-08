@@ -127,4 +127,4 @@ Tables principales :
 
 ---
 
-*Consulter `.ai/cdc.md` pour le cahier des charges complet.*
+*`.ai/cdc.md` est disponible comme référence complète si besoin d'approfondissement.*

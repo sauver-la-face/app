@@ -1,6 +1,8 @@
 # AGENTS.md — Instructions pour assistants IA
 
-Lire ces deux fichiers avant de générer du code sur ce projet :
+## Lecture obligatoire avant de générer du code
 
-- `.ai/context.md` — résumé du projet, stack, règles critiques (**source de vérité unique**)
-- `.ai/cdc.md` — cahier des charges complet
+- `.ai/context.md` — stack, architecture, règles critiques
+- `.ai/features.md` — fonctionnalités à implémenter et règles par feature
+
+> `.ai/cdc.md` est disponible comme référence complète si besoin d'approfondissement.
