@@ -15,6 +15,14 @@ Installe ces outils avant de démarrer :
 | [Docker Desktop](https://www.docker.com/products/docker-desktop) | 24.x+ | Télécharger sur le site officiel |
 | [Git](https://git-scm.com) | — | Télécharger sur le site officiel |
 
+### Installer bun
+
+Pour installer bun, vous pouvez passer par npm, avec cette commande :
+
+```bash
+npm install -g bun
+```
+
 ---
 
 ## Installation
@@ -40,6 +48,7 @@ Copie les fichiers d'exemple et remplis les valeurs manquantes :
 cp apps/backend/.env.example apps/backend/.env
 cp apps/web/.env.example apps/web/.env.local
 cp apps/mobile/.env.example apps/mobile/.env
+cp .env.example .env
 ```
 
 > Les valeurs à renseigner sont indiquées dans chaque fichier `.env.example`.
