@@ -272,6 +272,17 @@ Déploiement reproductible sur OVH HDS. Docker Compose orchestre **4 services** 
 #### 19. CI/CD — GitHub Actions
 Tests automatisés, déploiements zero-downtime. Pipelines exécutés uniquement sur les packages affectés par chaque PR.
 
+**Workflows automatisés :**
+
+| Déclencheur | Workflow | Action |
+|---|---|---|
+| Création branche `feature/XXX-00-nom` | `feature-in-progress.yml` | `features.md` → `[~]` (en cours) pushé sur `dev` |
+| Push sur une PR | `ci.yml` | Biome lint + TypeScript typecheck + tests — bloquant |
+| PR ouverte vers `dev` | CodeRabbit | Review qualitative automatique (logique, architecture, sécurité) |
+| PR mergée sur `dev` | `update-feature-status.yml` | `features.md` → `[x]` (terminé) pushé sur `dev` |
+
+**Règle de nommage des branches :** `feature/XXX-00-nom-de-la-feature` (ex: `feature/AUTH-01-authentification-patient`) — obligatoire pour que les workflows fonctionnent.
+
 #### 20. Linter / Formatter — Biome
 Remplace ESLint + Prettier en un seul outil. Cohérent avec l'écosystème Bun. Configuration unique à la racine via `biome.json`.
 
