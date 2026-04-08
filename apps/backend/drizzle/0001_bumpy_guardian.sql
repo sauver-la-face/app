@@ -1,0 +1,1 @@
+ALTER TABLE "patient_code" ADD COLUMN "is_active" integer DEFAULT 1 NOT NULL;

@@ -4,21 +4,23 @@
   "private": true,
   "scripts": {
     "dev": "bun run --watch src/index.ts",
+    "start": "bun run src/index.ts",
     "test": "bun test",
     "db:generate": "drizzle-kit generate",
-    "db:migrate": "drizzle-kit migrate"
+    "db:migrate": "drizzle-kit migrate",
+    "db:push": "drizzle-kit push"
   },
   "dependencies": {
-    "hono": "^4.0.0",
     "@hono/zod-openapi": "^0.16.0",
-    "drizzle-orm": "^0.30.0",
+    "@sauver-la-face/shared": "workspace:*",
     "better-auth": "^1.0.0",
-    "zod": "^3.0.0",
+    "drizzle-orm": "^0.45.2",
+    "hono": "^4.0.0",
     "pino": "^9.0.0",
-    "@sauver-la-face/shared": "workspace:*"
+    "zod": "^3.0.0"
   },
   "devDependencies": {
-    "drizzle-kit": "^0.20.0",
+    "drizzle-kit": "^0.31.10",
     "typescript": "^5.0.0"
   }
 }

@@ -1,0 +1,20 @@
+{
+  "version": "5",
+  "dialect": "pg",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "5",
+      "when": 1775651027993,
+      "tag": "0000_pretty_the_renegades",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "5",
+      "when": 1775651383099,
+      "tag": "0001_bumpy_guardian",
+      "breakpoints": true
+    }
+  ]
+}

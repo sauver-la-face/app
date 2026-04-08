@@ -8,12 +8,12 @@ Application de suivi post-opératoire pour patients cambodgiens opérés lors de
 
 Installe ces outils avant de démarrer :
 
-| Outil | Version | Installation |
-|---|---|---|
-| [Bun](https://bun.sh) | 1.1.x+ | `winget install Oven-sh.Bun` (Windows) / `curl -fsSL https://bun.sh/install \| bash` (Mac/Linux) |
-| [Node.js](https://nodejs.org) | 20.x LTS | Requis pour Expo |
-| [Docker Desktop](https://www.docker.com/products/docker-desktop) | 24.x+ | Télécharger sur le site officiel |
-| [Git](https://git-scm.com) | — | Télécharger sur le site officiel |
+| Outil                                                            | Version  | Installation                                                                                     |
+| ---------------------------------------------------------------- | -------- | ------------------------------------------------------------------------------------------------ |
+| [Bun](https://bun.sh)                                            | 1.1.x+   | `winget install Oven-sh.Bun` (Windows) / `curl -fsSL https://bun.sh/install \| bash` (Mac/Linux) |
+| [Node.js](https://nodejs.org)                                    | 20.x LTS | Requis pour Expo                                                                                 |
+| [Docker Desktop](https://www.docker.com/products/docker-desktop) | 24.x+    | Télécharger sur le site officiel                                                                 |
+| [Git](https://git-scm.com)                                       | —        | Télécharger sur le site officiel                                                                 |
 
 ---
 
@@ -54,6 +54,7 @@ docker compose up -d
 ```
 
 Cela démarre :
+
 - **PostgreSQL** sur le port `5432`
 - **MinIO** sur le port `9000` (console : `9001`)
 - **Caddy** (reverse proxy) sur les ports `80` / `443`
@@ -129,6 +130,7 @@ gh pr create --base dev --title "feat: AUTH-01 authentification patient"
 ```
 
 **Automatisations :**
+
 - Création de branche `feature/` → statut mis à jour automatiquement dans `features.md`
 - PR ouverte → **CodeRabbit** review automatiquement
 - CI bloquant → Biome + TypeScript + tests doivent passer
@@ -146,6 +148,9 @@ bun run format      # formate le code
 # Tests
 bun test --recursive
 
+# Installer Drizzle
+bun add drizzle-orm
+
 # Générer les migrations Drizzle
 bun run --cwd apps/backend db:generate
 
@@ -155,4 +160,4 @@ docker compose down
 
 ---
 
-*Projet Sauver la Face — Ydays 2025/2026*
+_Projet Sauver la Face — Ydays 2025/2026_

@@ -1,0 +1,457 @@
+{
+  "id": "a5cc8ca1-5b6c-4ba7-8417-e6cd9b5a02b7",
+  "prevId": "00000000-0000-0000-0000-000000000000",
+  "version": "5",
+  "dialect": "pg",
+  "tables": {
+    "instructions": {
+      "name": "instructions",
+      "schema": "",
+      "columns": {
+        "uuid_instructions": {
+          "name": "uuid_instructions",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "uuid_physician": {
+          "name": "uuid_physician",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "uuid_medical_procedure": {
+          "name": "uuid_medical_procedure",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "content": {
+          "name": "content",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "acknowledged_at": {
+          "name": "acknowledged_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "instructions_uuid_physician_physician_uuid_physician_fk": {
+          "name": "instructions_uuid_physician_physician_uuid_physician_fk",
+          "tableFrom": "instructions",
+          "tableTo": "physician",
+          "columnsFrom": [
+            "uuid_physician"
+          ],
+          "columnsTo": [
+            "uuid_physician"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "instructions_uuid_medical_procedure_medical_procedure_uuid_medical_procedure_fk": {
+          "name": "instructions_uuid_medical_procedure_medical_procedure_uuid_medical_procedure_fk",
+          "tableFrom": "instructions",
+          "tableTo": "medical_procedure",
+          "columnsFrom": [
+            "uuid_medical_procedure"
+          ],
+          "columnsTo": [
+            "uuid_medical_procedure"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {}
+    },
+    "media": {
+      "name": "media",
+      "schema": "",
+      "columns": {
+        "uuid_media": {
+          "name": "uuid_media",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "uuid_event": {
+          "name": "uuid_event",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "file_url": {
+          "name": "file_url",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "file_type": {
+          "name": "file_type",
+          "type": "varchar(20)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "taken_at": {
+          "name": "taken_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "description": {
+          "name": "description",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "media_uuid_event_medical_event_uuid_event_fk": {
+          "name": "media_uuid_event_medical_event_uuid_event_fk",
+          "tableFrom": "media",
+          "tableTo": "medical_event",
+          "columnsFrom": [
+            "uuid_event"
+          ],
+          "columnsTo": [
+            "uuid_event"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {}
+    },
+    "medical_event": {
+      "name": "medical_event",
+      "schema": "",
+      "columns": {
+        "uuid_event": {
+          "name": "uuid_event",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "uuid_medical_procedure": {
+          "name": "uuid_medical_procedure",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "uuid_physician": {
+          "name": "uuid_physician",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "event_type": {
+          "name": "event_type",
+          "type": "varchar(100)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "event_title": {
+          "name": "event_title",
+          "type": "varchar(200)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "description": {
+          "name": "description",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "severity": {
+          "name": "severity",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "medical_event_uuid_medical_procedure_medical_procedure_uuid_medical_procedure_fk": {
+          "name": "medical_event_uuid_medical_procedure_medical_procedure_uuid_medical_procedure_fk",
+          "tableFrom": "medical_event",
+          "tableTo": "medical_procedure",
+          "columnsFrom": [
+            "uuid_medical_procedure"
+          ],
+          "columnsTo": [
+            "uuid_medical_procedure"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "medical_event_uuid_physician_physician_uuid_physician_fk": {
+          "name": "medical_event_uuid_physician_physician_uuid_physician_fk",
+          "tableFrom": "medical_event",
+          "tableTo": "physician",
+          "columnsFrom": [
+            "uuid_physician"
+          ],
+          "columnsTo": [
+            "uuid_physician"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {}
+    },
+    "medical_procedure": {
+      "name": "medical_procedure",
+      "schema": "",
+      "columns": {
+        "uuid_medical_procedure": {
+          "name": "uuid_medical_procedure",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "uuid_patient": {
+          "name": "uuid_patient",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "procedure_type": {
+          "name": "procedure_type",
+          "type": "varchar(100)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "date": {
+          "name": "date",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "hospital_name": {
+          "name": "hospital_name",
+          "type": "varchar(200)",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "medical_procedure_uuid_patient_patient_uuid_patient_fk": {
+          "name": "medical_procedure_uuid_patient_patient_uuid_patient_fk",
+          "tableFrom": "medical_procedure",
+          "tableTo": "patient",
+          "columnsFrom": [
+            "uuid_patient"
+          ],
+          "columnsTo": [
+            "uuid_patient"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {}
+    },
+    "patient": {
+      "name": "patient",
+      "schema": "",
+      "columns": {
+        "uuid_patient": {
+          "name": "uuid_patient",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "first_name": {
+          "name": "first_name",
+          "type": "varchar(100)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "last_name": {
+          "name": "last_name",
+          "type": "varchar(100)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "sex": {
+          "name": "sex",
+          "type": "varchar(10)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "birthdate": {
+          "name": "birthdate",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "region": {
+          "name": "region",
+          "type": "varchar(100)",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {}
+    },
+    "patient_code": {
+      "name": "patient_code",
+      "schema": "",
+      "columns": {
+        "uuid_patient_code": {
+          "name": "uuid_patient_code",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "uuid_patient": {
+          "name": "uuid_patient",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "code": {
+          "name": "code",
+          "type": "varchar(6)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "used_at": {
+          "name": "used_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "deleted_at": {
+          "name": "deleted_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "patient_code_uuid_patient_patient_uuid_patient_fk": {
+          "name": "patient_code_uuid_patient_patient_uuid_patient_fk",
+          "tableFrom": "patient_code",
+          "tableTo": "patient",
+          "columnsFrom": [
+            "uuid_patient"
+          ],
+          "columnsTo": [
+            "uuid_patient"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {}
+    },
+    "physician": {
+      "name": "physician",
+      "schema": "",
+      "columns": {
+        "uuid_physician": {
+          "name": "uuid_physician",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "first_name": {
+          "name": "first_name",
+          "type": "varchar(100)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "last_name": {
+          "name": "last_name",
+          "type": "varchar(100)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "phone_number": {
+          "name": "phone_number",
+          "type": "varchar(20)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "mail": {
+          "name": "mail",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "password_hash": {
+          "name": "password_hash",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "physician_mail_unique": {
+          "name": "physician_mail_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "mail"
+          ]
+        }
+      }
+    }
+  },
+  "enums": {},
+  "schemas": {},
+  "_meta": {
+    "columns": {},
+    "schemas": {},
+    "tables": {}
+  }
+}

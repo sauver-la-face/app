@@ -2,7 +2,7 @@
 FROM oven/bun:latest
 
 # Définit le répertoire de travail
-WORKDIR /app
+WORKDIR /app/apps/backend
 
 # Copie les fichiers de dépendances
 COPY package.json  ./
@@ -17,4 +17,4 @@ COPY . .
 EXPOSE 3001
 
 # Commande de démarrage
-CMD ["bun", "run", "start"]
+CMD ["bun", "run", "dev"]
