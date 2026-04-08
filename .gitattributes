@@ -1,0 +1,15 @@
+# Normalise les fins de ligne en LF pour tout le monde
+* text=auto eol=lf
+
+# Fichiers binaires — pas de conversion
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.webp binary
+*.ico binary
+*.woff binary
+*.woff2 binary
+*.ttf binary
+*.otf binary
+*.zip binary
+*.apk binary
