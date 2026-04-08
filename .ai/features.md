@@ -277,11 +277,16 @@
 2. Créer la branche en respectant le format : `git checkout -b feature/XXX-00-nom`
 3. Le statut passe automatiquement de `[ ]` à `[~]` via GitHub Actions dès la création de la branche.
 
-### Clôture d'une feature (PR validée et mergée)
-Le statut passe automatiquement de `[~]` à `[x]` via GitHub Actions dès que la PR est mergée sur `dev`.
+### Clôture d'une feature (feature terminée)
+Quand le code est prêt et testé, l'agent crée la PR manuellement vers `dev` :
+```bash
+gh pr create --base dev --title "feat: XXX-00 nom de la feature" --body "..."
+```
+- CodeRabbit review automatiquement la PR
+- Une fois la PR mergée, le statut passe automatiquement de `[~]` à `[x]` via GitHub Actions
 
-> **Aucun push direct sur `dev` n'est autorisé.** Tout est automatisé via GitHub Actions.
-> Tout le code passe par une PR depuis une branche `feature/`.
+> **Aucun push direct sur `dev` n'est autorisé.**
+> La PR est créée uniquement quand la feature est terminée et testée — pas avant.
 
 ---
 
