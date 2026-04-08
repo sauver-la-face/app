@@ -1,0 +1,18 @@
+Lire `.ai/context.md` et `.ai/cdc.md` avant de générer du code sur ce projet.
+
+## Règles
+
+- Utiliser les types de `@sauver-la-face/shared` — ne jamais redéfinir ce qui existe dans `packages/shared/src/schema.ts`
+- Architecture backend : router / service / repository — logique métier dans le service uniquement
+- TDD sur les parties critiques : sync, alertes, auth, exports
+- Conflits offline : server-wins
+- Migrations Drizzle : additives uniquement (colonnes nullable), jamais de suppression
+- Pas de `BETTER_AUTH_SECRET` dans `apps/web/`
+
+## Stack
+
+- Backend : Bun + Hono + Drizzle + PostgreSQL + Better Auth + Pino
+- Web : Next.js 14 App Router + TanStack Query + Tailwind CSS
+- Mobile : React Native + Expo SDK 52 + expo-sqlite + expo-secure-store + i18next
+- Shared : Zod
+- Tooling : Biome, bun:test, GitHub Actions, Docker Compose
