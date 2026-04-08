@@ -7,7 +7,7 @@
 ## BACKEND
 
 ### AUTH-01 — Authentification patients (codes 6 chiffres)
-`[ ]` **TDD obligatoire** · `apps/backend/src/features/auth/`
+`[ ]` `apps/backend/src/features/auth/`
 
 **Comportement attendu :**
 - Génération d'un code numérique 6 chiffres unique par patient
@@ -23,7 +23,7 @@
 ---
 
 ### AUTH-02 — Authentification médecins (MFA TOTP)
-`[ ]` **TDD obligatoire** · `apps/backend/src/features/auth/`
+`[ ]` `apps/backend/src/features/auth/`
 
 **Comportement attendu :**
 - MFA TOTP obligatoire via Better Auth
@@ -37,7 +37,7 @@
 ---
 
 ### SYNC-01 — Réception et résolution des conflits (server-wins)
-`[ ]` **TDD obligatoire** · `apps/backend/src/features/sync/`
+`[ ]` `apps/backend/src/features/sync/`
 
 **Comportement attendu :**
 - Réception du payload offline du mobile
@@ -53,7 +53,7 @@
 ---
 
 ### ALERT-01 — Système d'alertes automatiques
-`[ ]` **TDD obligatoire** · `apps/backend/src/features/alerts/`
+`[ ]` `apps/backend/src/features/alerts/`
 
 **Comportement attendu :**
 - Alerte si `severity > 7` sur un `medical_event`
@@ -83,7 +83,7 @@
 ---
 
 ### EXPORT-01 — Export PDF / CSV RGPD
-`[ ]` **TDD obligatoire** · `apps/backend/src/features/exports/`
+`[ ]` `apps/backend/src/features/exports/`
 
 **Comportement attendu :**
 - Export PDF rapport complet d'un patient
@@ -195,7 +195,7 @@
 ## APPLICATION MOBILE
 
 ### MOB-01 — Authentification patient (code 6 chiffres)
-`[ ]` **TDD obligatoire** · `apps/mobile/src/features/auth/`
+`[ ]` `apps/mobile/src/features/auth/`
 
 **Comportement attendu :**
 - Écran de saisie du code 6 chiffres (clavier numérique)
@@ -225,7 +225,7 @@
 ---
 
 ### MOB-03 — Capture et compression de photos
-`[ ]` **TDD obligatoire** · `apps/mobile/src/features/photos/`
+`[ ]` `apps/mobile/src/features/photos/`
 
 **Comportement attendu :**
 - Ouverture caméra native via Expo
@@ -242,7 +242,7 @@
 ---
 
 ### MOB-04 — Queue de synchronisation (offline → backend)
-`[ ]` **TDD obligatoire** · `apps/mobile/src/features/sync/`
+`[ ]` `apps/mobile/src/features/sync/`
 
 **Comportement attendu :**
 - Table `sync_queue` en SQLite : stocke toutes les actions en attente
@@ -291,6 +291,8 @@ gh pr create --base dev --title "feat: XXX-00 nom de la feature" --body "..."
 ---
 
 ## RÈGLES GLOBALES (toutes les features)
+
+- **TDD obligatoire sur toutes les features** : l'agent écrit les tests en premier, génère l'implémentation pour les faire passer, puis le développeur valide. Ne jamais générer du code sans test associé.
 
 - **Types** : toujours importer depuis `@sauver-la-face/shared`, jamais redéfinir
 - **Backend** : router → service → repository. La logique métier va dans le service uniquement
