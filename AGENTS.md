@@ -1,0 +1,8 @@
+# AGENTS.md — Instructions pour assistants IA
+
+## Lecture obligatoire avant de générer du code
+
+- `.ai/context.md` — stack, architecture, règles critiques
+- `.ai/features.md` — fonctionnalités à implémenter et règles par feature
+
+> `.ai/cdc.md` est disponible comme référence complète si besoin d'approfondissement.

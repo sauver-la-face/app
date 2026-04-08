@@ -1,0 +1,58 @@
+name: Mise à jour statut feature
+
+on:
+  pull_request:
+    types: [closed]
+    branches: [dev]
+
+jobs:
+  update-feature-status:
+    # Se déclenche uniquement si la PR est mergée et vient d'une branche feature/
+    if: github.event.pull_request.merged == true && startsWith(github.event.pull_request.head.ref, 'feature/')
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout dev
+        uses: actions/checkout@v4
+        with:
+          ref: dev
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extraire l'ID de la feature depuis le nom de branche
+        id: feature
+        run: |
+          BRANCH="${{ github.event.pull_request.head.ref }}"
+          # Extrait l'ID ex: AUTH-01 depuis feature/AUTH-01-nom-de-la-feature
+          FEATURE_ID=$(echo "$BRANCH" | sed 's|feature/||' | grep -oE '^[A-Z]+-[0-9]+')
+          echo "id=$FEATURE_ID" >> $GITHUB_OUTPUT
+          echo "Feature ID détecté : $FEATURE_ID"
+
+      - name: Mettre à jour features.md
+        run: |
+          FEATURE_ID="${{ steps.feature.outputs.id }}"
+
+          if [ -z "$FEATURE_ID" ]; then
+            echo "Aucun ID de feature détecté dans le nom de branche — rien à faire"
+            exit 0
+          fi
+
+          # Trouve la ligne du header de la feature
+          LINE=$(grep -n "### ${FEATURE_ID}" .ai/features.md | head -1 | cut -d: -f1)
+
+          if [ -z "$LINE" ]; then
+            echo "Feature $FEATURE_ID non trouvée dans features.md — rien à faire"
+            exit 0
+          fi
+
+          # Met à jour le statut sur la ligne suivante : [~] ou [ ] → [x]
+          sed -i "$((LINE+1))s/\`\[.\]/\`[x]/" .ai/features.md
+          echo "Feature $FEATURE_ID marquée comme terminée [x]"
+
+      - name: Commit et push sur dev
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add .ai/features.md
+          # Ne committe que si le fichier a changé
+          git diff --staged --quiet || git commit -m "chore: feature ${{ steps.feature.outputs.id }} terminée [x]"
+          git push origin dev

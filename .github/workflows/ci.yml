@@ -1,0 +1,62 @@
+name: CI
+
+on:
+  pull_request:
+    branches: [dev, master]
+  push:
+    branches: [dev]
+
+jobs:
+  lint:
+    name: Lint & Format (Biome)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Installer les dépendances
+        run: bun install
+
+      - name: Vérifier le lint et le format
+        run: bun run lint
+
+  typecheck:
+    name: Vérification TypeScript
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Installer les dépendances
+        run: bun install
+
+      - name: Vérifier les types — backend
+        run: bun run --cwd apps/backend tsc --noEmit
+
+      - name: Vérifier les types — web
+        run: bun run --cwd apps/web tsc --noEmit
+
+      - name: Vérifier les types — mobile
+        run: bun run --cwd apps/mobile tsc --noEmit
+
+  test:
+    name: Tests (bun:test)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Installer les dépendances
+        run: bun install
+
+      - name: Lancer les tests
+        run: bun test --recursive
