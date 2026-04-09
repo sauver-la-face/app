@@ -22,3 +22,5 @@ EXPOSE 3001
 
 # Commande de démarrage
 CMD ["bun", "run", "dev"]
+
+USER bun
