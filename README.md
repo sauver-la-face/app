@@ -36,26 +36,27 @@ bun install
 
 ### 3. Configurer les variables d'environnement
 
-Copie les fichiers d'exemple et remplis les valeurs manquantes :
+Les fichiers `.env` avec les valeurs dev par défaut sont déjà committés. Tu dois seulement créer les fichiers locaux avec les vraies credentials :
 
 ```bash
-cp apps/backend/.env.example apps/backend/.env
-cp apps/web/.env.example apps/web/.env.local
-cp apps/mobile/.env.example apps/mobile/.env
-cp .env.example .env
+# Racine — variables Docker Compose (postgres, minio)
+cp .env.example .env.local
+
+# Backend — credentials réels (DATABASE_URL, secrets)
+cp apps/backend/.env.example apps/backend/.env.local
 ```
 
-> Les valeurs à renseigner sont indiquées dans chaque fichier `.env.example`.
+> Remplis les valeurs dans `.env.local` et `apps/backend/.env.local`. Ces fichiers sont gitignorés — ne jamais les committer.
 
 ### 4. Démarrer les services Docker
 
 ```bash
-docker compose up -d
+bun run docker:up
 ```
 
 Cela démarre :
 
-- **PostgreSQL** sur le port `5432`
+- **PostgreSQL** sur le port défini dans `.env.local` (`POSTGRES_PORT`)
 - **MinIO** sur le port `9000` (console : `9001`)
 - **Caddy** (reverse proxy) sur les ports `80` / `443`
 
@@ -155,7 +156,7 @@ bun add drizzle-orm
 bun run --cwd apps/backend db:generate
 
 # Arrêter Docker
-docker compose down
+bun run docker:down
 ```
 
 ---

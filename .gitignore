@@ -2,8 +2,7 @@
 node_modules/
 .bun/
 
-# Environnement — ne jamais committer
-.env
+# Environnement — .env commité (valeurs dev sans secrets), overrides ignorés
 .env.local
 .env.*.local
 

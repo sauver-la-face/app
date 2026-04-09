@@ -538,7 +538,10 @@ export const instructions = pgTable('instructions', {
 
 ## 13. Variables d'environnement
 
-Liste complète des variables nécessaires pour démarrer le projet. À placer dans les fichiers `.env` respectifs — **ne jamais committer ces fichiers**.
+Stratégie :
+- `.env` — valeurs dev par défaut, **commité** (sans secrets)
+- `.env.local` — credentials réels locaux, **gitignorés**
+- **Docker** — injecte les variables en prod via `--env-file .env.local`
 
 ### Backend (`apps/backend/.env`)
 
