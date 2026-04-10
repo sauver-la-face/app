@@ -105,7 +105,9 @@ sauver-la-face/
   .ai/
     context.md      ← Contexte projet pour les agents IA
     features.md     ← Fonctionnalités à implémenter
-    cdc.md          ← Cahier des charges complet
+    cdc.md          ← Cahier des charges complet (déplacé dans docs/)
+  docs/
+    lexique.md      ← Lexique des technologies et concepts du projet
   docker-compose.yml
   biome.json
 ```
@@ -158,6 +160,17 @@ bun run --cwd apps/backend db:generate
 # Arrêter Docker
 bun run docker:down
 ```
+
+---
+
+---
+
+## Documentation
+
+- [Onboarding](docs/onboarding.md) — guide pour un nouveau développeur qui rejoint le projet
+- [Architecture](docs/architecture.md) — décisions techniques et pourquoi elles ont été prises
+- [Lexique technique](docs/lexique.md) — définitions des technologies et concepts utilisés dans le projet
+- [Cahier des charges](docs/cdc.md) — spécifications complètes du projet
 
 ---
 

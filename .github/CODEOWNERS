@@ -8,5 +8,5 @@
 
 # Fichiers sensibles : review du chef de projet en plus
 .github/          @Johnn81100
-.ai/cdc.md        @Johnn81100
+docs/cdc.md       @Johnn81100
 docker-compose.yml @Johnn81100

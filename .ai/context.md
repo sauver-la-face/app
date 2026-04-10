@@ -1,7 +1,7 @@
 # Contexte projet — Sauver la Face
 
 > Ce fichier est destiné aux assistants IA pour prendre connaissance du projet avant de générer du code.
-> Lire ce fichier en priorité, puis consulter `.ai/cdc.md` pour le détail complet.
+> Lire ce fichier en priorité, puis consulter `docs/cdc.md` pour le détail complet.
 
 ---
 
@@ -86,6 +86,19 @@ apps/mobile/src/features/
 - Une fois utilisé (`used_at NOT NULL`), valide pour toujours
 - Renouvellement uniquement par le médecin local
 
+### Logs
+- Toujours importer le logger depuis `apps/backend/src/shared/logger.ts` — ne jamais créer une instance Pino locale
+- Jamais de `console.log` dans le backend
+- Niveaux disponibles : `trace` | `debug` | `info` | `warn` | `error` | `fatal`
+- Par défaut : `debug` en développement, `info` en production
+- Pour forcer un niveau sans toucher au code, définir `LOG_LEVEL` dans `.env.local`
+- Quand utiliser quel niveau :
+  - `debug` — détails internes utiles pendant le développement (ex: payload reçu)
+  - `info` — événements normaux et attendus (ex: patient créé, sync réussie)
+  - `warn` — situation anormale mais non bloquante (ex: tentative sur code expiré)
+  - `error` — erreur impactant une opération (ex: checksum mismatch, échec sync)
+  - `fatal` — erreur critique qui arrête le serveur
+
 ### Alertes temps réel
 - Polling via `refetchInterval` TanStack Query (pas de WebSocket ni SSE)
 - Seuil alerte automatique : douleur > 7 ou saignement présent
@@ -127,4 +140,4 @@ Tables principales :
 
 ---
 
-*`.ai/cdc.md` est disponible comme référence complète si besoin d'approfondissement.*
+*`docs/cdc.md` est disponible comme référence complète si besoin d'approfondissement.*
