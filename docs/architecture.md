@@ -1,3 +1,5 @@
+[← README](../README.md) · [Onboarding](onboarding.md) · [Lexique](lexique.md) · [CDC](cdc.md)
+
 # Architecture — Sauver la Face
 
 > Décisions techniques, choix d'architecture et pourquoi ils ont été faits.

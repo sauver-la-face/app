@@ -1,3 +1,5 @@
+[← README](../README.md) · [Onboarding](onboarding.md) · [Architecture](architecture.md) · [CDC](cdc.md)
+
 # Lexique technique — Sauver la Face
 
 > Définitions des technologies et concepts utilisés dans le projet, avec leur rôle concret.

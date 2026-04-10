@@ -1,3 +1,5 @@
+[← README](../README.md) · [Architecture](architecture.md) · [Lexique](lexique.md) · [CDC](cdc.md)
+
 # Onboarding — Sauver la Face
 
 > Guide pour un nouveau développeur qui rejoint le projet.

@@ -1,3 +1,5 @@
+[← README](../README.md) · [Onboarding](onboarding.md) · [Architecture](architecture.md) · [Lexique](lexique.md)
+
 # Analyse Architecte — Sauver la Face
 > Version 4 — Choix révisés et alignés
 
