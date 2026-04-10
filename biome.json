@@ -1,13 +1,9 @@
 {
-  "$schema": "https://biomejs.dev/schemas/1.8.0/schema.json",
-  "organizeImports": {
-    "enabled": true
-  },
+  "$schema": "https://biomejs.dev/schemas/1.9.4/schema.json",
+  "organizeImports": { "enabled": true },
   "linter": {
     "enabled": true,
-    "rules": {
-      "recommended": true
-    }
+    "rules": { "recommended": true }
   },
   "formatter": {
     "enabled": true,
@@ -18,15 +14,10 @@
   "javascript": {
     "formatter": {
       "quoteStyle": "single",
-      "trailingCommas": "es5"
+      "trailingComma": "es5"
     }
   },
   "files": {
-    "ignore": [
-      "node_modules",
-      ".next",
-      "dist",
-      ".expo"
-    ]
+    "ignore": ["node_modules", ".next", "dist", ".expo"]
   }
 }

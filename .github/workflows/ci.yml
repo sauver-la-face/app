@@ -37,13 +37,16 @@ jobs:
         run: bun install
 
       - name: Vérifier les types — backend
-        run: bunx --cwd apps/backend tsc --noEmit
+        working-directory: apps/backend
+        run: bunx tsc --noEmit
 
       - name: Vérifier les types — web
-        run: bunx --cwd apps/web tsc --noEmit
+        working-directory: apps/web
+        run: bunx tsc --noEmit
 
       - name: Vérifier les types — mobile
-        run: bunx --cwd apps/mobile tsc --noEmit
+        working-directory: apps/mobile
+        run: bunx tsc --noEmit
 
   test:
     name: Tests (bun:test)
