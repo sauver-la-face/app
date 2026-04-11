@@ -90,6 +90,36 @@ Stratégie **server-wins** : en cas de conflit entre une donnée mobile et une d
 
 ---
 
+## Docker — développement vs production
+
+Le `Dockerfile` du backend utilise un **multi-stage build** avec trois étapes :
+
+```
+base  ← installation des dépendances (commune)
+ ├── dev   ← hot reload (bun run dev) — utilisé par docker-compose.yml
+ └── prod  ← démarrage simple (bun run start) — utilisé en production
+```
+
+En développement, Docker Compose cible automatiquement l'étape `dev` :
+
+```yaml
+# docker-compose.yml
+build:
+  target: dev  ← hot reload activé
+```
+
+En production, on cible `prod` :
+
+```yaml
+# docker-compose.prod.yml (à créer au moment du déploiement)
+build:
+  target: prod  ← pas de watch mode, démarrage optimisé
+```
+
+> Ne jamais déployer avec `target: dev` en production — le watch mode surveille les fichiers en permanence et consomme des ressources inutilement.
+
+---
+
 ## Contacts et ressources
 
 - **Branche de travail** : `dev`

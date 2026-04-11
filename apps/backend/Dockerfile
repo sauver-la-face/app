@@ -1,26 +1,26 @@
-# Utilise l'image officielle Bun
-FROM oven/bun:latest
+# ── ÉTAPE 1 : base commune ──────────────────────────────────────────────────────
+FROM oven/bun:1.3.12 AS base
 
-# Définit le répertoire de travail racine du monorepo
 WORKDIR /app
 
-# Copie les fichiers de dépendances du monorepo
 COPY package.json bun.lockb* ./
 COPY apps/backend/package.json ./apps/backend/
 COPY packages/ ./packages/
 
-# Installe les dépendances
 RUN bun install
 
-# Copie le reste du code
 COPY apps/backend/ ./apps/backend/
 
 WORKDIR /app/apps/backend
 
-# Expose le port utilisé par Hono
 EXPOSE 3001
 
-# Commande de démarrage
+USER bun
+
+# ── ÉTAPE 2 : développement (hot reload) ────────────────────────────────────────
+FROM base AS dev
 CMD ["bun", "run", "dev"]
 
-USER bun
+# ── ÉTAPE 3 : production ────────────────────────────────────────────────────────
+FROM base AS prod
+CMD ["bun", "run", "start"]
