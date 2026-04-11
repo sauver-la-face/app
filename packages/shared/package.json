@@ -1,8 +1,12 @@
 {
   "name": "@sauver-la-face/shared",
   "version": "0.0.1",
-  "main": "./src/index.ts",
-  "types": "./src/index.ts",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "scripts": {
+    "build": "tsc --build",
+    "dev": "tsc --build --watch"
+  },
   "dependencies": {
     "drizzle-orm": "^0.45.2",
     "zod": "^3.0.0"

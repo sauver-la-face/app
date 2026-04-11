@@ -14,6 +14,7 @@
     "docker:down": "docker compose --env-file .env.local down",
     "lint": "bunx biome check .",
     "format": "bunx biome format --write .",
+    "build:shared": "bun run --cwd packages/shared build",
     "test": "bun test --recursive"
   },
   "dependencies": {

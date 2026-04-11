@@ -36,6 +36,9 @@ jobs:
       - name: Installer les dépendances
         run: bun install
 
+      - name: Compiler le package shared
+        run: bun run build:shared
+
       - name: Vérifier les types — backend
         run: cd apps/backend && bunx tsc --noEmit
 
