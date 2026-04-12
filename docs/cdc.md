@@ -36,13 +36,14 @@ Développer une application de suivi post-opératoire permettant aux patients ca
 ## 3. Fonctionnalités must-have
 
 ### 📱 Mobile (patient)
-1. **Authentification patient** : connexion code 6 chiffres, session expire après 48h d'inactivité, renouvellement du code par médecin local uniquement
-2. **Interface pictographique** : navigation max 2 clics, boutons min 48x48 dp, langues khmer/français/anglais
-3. **Capture photos cicatrices** : appareil photo intégré, compression automatique, horodatage
-4. **Questionnaire symptômes** : questions visuelles via pictogrammes, réponses simples par tap
-5. **Mode offline complet** : 100% fonctionnalités mobiles sans réseau, stockage local SQLite 50 Mo max
-6. **Synchronisation automatique** : détection connexion, upload silencieux, stratégie server-wins pour conflits
-7. **Instructions médicales** : consultation des consignes pictographiques envoyées par le chirurgien, accusé réception
+1. **Consentement RGPD** : écran obligatoire au premier lancement avant toute collecte, acceptation ou refus explicite avec pictogrammes, date de consentement sauvegardée
+2. **Authentification patient** : connexion code 6 chiffres, session expire après 48h d'inactivité, renouvellement du code par médecin local uniquement
+3. **Interface pictographique** : navigation max 2 clics, boutons min 48x48 dp, langues khmer/français/anglais
+4. **Capture photos cicatrices** : appareil photo intégré, compression automatique, horodatage
+5. **Questionnaire symptômes** : questions visuelles via pictogrammes, réponses simples par tap
+6. **Mode offline complet** : 100% fonctionnalités mobiles sans réseau, stockage local SQLite 50 Mo max
+7. **Synchronisation automatique** : détection connexion, upload silencieux, stratégie server-wins pour conflits
+8. **Instructions médicales** : consultation des consignes pictographiques envoyées par le chirurgien, accusé réception
 
 ### 🖥️ Frontend web (médecins)
 8. **Tableau de bord médecin** : liste patients, alertes symptômes critiques
@@ -141,7 +142,7 @@ Développer une application de suivi post-opératoire permettant aux patients ca
 - Temps résolution incident mineur : 24h
 
 ### Légales
-- Hébergement : HDS certifié obligatoire (OVH Cloud ou AWS Healthcare — à décider)
+- Hébergement : HDS certifié obligatoire — **OVH Cloud retenu** (société française, données sous droit français, pas de risque CLOUD Act contrairement aux hébergeurs américains)
 - Juridiction : droit français, serveurs UE uniquement
 - Responsabilité médicale : app = outil d'aide à la décision, responsabilité médecin
 - Audit sécurité : annuel par organisme certifié
@@ -252,8 +253,10 @@ Chiffrement AES-256 des tokens JWT. Utilise le Keystore Android et le Keychain i
 #### 14. Internationalisation — i18next + expo-localization
 Khmer (défaut) / français / anglais. Détection automatique de la locale système. Chargement lazy pour maintenir l'APK < 30 Mo.
 
-#### 15. Notifications locales — expo-notifications
-Rappels générés localement sans serveur, via alarmes programmées. Fonctionnel en mode offline complet.
+#### 15. Notifications — expo-notifications
+Deux types de notifications :
+- **Locales** : rappels hebdomadaires générés directement par l'app (prise de photos, questionnaire) — fonctionnels en mode offline complet, sans serveur
+- **Push** : notifications envoyées depuis le backend via Expo Push Service (nouvelles instructions médicales) — nécessitent une connexion, token Expo stocké dans `expo-secure-store`
 
 ---
 
@@ -269,10 +272,13 @@ Schémas définis une seule fois dans `packages/shared/` et consommés par le ba
 #### 17. Monorepo — Bun Workspaces
 Workspaces natifs Bun pour gérer les dépendances entre apps et lier le package `shared/`. Turborepo écarté — Bun workspaces couvre tous les besoins du projet à ce stade.
 
-#### 18. Containers — Docker + Docker Compose
-Déploiement reproductible sur OVH HDS. Docker Compose orchestre **4 services** : backend Hono, PostgreSQL, MinIO, reverse proxy.
+#### 18. Reverse proxy — Caddy
+TLS 1.3 obligatoire pour les données de santé (RGPD + HDS) — Caddy le gère par défaut. Certificats Let's Encrypt automatiques, renouvellement inclus. En développement, certificat auto-signé en une ligne (`tls internal`). Hono ne termine jamais le TLS directement — Caddy est la seule porte d'entrée exposée à Internet. Choix retenu face à Nginx (configuration SSL manuelle complexe) et Traefik (courbe d'apprentissage élevée).
 
-#### 19. CI/CD — GitHub Actions
+#### 19. Containers — Docker + Docker Compose
+Déploiement reproductible sur OVH HDS. Docker Compose orchestre **5 services** : Caddy (reverse proxy), backend Hono, PostgreSQL, MinIO, pgAdmin.
+
+#### 20. CI/CD — GitHub Actions
 Tests automatisés, déploiements zero-downtime. Pipelines exécutés uniquement sur les packages affectés par chaque PR.
 
 **Workflows automatisés :**
@@ -286,11 +292,11 @@ Tests automatisés, déploiements zero-downtime. Pipelines exécutés uniquement
 
 **Règle de nommage des branches :** `feature/XXX-00-nom-de-la-feature` (ex: `feature/AUTH-01-authentification-patient`) — obligatoire pour que les workflows fonctionnent.
 
-#### 20. Linter / Formatter — Biome
+#### 21. Linter / Formatter — Biome
 Remplace ESLint + Prettier en un seul outil. Cohérent avec l'écosystème Bun. Configuration unique à la racine via `biome.json`.
 
-#### 21. Git workflow — GitHub Flow
-Une branche par feature, PR obligatoire pour merge sur `dev` et sur `main`. La branche `dev` est la référence pour récupérer le code à jour — chaque développeur rebase depuis `dev` avant de démarrer une feature. La branche `main` est réservée aux releases stables déployées en production. Règle de gel des migrations pendant les missions actives.
+#### 22. Git workflow — GitHub Flow
+Une branche par feature, PR obligatoire pour merge sur `dev` et sur `main`. La branche `dev` est la référence pour récupérer le code à jour — chaque développeur rebase depuis `dev` avant de démarrer une feature. La branche `main` est réservée aux releases stables déployées en production.
 
 **Reviewers :**
 - PR vers `dev` : review automatique par **CodeRabbit** (IA) — détection bugs, incohérences de types, problèmes de sécurité ligne par ligne
