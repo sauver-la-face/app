@@ -139,10 +139,12 @@
 - Utiliser le logger Pino centralisé (`import { logger } from "../logger"`) — jamais de nouvelle instance
 - Niveau de log : `info` pour les succès, `warn` pour les échecs d'authentification, `error` pour les erreurs serveur
 - Pino écrit dans un fichier local d'abord — le cron exporte ensuite vers S3 (robustesse si S3 indisponible)
+- Utiliser `@aws-sdk/client-s3` — client universel compatible MinIO (dev) et OVH S3 (prod) sans changer le code
 - En dev : MinIO local (`S3_ENDPOINT=localhost`, `S3_USE_SSL=false`)
 - En prod : OVH Object Storage (`S3_ENDPOINT=s3.gra.io.cloud.ovh.net`, `S3_USE_SSL=true`)
-- Ajouter `S3_ENDPOINT`, `S3_PORT`, `S3_USE_SSL`, `S3_ACCESS_KEY`, `S3_SECRET_KEY`, `S3_BUCKET_LOGS` dans `.env.example`
+- Variables d'environnement déjà ajoutées dans `.env.example` : `S3_ENDPOINT`, `S3_PORT`, `S3_USE_SSL`, `S3_ACCESS_KEY`, `S3_SECRET_KEY`, `S3_BUCKET_LOGS`
 - Bucket dédié aux logs (`logs-audit`) séparé du bucket photos (`photos`)
+- Installer au moment de l'implémentation : `bun add @aws-sdk/client-s3`
 
 ---
 
