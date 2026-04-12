@@ -574,8 +574,17 @@ MINIO_USE_SSL=false                  # true en production
 NODE_ENV=development
 PORT=3001
 
-# Missions (gel des déploiements de schéma)
-MISSION_ACTIVE=false
+# Logs (optionnel — niveaux : trace | debug | info | warn | error | fatal)
+# Par défaut : "debug" en développement, "info" en production
+LOG_LEVEL=
+
+# S3 — Logs d'audit (dev : MinIO local, prod : OVH Object Storage)
+S3_ENDPOINT=localhost          # prod : s3.gra.io.cloud.ovh.net
+S3_PORT=9000                   # prod : 443
+S3_USE_SSL=false               # prod : true
+S3_ACCESS_KEY=
+S3_SECRET_KEY=
+S3_BUCKET_LOGS=logs-audit
 ```
 
 ### Dashboard web (`apps/web/.env.local`)
