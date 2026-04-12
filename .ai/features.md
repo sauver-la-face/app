@@ -115,6 +115,58 @@
 
 ---
 
+### AUDIT-01 — Middleware d'audit logs
+
+`[ ]` `apps/backend/src/shared/middleware/audit.middleware.ts`
+
+**Comportement attendu :**
+
+- Enregistrer automatiquement chaque requête HTTP reçue par le backend
+- Logger : horodatage UTC, méthode HTTP, route, identifiant utilisateur, adresse IP, user-agent, statut de réponse, durée
+- Ne jamais logger le contenu des données médicales (corps de requête, noms, photos)
+- Export journalier des logs vers le stockage S3 (MinIO en dev, OVH Object Storage en prod)
+- Rétention des logs : 1 an (obligation HDS)
+
+**Fichiers à créer :**
+
+- `apps/backend/src/shared/middleware/audit.middleware.ts` — middleware Hono branché sur toutes les routes
+- `apps/backend/src/shared/storage/logs.storage.ts` — client S3 pour l'export des logs
+- `apps/backend/src/shared/jobs/audit.export.cron.ts` — cron journalier de compression et export vers S3
+
+**Règles de code :**
+
+- Le middleware est branché une seule fois dans `apps/backend/src/index.ts` — actif sur toutes les routes automatiquement
+- Utiliser le logger Pino centralisé (`import { logger } from "../logger"`) — jamais de nouvelle instance
+- Niveau de log : `info` pour les succès, `warn` pour les échecs d'authentification, `error` pour les erreurs serveur
+- Pino écrit dans un fichier local d'abord — le cron exporte ensuite vers S3 (robustesse si S3 indisponible)
+- En dev : MinIO local (`S3_ENDPOINT=localhost`, `S3_USE_SSL=false`)
+- En prod : OVH Object Storage (`S3_ENDPOINT=s3.gra.io.cloud.ovh.net`, `S3_USE_SSL=true`)
+- Ajouter `S3_ENDPOINT`, `S3_PORT`, `S3_USE_SSL`, `S3_ACCESS_KEY`, `S3_SECRET_KEY`, `S3_BUCKET_LOGS` dans `.env.example`
+- Bucket dédié aux logs (`logs-audit`) séparé du bucket photos (`photos`)
+
+---
+
+### API-01 — Documentation OpenAPI auto-générée (Swagger UI)
+
+`[ ]` `apps/backend/src/index.ts`
+
+**Comportement attendu :**
+
+- Documentation interactive accessible sur `http://localhost:3001/docs` en développement
+- Générée automatiquement depuis les schémas Zod des routes Hono — aucune documentation manuelle
+- Chaque route décrit ses paramètres d'entrée, les réponses possibles et les codes d'erreur
+- `/openapi.json` expose le schéma brut pour générer des clients TypeScript côté web et mobile
+
+**Règles de code :**
+
+- Utiliser `@hono/zod-openapi` (déjà installé) — remplacer `new Hono()` par `new OpenAPIHono()`
+- Chaque route est déclarée avec `.openapi()` — les schémas Zod de `@sauver-la-face/shared` sont réutilisés directement, aucun type à réécrire
+- Le endpoint `/docs` est exposé uniquement en développement (`NODE_ENV !== 'production'`)
+- Ajouter un script dans `package.json` du web et du mobile pour régénérer le client TypeScript : `bunx openapi-typescript http://localhost:3001/openapi.json -o src/api.types.ts`
+- Quand un schéma Zod change dans `shared/`, régénérer le client — les types web et mobile sont automatiquement à jour
+
+---
+
 ### PATIENT-01 — CRUD patients et gestion utilisateurs
 
 `[ ]` · `apps/backend/src/features/patients/`
@@ -306,6 +358,30 @@
 
 ---
 
+### MOB-06 — Consentement RGPD première connexion
+
+`[ ]` `apps/mobile/src/features/consent/`
+
+**Comportement attendu :**
+
+- Écran affiché une seule fois au premier lancement, avant l'écran de connexion
+- Présentation claire de ce qui est collecté : photos de cicatrices, questionnaires de symptômes
+- Le patient accepte ou refuse via deux boutons avec pictogrammes
+- Si refus → l'app se ferme, aucune donnée n'est collectée
+- Si accepte → consentement et date d'acceptation sauvegardés dans `expo-secure-store`
+- L'écran ne réapparaît plus jamais après acceptation
+
+**Règles de code :**
+
+- Le consentement est stocké dans `expo-secure-store` avec la date UTC d'acceptation (`consent_given_at`)
+- Au lancement de l'app, vérifier la présence du consentement avant d'afficher l'écran de connexion
+- L'interface est en khmer par défaut — dépend de **I18N-01**
+- Utiliser des pictogrammes pour illustrer chaque type de donnée collectée (accessibilité patients)
+- Ne jamais bypasser cet écran en développement — tester le flux complet
+- Tester : premier lancement sans consentement, refus ferme l'app, acceptation sauvegardée, deuxième lancement skip l'écran
+
+---
+
 ### MOB-05 — Consultation des instructions médicales
 
 `[ ]` · `apps/mobile/src/features/instructions/`
@@ -323,7 +399,89 @@
 
 ---
 
+### MOB-07 — Notifications (locales et push)
+
+`[ ]` `apps/mobile/src/features/notifications/`
+
+**Comportement attendu :**
+
+**Notifications locales (offline) :**
+- Rappel hebdomadaire automatique pour la prise de photos et le remplissage du questionnaire
+- Programmées localement par l'app — fonctionnent sans connexion
+- Planification au premier lancement après consentement (MOB-06)
+
+**Notifications push (serveur) :**
+- Alerte quand le médecin envoie de nouvelles instructions (INSTRUCTION-01)
+- Envoyées depuis le backend via Expo Push Service
+
+**Règles de code :**
+
+- `expo-notifications` est déjà installé dans `apps/mobile/package.json`
+- Demander la permission de notifications au premier lancement (après MOB-06)
+- Les notifications locales sont gérées dans `notifications/local.service.ts`
+- Les notifications push nécessitent l'enregistrement du token Expo côté backend — stocker le token dans `expo-secure-store`
+- L'interface des notifications est en khmer par défaut — dépend de **I18N-01**
+- Tester : permission accordée/refusée, rappel local programmé, réception notification push
+
+---
+
+## INTERNATIONALISATION
+
+### I18N-01 — Internationalisation de l'application mobile (khmer / français)
+
+`[ ]` `apps/mobile/src/i18n/`
+
+**Comportement attendu :**
+
+- Interface en khmer par défaut (`km`)
+- Fallback en français (`fr`) si la traduction khmer est manquante
+- Détection automatique de la langue du device via `expo-localization`
+- Changement de langue possible depuis les paramètres de l'app
+
+**Fichiers de traductions :**
+
+- `apps/mobile/src/i18n/locales/km.json` — traductions khmer
+- `apps/mobile/src/i18n/locales/fr.json` — traductions français
+- `apps/mobile/src/i18n/index.ts` — configuration i18next
+
+**Règles de code :**
+
+- Initialiser i18next avec `initReactI18next` dans `apps/mobile/src/i18n/index.ts`
+- Importer `i18n` une seule fois au point d'entrée de l'app (`App.tsx` ou `_layout.tsx`)
+- Utiliser le hook `useTranslation()` dans tous les composants — jamais de string en dur
+- Les clés de traduction suivent le format `feature.composant.element` (ex. `auth.login.title`)
+- `expo-localization` est déjà installé — utiliser `getLocales()[0].languageCode` pour détecter la langue
+- `i18next` et `react-i18next` sont déjà installés dans `apps/mobile/package.json`
+- Tester : détection langue, fallback, changement de langue dynamique
+
+---
+
 ## DEVOPS
+
+### DEVOPS-02 — Reverse proxy Caddy avec TLS 1.3
+
+`[ ]` `Caddyfile` · `docker-compose.yml`
+
+**Comportement attendu :**
+
+- Caddy termine le TLS en entrée et proxifie vers le backend Hono (`backend:3001`)
+- TLS 1.3 obligatoire — TLS 1.2 et inférieurs rejetés
+- En développement : certificat auto-signé généré automatiquement (`tls internal`)
+- En production : certificat Let's Encrypt automatique via le domaine OVH
+
+**Fichiers à créer/modifier :**
+
+- `Caddyfile` à la racine — configuration du reverse proxy
+- `docker-compose.yml` — ajouter le service `caddy` avec les ports 80 et 443
+
+**Règles de code :**
+
+- Le backend Hono n'expose jamais directement le port 3001 hors du réseau Docker — tout le trafic passe par Caddy
+- `CADDY_DOMAIN` en variable d'environnement pour switcher entre dev (`localhost`) et prod (domaine réel)
+- Le `Caddyfile` est monté en volume dans le service Docker — pas de rebuild image pour changer la config
+- Ajouter `CADDY_DOMAIN` dans `.env.example` et `.env.local`
+
+---
 
 ### DEVOPS-01 — Interface d'administration PostgreSQL (pgAdmin)
 

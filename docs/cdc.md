@@ -7,7 +7,7 @@
 
 ## 1. Objectifs du projet
 
-Développer une application de suivi post-opératoire permettant aux patients cambodgiens opérés lors de missions humanitaires de chirurgie maxillo-faciale de transmettre leurs informations médicales (photos, questionnaires) à leurs soignants en mode offline-first, avec synchronisation automatique. Fournir aux chirurgiens toulousains et médecins locaux un tableau de bord web pour surveiller les patients à distance, gérer les alertes et planifier les missions.
+Développer une application de suivi post-opératoire permettant aux patients cambodgiens opérés lors de missions humanitaires de chirurgie maxillo-faciale de transmettre leurs informations médicales (photos, questionnaires) à leurs soignants en mode offline-first, avec synchronisation automatique. Les chirurgiens toulousains effectuent des missions ponctuelles au Cambodge puis assurent le suivi à distance sur le long terme. Fournir aux chirurgiens toulousains et médecins locaux un tableau de bord web pour surveiller les patients à distance, gérer les alertes et planifier les missions.
 
 ---
 
@@ -132,6 +132,7 @@ Développer une application de suivi post-opératoire permettant aux patients ca
 - Connexions : horodatage UTC, IP, user-agent, succès/échec
 - Actions médicales : consultation dossier, modification, export
 - Rétention : 1 an logs audit, 3 mois logs techniques
+- Stockage : Pino écrit en fichier local, export journalier vers S3 (MinIO en dev, OVH Object Storage certifié HDS en prod) dans un bucket dédié `logs-audit`
 
 ### SLA
 - Disponibilité application mobile : 99.5% (mode offline compense les interruptions)

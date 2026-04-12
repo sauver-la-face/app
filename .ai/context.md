@@ -7,7 +7,7 @@
 
 ## Résumé du projet
 
-Application de suivi post-opératoire pour patients cambodgiens opérés lors de missions humanitaires de chirurgie maxillo-faciale. Permet aux patients d'envoyer photos et questionnaires en mode offline-first, et aux chirurgiens toulousains de surveiller les patients via un dashboard web.
+Application de suivi post-opératoire pour patients cambodgiens opérés lors de missions humanitaires de chirurgie maxillo-faciale. Les chirurgiens toulousains effectuent des missions ponctuelles au Cambodge, opèrent les patients, puis rentrent en France. Le suivi post-opératoire se poursuit ensuite à distance sur le long terme : les patients envoient photos et questionnaires en mode offline-first, et les médecins locaux comme les chirurgiens toulousains surveillent l'évolution des patients et mettent à jour les dossiers via un dashboard web.
 
 ---
 
@@ -18,7 +18,8 @@ Application de suivi post-opératoire pour patients cambodgiens opérés lors de
 | Monorepo | Bun Workspaces |
 | Backend | Bun + Hono + Drizzle ORM + PostgreSQL |
 | Auth | Better Auth (MFA médecins, codes 6 chiffres patients) |
-| Stockage photos | MinIO (S3-compatible) |
+| Stockage photos | MinIO (dev) / OVH Object Storage S3 (prod) |
+| Logs d'audit | MinIO bucket `logs-audit` (dev) / OVH Object Storage bucket `logs-audit` (prod, HDS) |
 | Logs | Pino |
 | Dashboard web | Next.js 14 (App Router) + TanStack Query + Tailwind CSS |
 | Mobile | React Native + Expo SDK 52 |
@@ -30,6 +31,9 @@ Application de suivi post-opératoire pour patients cambodgiens opérés lors de
 | Tests | bun:test (TDD sur les parties critiques) |
 | CI/CD | GitHub Actions |
 | Containers | Docker + Docker Compose |
+| Reverse proxy | Caddy (TLS 1.3, certificats automatiques) |
+| API Documentation | @hono/zod-openapi → Swagger UI + client TypeScript généré |
+| Notifications mobile | expo-notifications (locales offline + push serveur) |
 
 ---
 
@@ -57,11 +61,13 @@ apps/web/src/
 ### Mobile — Feature-based avec storage offline par feature
 ```
 apps/mobile/src/features/
+  consent/      → consentement RGPD première connexion (obligatoire avant tout)
   auth/         → code 6 chiffres, session, expo-secure-store
   questionnaire/ → SQLite local + sync queue
   photos/       → SQLite + compression JPEG
   instructions/ → cache offline, acknowledged_at
   sync/         → orchestration queue SQLite, retry backoff
+  notifications/ → rappels locaux + push serveur (token Expo)
 ```
 
 ---
@@ -69,17 +75,22 @@ apps/mobile/src/features/
 ## Règles critiques à respecter
 
 ### Sécurité
-- TLS 1.3 obligatoire en transit
+- TLS 1.3 obligatoire en transit — terminé par Caddy, jamais exposé directement par Hono
 - AES-256-GCM pour le stockage local (expo-secure-store)
 - MFA TOTP obligatoire pour les médecins web
 - Jamais de `BETTER_AUTH_SECRET` côté Next.js — validation déléguée au backend
 - Hébergement HDS certifié uniquement (OVH Cloud)
+- Token push Expo stocké dans `expo-secure-store` — jamais en clair
+
+### RGPD
+- Consentement explicite obligatoire au premier lancement de l'app mobile (MOB-06) — avant toute collecte
+- La date de consentement (`consent_given_at`) est sauvegardée dans `expo-secure-store`
+- Jamais logger de données patient (nom, prénom, date de naissance) dans Pino
 
 ### Offline & synchronisation
 - Stratégie conflits : **server-wins** (le serveur a toujours raison)
 - Queue de sync : table `sync_queue` en SQLite, retry backoff exponentiel (1s, 2s, 4s, 8s)
 - Migrations de schéma : **toujours additives** (colonnes nullable uniquement, jamais de suppression)
-- Gel des déploiements de schéma pendant les missions actives (`MISSION_ACTIVE=true`)
 
 ### Codes patients
 - Code numérique 6 chiffres, soft delete automatique après 48h si non utilisé

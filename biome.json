@@ -1,7 +1,7 @@
 {
   "$schema": "https://biomejs.dev/schemas/2.4.11/schema.json",
   "files": {
-    "includes": ["**", "!**/drizzle", "!**/dist"]
+    "includes": ["**", "!**/node_modules", "!**/dist", "!**/drizzle", "!**/.next", "!**/.expo"]
   },
   "linter": {
     "enabled": true,

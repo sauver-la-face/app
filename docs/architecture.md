@@ -10,17 +10,24 @@
 
 ```
 ┌─────────────────┐              ┌──────────────────┐              ┌────────────────┐
-│  App mobile     │              │   Backend API    │              │  Dashboard web │
-│  React Native   │◀────API─────▶│   Bun + Hono     │◀────API─────▶│  Next.js 14    │
-│  Expo SDK 52    │              │   Port 3001      │              │  Port 3000     │
-│  (Android)      │              └──────▲───────▲───┘              └────────────────┘
-└─────────────────┘                     │       │
+│  App mobile     │              │     Caddy        │              │  Dashboard web │
+│  React Native   │◀──HTTPS─────▶│  Reverse Proxy   │◀──HTTPS─────▶│  Next.js 14    │
+│  Expo SDK 52    │              │  TLS 1.3         │              │  Port 3000     │
+│  (Android)      │              └────────▲─────────┘              └────────────────┘
+└─────────────────┘                       │ HTTP (réseau interne Docker)
+                                 ┌────────▼─────────┐
+                                 │   Backend API    │
+                                 │   Bun + Hono     │
+                                 │   Port 3001      │
+                                 └──────▲───────▲───┘
+                                        │       │
                                   Drizzle ORM  Client S3
                                         │       │
-                             ┌──────────▼─┐  ┌──▼──────────────┐
-                             │ PostgreSQL │  │     MinIO       │
-                             │ (données)  │  │   (photos)      │
-                             └────────────┘  └─────────────────┘
+                             ┌──────────▼─┐  ┌──▼──────────────────────────────────┐
+                             │ PostgreSQL │  │            Client S3                │
+                             │ (données)  │  │  dev : MinIO    prod : OVH S3 (HDS) │
+                             └────────────┘  │  bucket photos  bucket logs-audit   │
+                                             └─────────────────────────────────────┘
 ```
 
 ---
@@ -52,6 +59,18 @@ Dans un contexte médical, les données du serveur (validées par un médecin) o
 ### Pourquoi Better Auth au lieu d'une auth custom
 La gestion de l'authentification (sessions, tokens, MFA, refresh) est complexe et critique pour la sécurité. Better Auth gère tout ça sans qu'on ait à le coder. On se concentre sur la logique métier.
 
+### Pourquoi Caddy comme reverse proxy
+- TLS 1.3 obligatoire pour les données de santé (RGPD + certification HDS) — Caddy l'active par défaut sans configuration
+- Certificats Let's Encrypt automatiques — renouvellement inclus, zéro intervention manuelle
+- En dev : certificat auto-signé en une ligne (`tls internal`)
+- Config minimaliste (3 lignes) vs Nginx (~30 lignes) ou Traefik (labels Docker complexes)
+- Hono ne termine jamais le TLS directement — Caddy est la seule porte d'entrée exposée à Internet
+
+### Pourquoi OpenAPI avec @hono/zod-openapi
+- Les schémas Zod de `@sauver-la-face/shared` sont réutilisés directement — aucune documentation manuelle
+- `/docs` génère une interface Swagger UI interactive en dev
+- `/openapi.json` permet de générer un client TypeScript pour le web et le mobile en une commande — les types sont toujours synchronisés avec le backend
+
 ### Pourquoi MinIO au lieu de S3 directement
 - Déployable en local pour le développement (pas besoin de credentials AWS)
 - Compatible avec l'API S3 — migration vers S3 ou OVH Object Storage sans changer le code
@@ -67,6 +86,13 @@ La gestion de l'authentification (sessions, tokens, MFA, refresh) est complexe e
 - Le plus rapide des loggers Node.js (format JSON natif, pas de sérialisation coûteuse)
 - Format JSON adapté aux outils de monitoring (Datadog, Loki, etc.)
 - Niveaux structurés — permet de filtrer par `LOG_LEVEL` sans toucher au code
+
+### Logs d'audit — stockage S3
+Les logs d'audit (accès aux données médicales) sont une obligation HDS. Pino écrit dans un fichier local, un cron journalier exporte vers S3 :
+- **Dev** : bucket `logs-audit` sur MinIO local
+- **Prod** : bucket `logs-audit` sur OVH Object Storage (certifié HDS, rétention 1 an)
+
+Même client S3 dans le code — seules les variables d'environnement changent entre dev et prod.
 
 ---
 
@@ -118,11 +144,12 @@ Toutes les migrations sont **additives** : on n'ajoute que des colonnes nullable
 
 | Couche | Mécanisme |
 |---|---|
-| Transit | TLS 1.3 obligatoire |
+| Transit | TLS 1.3 obligatoire (RGPD + HDS) — terminé par Caddy |
 | Stockage mobile | AES-256-GCM via expo-secure-store |
 | Auth médecins | MFA TOTP obligatoire (Better Auth) |
 | Auth patients | Code 6 chiffres + JWT signé HMAC-SHA256 |
 | Intégrité photos | Checksum SHA-256 calculé mobile, vérifié backend |
+| Consentement | Écran RGPD obligatoire au premier lancement (date sauvegardée) |
 | Hébergement | OVH Cloud certifié HDS |
 
 ---

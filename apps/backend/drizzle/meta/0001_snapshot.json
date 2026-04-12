@@ -53,12 +53,8 @@
           "name": "instructions_uuid_physician_physician_uuid_physician_fk",
           "tableFrom": "instructions",
           "tableTo": "physician",
-          "columnsFrom": [
-            "uuid_physician"
-          ],
-          "columnsTo": [
-            "uuid_physician"
-          ],
+          "columnsFrom": ["uuid_physician"],
+          "columnsTo": ["uuid_physician"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -66,12 +62,8 @@
           "name": "instructions_uuid_medical_procedure_medical_procedure_uuid_medical_procedure_fk",
           "tableFrom": "instructions",
           "tableTo": "medical_procedure",
-          "columnsFrom": [
-            "uuid_medical_procedure"
-          ],
-          "columnsTo": [
-            "uuid_medical_procedure"
-          ],
+          "columnsFrom": ["uuid_medical_procedure"],
+          "columnsTo": ["uuid_medical_procedure"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -127,12 +119,8 @@
           "name": "media_uuid_event_medical_event_uuid_event_fk",
           "tableFrom": "media",
           "tableTo": "medical_event",
-          "columnsFrom": [
-            "uuid_event"
-          ],
-          "columnsTo": [
-            "uuid_event"
-          ],
+          "columnsFrom": ["uuid_event"],
+          "columnsTo": ["uuid_event"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -201,12 +189,8 @@
           "name": "medical_event_uuid_medical_procedure_medical_procedure_uuid_medical_procedure_fk",
           "tableFrom": "medical_event",
           "tableTo": "medical_procedure",
-          "columnsFrom": [
-            "uuid_medical_procedure"
-          ],
-          "columnsTo": [
-            "uuid_medical_procedure"
-          ],
+          "columnsFrom": ["uuid_medical_procedure"],
+          "columnsTo": ["uuid_medical_procedure"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -214,12 +198,8 @@
           "name": "medical_event_uuid_physician_physician_uuid_physician_fk",
           "tableFrom": "medical_event",
           "tableTo": "physician",
-          "columnsFrom": [
-            "uuid_physician"
-          ],
-          "columnsTo": [
-            "uuid_physician"
-          ],
+          "columnsFrom": ["uuid_physician"],
+          "columnsTo": ["uuid_physician"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -269,12 +249,8 @@
           "name": "medical_procedure_uuid_patient_patient_uuid_patient_fk",
           "tableFrom": "medical_procedure",
           "tableTo": "patient",
-          "columnsFrom": [
-            "uuid_patient"
-          ],
-          "columnsTo": [
-            "uuid_patient"
-          ],
+          "columnsFrom": ["uuid_patient"],
+          "columnsTo": ["uuid_patient"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -385,12 +361,8 @@
           "name": "patient_code_uuid_patient_patient_uuid_patient_fk",
           "tableFrom": "patient_code",
           "tableTo": "patient",
-          "columnsFrom": [
-            "uuid_patient"
-          ],
-          "columnsTo": [
-            "uuid_patient"
-          ],
+          "columnsFrom": ["uuid_patient"],
+          "columnsTo": ["uuid_patient"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -447,9 +419,7 @@
         "physician_mail_unique": {
           "name": "physician_mail_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "mail"
-          ]
+          "columns": ["mail"]
         }
       }
     }

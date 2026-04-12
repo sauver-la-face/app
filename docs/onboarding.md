@@ -8,7 +8,7 @@
 
 ## Le projet en une phrase
 
-Application mobile offline-first pour des patients cambodgiens opérés lors de missions humanitaires de chirurgie maxillo-faciale. Les patients envoient photos et questionnaires depuis leur téléphone, les chirurgiens toulousains suivent leur évolution via un dashboard web.
+Application mobile offline-first pour des patients cambodgiens opérés lors de missions humanitaires de chirurgie maxillo-faciale. Les chirurgiens toulousains effectuent des missions ponctuelles au Cambodge, opèrent les patients, puis assurent le suivi à distance sur le long terme. Les patients envoient photos et questionnaires depuis leur téléphone, et les médecins locaux comme les chirurgiens toulousains surveillent leur évolution et mettent à jour les dossiers via un dashboard web.
 
 ---
 
@@ -79,8 +79,10 @@ gh pr create --base dev --title "feat: XXX-00 nom de la feature"
 ### Contexte humanitaire
 Les patients sont au Cambodge avec une connexion instable. L'application **doit fonctionner offline**. Toute donnée est d'abord écrite en SQLite local, puis synchronisée. Ne jamais supposer qu'une connexion est disponible côté mobile.
 
-### Données médicales
+### Données médicales et consentement RGPD
 Le projet est soumis au RGPD et à la certification HDS. Ne jamais logger de données patient (nom, prénom, date de naissance). Les exports CSV anonymisent systématiquement ces champs.
+
+L'écran de consentement RGPD (MOB-06) est obligatoire au premier lancement de l'app mobile — il doit s'afficher avant tout autre écran. La date d'acceptation est sauvegardée dans `expo-secure-store`.
 
 ### Conflits de synchronisation
 Stratégie **server-wins** : en cas de conflit entre une donnée mobile et une donnée serveur, le serveur a toujours raison. Toujours logger le conflit avant d'écraser.
@@ -91,6 +93,8 @@ Stratégie **server-wins** : en cas de conflit entre une donnée mobile et une d
 ---
 
 ## Docker — développement vs production
+
+Docker Compose orchestre **5 services** : backend Hono, Caddy (reverse proxy), PostgreSQL, MinIO, pgAdmin.
 
 Le `Dockerfile` du backend utilise un **multi-stage build** avec trois étapes :
 
