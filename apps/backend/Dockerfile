@@ -3,7 +3,7 @@ FROM oven/bun:1.3.12 AS base
 
 WORKDIR /app
 
-COPY package.json bun.lockb* ./
+COPY package.json bun.lock* ./
 COPY apps/backend/package.json ./apps/backend/
 COPY packages/ ./packages/
 
