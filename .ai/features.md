@@ -284,7 +284,7 @@
 
 ## APPLICATION MOBILE
 
-### MOB-01 — Authentification patient (code 6 chiffres)
+### MOB-02 — Authentification patient (code 6 chiffres)
 
 `[ ]` `apps/mobile/src/features/auth/`
 
@@ -302,7 +302,7 @@
 
 ---
 
-### MOB-02 — Questionnaire symptômes (offline)
+### MOB-03 — Questionnaire symptômes (offline)
 
 `[ ]` · `apps/mobile/src/features/questionnaire/`
 
@@ -320,7 +320,7 @@
 
 ---
 
-### MOB-03 — Capture et compression de photos
+### MOB-04 — Capture et compression de photos
 
 `[ ]` `apps/mobile/src/features/photos/`
 
@@ -340,7 +340,7 @@
 
 ---
 
-### MOB-04 — Queue de synchronisation (offline → backend)
+### MOB-05 — Queue de synchronisation (offline → backend)
 
 `[ ]` `apps/mobile/src/features/sync/`
 
@@ -358,7 +358,7 @@
 
 ---
 
-### MOB-06 — Consentement RGPD première connexion
+### MOB-01 — Consentement RGPD première connexion
 
 `[ ]` `apps/mobile/src/features/consent/`
 
@@ -382,7 +382,7 @@
 
 ---
 
-### MOB-05 — Consultation des instructions médicales
+### MOB-06 — Consultation des instructions médicales
 
 `[ ]` · `apps/mobile/src/features/instructions/`
 
@@ -394,7 +394,7 @@
 
 **Règles de code :**
 
-- `acknowledged_at` est envoyé au backend via la `sync_queue` (MOB-04)
+- `acknowledged_at` est envoyé au backend via la `sync_queue` (MOB-05)
 - Les instructions sont mises en cache SQLite pour fonctionner offline
 
 ---
@@ -408,7 +408,7 @@
 **Notifications locales (offline) :**
 - Rappel hebdomadaire automatique pour la prise de photos et le remplissage du questionnaire
 - Programmées localement par l'app — fonctionnent sans connexion
-- Planification au premier lancement après consentement (MOB-06)
+- Planification au premier lancement après consentement (MOB-01)
 
 **Notifications push (serveur) :**
 - Alerte quand le médecin envoie de nouvelles instructions (INSTRUCTION-01)
@@ -417,7 +417,7 @@
 **Règles de code :**
 
 - `expo-notifications` est déjà installé dans `apps/mobile/package.json`
-- Demander la permission de notifications au premier lancement (après MOB-06)
+- Demander la permission de notifications au premier lancement (après MOB-01)
 - Les notifications locales sont gérées dans `notifications/local.service.ts`
 - Les notifications push nécessitent l'enregistrement du token Expo côté backend — stocker le token dans `expo-secure-store`
 - L'interface des notifications est en khmer par défaut — dépend de **I18N-01**

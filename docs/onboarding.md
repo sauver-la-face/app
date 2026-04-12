@@ -82,7 +82,7 @@ Les patients sont au Cambodge avec une connexion instable. L'application **doit 
 ### Données médicales et consentement RGPD
 Le projet est soumis au RGPD et à la certification HDS. Ne jamais logger de données patient (nom, prénom, date de naissance). Les exports CSV anonymisent systématiquement ces champs.
 
-L'écran de consentement RGPD (MOB-06) est obligatoire au premier lancement de l'app mobile — il doit s'afficher avant tout autre écran. La date d'acceptation est sauvegardée dans `expo-secure-store`.
+L'écran de consentement RGPD (MOB-01) est obligatoire au premier lancement de l'app mobile — il doit s'afficher avant tout autre écran. La date d'acceptation est sauvegardée dans `expo-secure-store`.
 
 ### Conflits de synchronisation
 Stratégie **server-wins** : en cas de conflit entre une donnée mobile et une donnée serveur, le serveur a toujours raison. Toujours logger le conflit avant d'écraser.

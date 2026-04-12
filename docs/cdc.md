@@ -380,6 +380,7 @@ Chaque feature gère son propre état SQLite local et sa queue de sync. La couch
 ```
 apps/mobile/src/
   features/
+    consent/                  ← consentement RGPD (premier écran obligatoire)
     auth/
       screens/                ← écran code 6 chiffres
       hooks/                  ← session, expiration 48h
@@ -399,6 +400,9 @@ apps/mobile/src/
     sync/
       sync.service.ts         ← orchestration queue SQLite
       sync.queue.ts           ← table sync_queue, retry logic
+    notifications/
+      local.service.ts        ← rappels hebdomadaires offline
+      push.service.ts         ← token Expo + notifications serveur
   shared/
     components/               ← pictogrammes, boutons
     i18n/                     ← khmer / français / anglais (i18next)
@@ -628,8 +632,8 @@ Versions fixées pour garantir la reproductibilité entre les membres de l'équi
 |---|---|
 | hono | 4.x |
 | @hono/zod-openapi | 0.16.x |
-| drizzle-orm | 0.30.x |
-| drizzle-kit | 0.20.x |
+| drizzle-orm | 0.45.x |
+| drizzle-kit | 0.31.x |
 | better-auth | 1.x |
 | zod | 3.x |
 | pino | 9.x |

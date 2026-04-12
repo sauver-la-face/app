@@ -83,7 +83,7 @@ apps/mobile/src/features/
 - Token push Expo stocké dans `expo-secure-store` — jamais en clair
 
 ### RGPD
-- Consentement explicite obligatoire au premier lancement de l'app mobile (MOB-06) — avant toute collecte
+- Consentement explicite obligatoire au premier lancement de l'app mobile (MOB-01) — avant toute collecte
 - La date de consentement (`consent_given_at`) est sauvegardée dans `expo-secure-store`
 - Jamais logger de données patient (nom, prénom, date de naissance) dans Pino
 
