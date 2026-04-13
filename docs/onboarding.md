@@ -58,7 +58,7 @@ Le format de branche est obligatoire : `feature/XXX-00-nom` (ex: `feature/AUTH-0
 ### Pendant le développement
 
 - **TDD obligatoire** : écrire les tests avant le code sur toutes les features critiques (auth, sync, alertes, exports)
-- **Jamais de `console.log`** : utiliser le logger Pino (`import { logger } from "../shared/logger"`)
+- **Jamais de `console.log`** : utiliser le logger Pino partagé (`apps/backend/src/shared/logger.ts`) avec un chemin d'import relatif adapté à l'emplacement du fichier
 - **Types** : toujours importer depuis `@sauver-la-face/shared`, jamais redéfinir
 - **Backend** : router → service → repository. La logique métier va dans le service uniquement
 
