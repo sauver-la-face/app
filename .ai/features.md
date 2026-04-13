@@ -460,6 +460,38 @@
 
 ## DEVOPS
 
+### DEVOPS-03 — Automatisation statut features (workflows + authentification bot)
+
+`[ ]` `.github/workflows/feature-in-progress.yml` · `.github/workflows/update-feature-status.yml`
+
+**Comportement attendu :**
+
+- Création d'une branche `feature/XXX-00-nom` → `features.md` passe automatiquement de `[ ]` à `[~]`
+- PR mergée sur `dev` → `features.md` passe automatiquement de `[~]` à `[x]`
+- Les deux workflows commitent sur `dev` via un token d'authentification dédié
+
+**Décision technique — authentification des workflows**
+
+Les workflows doivent pusher sur `dev`. Le `GITHUB_TOKEN` par défaut est en lecture seule — deux options :
+
+| Option | Description | Avantages | Inconvénients |
+|---|---|---|---|
+| **PAT personnel** | Token généré depuis le compte du développeur | Simple, rapide à mettre en place | Lié à une personne — si elle quitte, les workflows cassent |
+| **Compte bot dédié** | Compte GitHub `sauver-la-face-bot` avec son propre PAT | Indépendant des personnes, révocable sans impact | Nécessite un second compte GitHub |
+
+**Choix retenu : compte bot dédié (`sauver-la-face-bot`)**
+
+Un PAT lié à un compte personnel crée une dépendance à une personne. Si le développeur quitte l'équipe ou change de compte, les workflows cassent silencieusement. Le compte bot est indépendant du turnover de l'équipe — c'est la pratique recommandée par GitHub pour les automatisations en équipe.
+
+**Règles de code :**
+
+- Créer le compte GitHub `sauver-la-face-bot` et lui donner accès au repo en tant que collaborateur
+- Générer un PAT Fine-grained depuis ce compte avec uniquement `Contents: Read and write` sur ce repo
+- Ajouter le token comme secret `GH_PAT` dans Settings → Secrets and variables → Actions
+- Remplacer `token: ${{ secrets.GITHUB_TOKEN }}` par `token: ${{ secrets.GH_PAT }}` dans les deux workflows
+
+---
+
 ### DEVOPS-02 — Reverse proxy Caddy avec TLS 1.3
 
 `[ ]` `Caddyfile` · `docker-compose.yml`

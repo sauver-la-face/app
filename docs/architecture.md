@@ -59,6 +59,11 @@ Dans un contexte médical, les données du serveur (validées par un médecin) o
 ### Pourquoi Better Auth au lieu d'une auth custom
 La gestion de l'authentification (sessions, tokens, MFA, refresh) est complexe et critique pour la sécurité. Better Auth gère tout ça sans qu'on ait à le coder. On se concentre sur la logique métier.
 
+### Pourquoi un compte bot pour les workflows GitHub Actions
+Les workflows qui commitent automatiquement sur `dev` (mise à jour `features.md`) ont besoin d'un token d'écriture. Deux options évaluées :
+- **PAT personnel** — simple mais lié à une personne. Si elle quitte le projet, les workflows cassent.
+- **Compte bot dédié (`sauver-la-face-bot`)** — retenu. Token indépendant des personnes, révocable sans impact sur l'équipe. Pratique recommandée par GitHub pour les automatisations en équipe.
+
 ### Pourquoi Caddy comme reverse proxy
 - TLS 1.3 obligatoire pour les données de santé (RGPD + certification HDS) — Caddy l'active par défaut sans configuration
 - Certificats Let's Encrypt automatiques — renouvellement inclus, zéro intervention manuelle
