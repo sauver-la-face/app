@@ -1,3 +1,5 @@
+[← README](../README.md) · [Contexte IA](context.md) · [Onboarding](../docs/onboarding.md) · [Architecture](../docs/architecture.md) · [CDC](../docs/cdc.md)
+
 # Fonctionnalités à implémenter — Sauver la Face
 
 > Statuts : `[ ]` à faire · `[~]` en cours · `[x]` terminé

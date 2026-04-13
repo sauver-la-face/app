@@ -1,3 +1,5 @@
+[Onboarding](docs/onboarding.md) · [Architecture](docs/architecture.md) · [Lexique](docs/lexique.md) · [CDC](docs/cdc.md) · [Contexte IA](.ai/context.md) · [Features](.ai/features.md)
+
 # Sauver la Face
 
 Application de suivi post-opératoire pour patients cambodgiens opérés lors de missions humanitaires de chirurgie maxillo-faciale.
@@ -167,10 +169,15 @@ bun run docker:down
 
 ## Documentation
 
+### Docs humaines
 - [Onboarding](docs/onboarding.md) — guide pour un nouveau développeur qui rejoint le projet
 - [Architecture](docs/architecture.md) — décisions techniques et pourquoi elles ont été prises
 - [Lexique technique](docs/lexique.md) — définitions des technologies et concepts utilisés dans le projet
 - [Cahier des charges](docs/cdc.md) — spécifications complètes du projet
+
+### Contexte agent IA
+- [Contexte projet](.ai/context.md) — stack, architecture, règles critiques — **lire en premier**
+- [Features](.ai/features.md) — fonctionnalités à implémenter, en cours et terminées
 
 ---
 

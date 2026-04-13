@@ -1,3 +1,5 @@
+[← README](../README.md) · [Features](features.md) · [Onboarding](../docs/onboarding.md) · [Architecture](../docs/architecture.md) · [CDC](../docs/cdc.md)
+
 # Contexte projet — Sauver la Face
 
 > Ce fichier est destiné aux assistants IA pour prendre connaissance du projet avant de générer du code.
