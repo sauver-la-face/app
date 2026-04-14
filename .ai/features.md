@@ -69,14 +69,15 @@
 
 **Comportement attendu :**
 
-- Alerte si `severity > 7` sur un `medical_event`
-- Alerte si saignement présent
+- Alerte si un symptôme avec `triggers_alert = true` est sélectionné sur un `medical_event`
 - Alerte si aucune synchronisation depuis 7 jours
+- La liste des symptômes déclencheurs est définie dans la table `symptom` — pas de magic numbers dans le code
 
 **Règles de code :**
 
-- Les seuils sont des constantes nommées dans `alerts.service.ts` (pas de magic numbers)
-- Tester : chaque seuil individuellement, pas d'alerte en dessous du seuil
+- La logique d'alerte lit `triggers_alert` depuis la table `symptom` — si un jour un nouveau symptôme déclencheur est ajouté, aucun code à changer
+- Dépend de **MED-01** pour la liste définitive des symptômes
+- Tester : symptôme déclencheur → alerte, symptôme non déclencheur → pas d'alerte, absence de sync 7j → alerte
 
 ---
 
@@ -457,6 +458,37 @@
 - `expo-localization` est déjà installé — utiliser `getLocales()[0].languageCode` pour détecter la langue
 - `i18next` et `react-i18next` sont déjà installés dans `apps/mobile/package.json`
 - Tester : détection langue, fallback, changement de langue dynamique
+
+---
+
+## MÉDICAL
+
+### MED-01 — Définition des pictogrammes de symptômes
+
+`[ ]` `packages/shared/src/schema.ts` · à valider avec les chirurgiens toulousains
+
+**Contexte :**
+
+Le patient évalue ses symptômes via des pictogrammes visuels — pas de chiffres. La liste définitive doit être validée par les chirurgiens toulousains avant implémentation. La structure de base de données est prête (`symptom` + `medical_event_symptom`).
+
+**À définir avec les chirurgiens :**
+
+- Liste complète des symptômes observables post-op
+- Libellés en français (`label_fr`) et en khmer (`label_km`)
+- Quels symptômes déclenchent une alerte automatique (`triggers_alert = true`)
+
+**Impact sur les autres features :**
+
+- **ALERT-01** — les alertes lisent `triggers_alert` depuis la table `symptom`
+- **MOB-03** — l'UI du questionnaire affiche les pictogrammes à sélectionner
+- **EXPORT-01** — les exports PDF/CSV affichent les labels des symptômes sélectionnés
+- **I18N-01** — les labels khmer sont dans la table, pas dans les fichiers i18n
+
+**Règles de code :**
+
+- Ne pas hardcoder de symptômes dans le code — tout passe par la table `symptom`
+- Les pictogrammes (images) sont des assets dans `apps/mobile/src/assets/symptoms/`
+- Le `code` du symptôme (ex: `pain_severe`, `bleeding`) fait le lien entre l'asset et la table
 
 ---
 

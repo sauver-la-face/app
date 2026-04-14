@@ -1,4 +1,4 @@
-import { date, integer, pgTable, text, timestamp, uuid, varchar } from 'drizzle-orm/pg-core';
+import { boolean, date, integer, pgTable, text, timestamp, uuid, varchar } from 'drizzle-orm/pg-core';
 
 export const physician = pgTable('physician', {
   uuid_physician: uuid('uuid_physician').primaryKey().defaultRandom(),
@@ -52,7 +52,28 @@ export const medicalEvent = pgTable('medical_event', {
   event_title: varchar('event_title', { length: 200 }),
   description: text('description'),
   created_at: timestamp('created_at').notNull().defaultNow(),
-  severity: integer('severity'), // 1-10, seuil alerte > 7
+  // severity remplacé par pictogrammes de symptômes (voir table symptom + medical_event_symptom)
+});
+
+// Liste des pictogrammes de symptômes disponibles
+// La liste définitive est à valider avec les chirurgiens toulousains (MED-01)
+export const symptom = pgTable('symptom', {
+  uuid_symptom: uuid('uuid_symptom').primaryKey().defaultRandom(),
+  code: varchar('code', { length: 50 }).notNull().unique(), // ex: 'pain_severe', 'bleeding'
+  label_fr: varchar('label_fr', { length: 100 }).notNull(),
+  label_km: varchar('label_km', { length: 100 }).notNull(), // khmer
+  triggers_alert: boolean('triggers_alert').notNull().default(false), // true = alerte automatique si sélectionné
+});
+
+// Relation N-N entre un événement médical et les symptômes sélectionnés par le patient
+export const medicalEventSymptom = pgTable('medical_event_symptom', {
+  uuid_medical_event_symptom: uuid('uuid_medical_event_symptom').primaryKey().defaultRandom(),
+  uuid_event: uuid('uuid_event')
+    .notNull()
+    .references(() => medicalEvent.uuid_event),
+  uuid_symptom: uuid('uuid_symptom')
+    .notNull()
+    .references(() => symptom.uuid_symptom),
 });
 
 export const media = pgTable('media', {

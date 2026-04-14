@@ -140,7 +140,9 @@ Tables principales :
 - `patient` — données démographiques patient
 - `patient_code` — codes 6 chiffres d'accès (soft delete 48h si non utilisé)
 - `medical_procedure` — interventions chirurgicales
-- `medical_event` — événements médicaux post-op (severity 1-10, alerte > 7)
+- `medical_event` — événements médicaux post-op (symptômes via pictogrammes)
+- `symptom` — liste des pictogrammes de symptômes (`triggers_alert` pour les alertes auto) — liste à valider avec les chirurgiens (MED-01)
+- `medical_event_symptom` — relation N-N entre événement et symptômes sélectionnés
 - `media` — photos de cicatrices (stockées dans MinIO)
 - `instructions` — consignes médicales envoyées au patient (acknowledged_at)
 
