@@ -553,8 +553,8 @@ export const instructions = pgTable('instructions', {
 
 Stratégie :
 - `.env` — valeurs dev par défaut, **commité** (sans secrets)
-- `.env.local` — credentials réels locaux, **gitignorés**
-- **Docker** — injecte les variables en prod via `--env-file .env.local`
+- `.env.local` — overrides locaux du développeur, **gitignorés** (ne jamais utiliser en prod)
+- **Production** — variables d'environnement injectées par la plateforme (Docker secrets, variables d'environnement du service d'hébergement, ou gestionnaire de secrets) — jamais de fichier `.env.local` en prod
 
 ### Backend (`apps/backend/.env`)
 

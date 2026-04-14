@@ -7,6 +7,16 @@
 
 > `docs/cdc.md` est disponible comme référence complète si besoin d'approfondissement.
 
+## Alias TypeScript (backend)
+
+- `@shared/*` → `apps/backend/src/shared/*`
+- Toujours utiliser cet alias pour importer depuis `shared/` — jamais de chemin relatif `../../shared/`
+- Exemples : `import { logger } from "@shared/logger"` · `import { auditMiddleware } from "@shared/middleware/audit.middleware"`
+
+## Règles Markdown
+
+- Tous les blocs de code doivent avoir un langage déclaré (MD040) : ` ```bash `, ` ```ts `, ` ```yaml `, ` ```text ` pour le texte brut — jamais de ` ``` ` nu.
+
 ## Commandes
 
 ```bash
@@ -28,6 +38,9 @@ bun test --recursive
 # Lint / Format
 bun run lint
 bun run format
+
+# Compiler le package shared (obligatoire avant typecheck)
+bun run build:shared
 
 # Migrations Drizzle
 bun run --cwd apps/backend db:generate

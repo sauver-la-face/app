@@ -58,7 +58,7 @@ Le format de branche est obligatoire : `feature/XXX-00-nom` (ex: `feature/AUTH-0
 ### Pendant le développement
 
 - **TDD obligatoire** : écrire les tests avant le code sur toutes les features critiques (auth, sync, alertes, exports)
-- **Jamais de `console.log`** : utiliser le logger Pino partagé (`apps/backend/src/shared/logger.ts`) avec un chemin d'import relatif adapté à l'emplacement du fichier
+- **Jamais de `console.log`** : utiliser le logger Pino backend — toujours importer le symbole `logger` depuis `apps/backend/src/shared/logger.ts` via l'alias `@shared/logger` (configuré dans `apps/backend/tsconfig.json`)
 - **Types** : toujours importer depuis `@sauver-la-face/shared`, jamais redéfinir
 - **Backend** : router → service → repository. La logique métier va dans le service uniquement
 
@@ -98,7 +98,7 @@ Docker Compose orchestre **5 services** : backend Hono, Caddy (reverse proxy), P
 
 Le `Dockerfile` du backend utilise un **multi-stage build** avec trois étapes :
 
-```
+```text
 base  ← installation des dépendances (commune)
  ├── dev   ← hot reload (bun run dev) — utilisé par docker-compose.yml
  └── prod  ← démarrage simple (bun run start) — utilisé en production

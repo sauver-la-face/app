@@ -103,7 +103,7 @@ Même client S3 dans le code — seules les variables d'environnement changent e
 
 ## Architecture backend — 3 couches par feature
 
-```
+```text
 feature/
   feature.router.ts      ← reçoit la requête HTTP, valide avec Zod, appelle le service
   feature.service.ts     ← logique métier uniquement, appelle le repository
