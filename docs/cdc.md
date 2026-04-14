@@ -142,7 +142,7 @@ Développer une application de suivi post-opératoire permettant aux patients ca
 - Temps résolution incident mineur : 24h
 
 ### Légales
-- Hébergement : HDS certifié obligatoire — **OVH Cloud retenu** (société française, données sous droit français, pas de risque CLOUD Act contrairement aux hébergeurs américains)
+- Hébergement : HDS certifié obligatoire — **OVH Cloud retenu** (société française, données sous droit français — risque CLOUD Act réduit mais non nul ; mitigations : juridiction française, contrat DPA avec OVH, données chiffrées AES-256 au repos et TLS 1.3 en transit)
 - Juridiction : droit français, serveurs UE uniquement
 - Responsabilité médicale : app = outil d'aide à la décision, responsabilité médecin
 - Audit sécurité : annuel par organisme certifié
@@ -276,7 +276,7 @@ Workspaces natifs Bun pour gérer les dépendances entre apps et lier le package
 TLS 1.3 obligatoire pour les données de santé (RGPD + HDS) — Caddy le gère par défaut. Certificats Let's Encrypt automatiques, renouvellement inclus. En développement, certificat auto-signé en une ligne (`tls internal`). Hono ne termine jamais le TLS directement — Caddy est la seule porte d'entrée exposée à Internet. Choix retenu face à Nginx (configuration SSL manuelle complexe) et Traefik (courbe d'apprentissage élevée).
 
 #### 19. Containers — Docker + Docker Compose
-Déploiement reproductible sur OVH HDS. Docker Compose orchestre **5 services** : Caddy (reverse proxy), backend Hono, PostgreSQL, MinIO, pgAdmin.
+Déploiement reproductible sur OVH HDS. Docker Compose orchestre **4 services en production** : Caddy (reverse proxy), backend Hono, PostgreSQL, MinIO. pgAdmin est un outil d'administration réservé au développement — activé uniquement via `--profile dev`, jamais déployé en production.
 
 #### 20. CI/CD — GitHub Actions
 Tests automatisés, déploiements zero-downtime. Pipelines exécutés uniquement sur les packages affectés par chaque PR.

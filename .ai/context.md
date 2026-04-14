@@ -61,7 +61,10 @@ apps/web/src/
 ```
 
 ### Mobile — Feature-based avec storage offline par feature
-```
+
+> Architecture cible — les dossiers seront créés au fur et à mesure de l'implémentation des features (voir `features.md`)
+
+```text
 apps/mobile/src/features/
   consent/      → consentement RGPD première connexion (obligatoire avant tout)
   auth/         → code 6 chiffres, session, expo-secure-store

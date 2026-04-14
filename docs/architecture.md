@@ -8,7 +8,7 @@
 
 ## Vue d'ensemble
 
-```
+```text
 ┌─────────────────┐              ┌──────────────────┐              ┌────────────────┐
 │  App mobile     │              │     Caddy        │              │  Dashboard web │
 │  React Native   │◀──HTTPS─────▶│  Reverse Proxy   │◀──HTTPS─────▶│  Next.js 14    │
@@ -116,7 +116,7 @@ feature/
 
 ## Architecture mobile — offline-first par feature
 
-```
+```text
 feature/
   feature.screen.tsx     ← composant UI
   feature.storage.ts     ← lecture/écriture SQLite local
@@ -129,17 +129,7 @@ feature/
 
 ## Schéma de base de données
 
-```
-physician ──────────────────────────────────────────┐
-                                                     │
-patient_code ──── patient ──── medical_procedure     │
-                     │              │                │
-                     │         medical_event ────────┤
-                     │              │                │
-                     │           media               │
-                     │                               │
-                     └──── instructions ─────────────┘
-```
+![MLD — Modèle Logique de Données](mld.png)
 
 Toutes les migrations sont **additives** : on n'ajoute que des colonnes nullable, jamais de suppression ni de renommage. Raison : les appareils mobiles peuvent être désynchronisés depuis plusieurs semaines — un schéma incompatible bloquerait leur synchronisation.
 
