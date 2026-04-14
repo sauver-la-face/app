@@ -41,22 +41,33 @@ Application de suivi post-opératoire pour patients cambodgiens opérés lors de
 
 ## Architecture du code
 
-### Backend — Feature-based, 3 couches par feature
-```
+### Backend — Feature-based + Clean Architecture (4 couches par feature)
+
+Dépendances : `presentation → application → domain ← infrastructure`
+
+```text
 apps/backend/src/features/
-  patients/     → patients.router.ts / patients.service.ts / patients.repository.ts
-  sync/         → logique server-wins, versioning schéma (TDD)
-  alerts/       → seuils douleur > 7, saignement (TDD)
-  exports/      → PDF, CSV RGPD
-  auth/         → Better Auth, MFA, codes 6 chiffres (TDD)
+  patients/
+    presentation/   → patients.router.ts
+    application/    → patients.usecase.ts
+    domain/         → patients.domain.ts (règles métier pures)
+    infrastructure/ → patients.repository.ts
+  sync/             → même structure (logique server-wins, TDD)
+  alerts/           → même structure (triggers_alert, TDD)
+  exports/          → même structure (PDF, CSV RGPD)
+  auth/             → même structure (Better Auth, MFA, codes 6 chiffres, TDD)
 ```
 
-### Dashboard web — Next.js App Router
-```
+### Dashboard web — Séparation UI / logique (Next.js App Router)
+
+UI isolée dans `components/`, logique dans `hooks/`, mutations dans `actions/`. Les composants ne font jamais de `fetch` direct.
+
+```text
 apps/web/src/
   app/          → routing natif Next.js
-  components/   → composants réutilisables
-  hooks/        → TanStack Query hooks
+  components/   → UI pure (JSX uniquement, consomme les hooks)
+  hooks/        → TanStack Query hooks (logique + appels API)
+  actions/      → Server Actions Next.js (mutations)
   lib/          → helpers, formatters
 ```
 
@@ -103,21 +114,22 @@ apps/mobile/src/features/
 - Renouvellement uniquement par le médecin local
 
 ### Logs
-- Toujours importer le logger depuis `apps/backend/src/shared/logger.ts` — ne jamais créer une instance Pino locale
+- Toujours importer le logger via l'alias `@shared/logger` — ne jamais créer une instance Pino locale
 - Jamais de `console.log` dans le backend
 - Niveaux disponibles : `trace` | `debug` | `info` | `warn` | `error` | `fatal`
 - Par défaut : `debug` en développement, `info` en production
-- Pour forcer un niveau sans toucher au code, définir `LOG_LEVEL` dans `.env.local`
+- Pour forcer un niveau sans toucher au code, définir `LOG_LEVEL` comme variable d'environnement — via `.env.local` en dev, via la plateforme d'hébergement en prod
 - Quand utiliser quel niveau :
-  - `debug` — détails internes utiles pendant le développement (ex: payload reçu)
-  - `info` — événements normaux et attendus (ex: patient créé, sync réussie)
+  - `debug` — détails internes utiles pendant le développement (ex: payload anonymisé — jamais de PII : nom, prénom, date de naissance)
+  - `info` — événements normaux et attendus (ex: patient enregistré [uuid uniquement], sync réussie)
   - `warn` — situation anormale mais non bloquante (ex: tentative sur code expiré)
   - `error` — erreur impactant une opération (ex: checksum mismatch, échec sync)
   - `fatal` — erreur critique qui arrête le serveur
 
 ### Alertes temps réel
 - Polling via `refetchInterval` TanStack Query (pas de WebSocket ni SSE)
-- Seuil alerte automatique : douleur > 7 ou saignement présent
+- Alerte automatique si un symptôme avec `triggers_alert = true` est sélectionné (liste définie dans la table `symptom` — voir MED-01)
+- Alerte si aucune synchronisation depuis 7 jours
 
 ### Tests (TDD)
 - Tests écrits **avant** l'implémentation sur : sync, alertes, auth, exports

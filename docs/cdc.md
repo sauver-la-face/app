@@ -37,7 +37,7 @@ Développer une application de suivi post-opératoire permettant aux patients ca
 
 ### 📱 Mobile (patient)
 1. **Consentement RGPD** : écran obligatoire au premier lancement avant toute collecte, acceptation ou refus explicite avec pictogrammes, date de consentement sauvegardée
-2. **Authentification patient** : connexion code 6 chiffres, session expire après 48h d'inactivité, renouvellement du code par médecin local uniquement
+2. **Authentification patient** : connexion code 6 chiffres, JWT valide pour toujours une fois activé, code expiré après 48h si non utilisé, renouvellement du code par médecin local uniquement
 3. **Interface pictographique** : navigation max 2 clics, boutons min 48x48 dp, langues khmer/français/anglais
 4. **Capture photos cicatrices** : appareil photo intégré, compression automatique, horodatage
 5. **Questionnaire symptômes** : questions visuelles via pictogrammes, réponses simples par tap
@@ -54,7 +54,7 @@ Développer une application de suivi post-opératoire permettant aux patients ca
 
 ### ⚙️ Backend
 13. **API REST sécurisée** : endpoints authentifiés, validation Zod, documentation OpenAPI auto-générée
-14. **Système alertes** : seuils automatiques (douleur > 7, saignement présent), notifications temps réel médecins
+14. **Système alertes** : alertes automatiques via pictogrammes de symptômes (`triggers_alert`), notifications temps réel médecins
 15. **Gestion synchronisation** : réception données offline, résolution conflits server-wins, versioning schéma
 16. **Stockage photos** : réception, validation checksum SHA-256, stockage MinIO HDS
 17. **Authentification** : codes patients 6 chiffres + expiration 48h, MFA médecins web
@@ -119,15 +119,22 @@ Développer une application de suivi post-opératoire permettant aux patients ca
 ### Sécurité
 
 **Authentification :**
-- Patients : code numérique 6 chiffres, session expire après 48h d'inactivité, renouvellement du code par médecin local uniquement
-- Médecins web : MFA obligatoire TOTP/SMS, session timeout 2h inactivité (postes partagés hôpitaux)
-- Tokens JWT signés HMAC-SHA256, renouvellement automatique silencieux
+- Patients : code numérique 6 chiffres, JWT valide pour toujours une fois activé, expiration du code après 48h si non utilisé, renouvellement du code par médecin local uniquement
+- Médecins web : MFA obligatoire TOTP, session timeout 2h d'inactivité (postes partagés hôpitaux), renouvellement silencieux automatique tant qu'actif
+- Tokens JWT signés HMAC-SHA256
+
+**Rate limiting :**
+- 3 tentatives échouées → blocage 15 minutes par IP (patients et médecins)
+- Indépendant de l'expiration 48h du code patient
+
+**CSRF :**
+- Cookies `SameSite=Strict` sur le dashboard web — géré par Better Auth
 
 **Chiffrement :**
 - AES-256-GCM en local sur l'appareil (expo-secure-store)
-- TLS 1.3 obligatoire en transit
-- Base PostgreSQL chiffrée au niveau colonnes pour données médicales
-- Rotation des clés tous les 90 jours
+- TLS 1.3 obligatoire en transit (terminé par Caddy)
+- Chiffrement disque au niveau infrastructure assuré par OVH HDS — pas de chiffrement colonne PostgreSQL nécessaire
+- Rotation des clés JWT et credentials OVH S3 tous les 90 jours (production uniquement)
 
 **Logs audit :**
 - Connexions : horodatage UTC, IP, user-agent, succès/échec
@@ -155,7 +162,7 @@ Développer une application de suivi post-opératoire permettant aux patients ca
 
 Un seul dépôt Git géré avec les workspaces natifs de Bun. Turborepo écarté — les volumes du projet ne justifient pas l'outil supplémentaire, Bun workspaces couvre tous les besoins.
 
-```
+```text
 sauver-la-face/
   apps/
     backend/        ← Bun + Hono
@@ -203,7 +210,7 @@ Test runner natif Bun, zéro configuration, API compatible Jest. Couverture de c
 
 **Backend :**
 - Logique de synchronisation offline (server-wins, conflits, versioning schéma)
-- Seuils d'alertes médicales (douleur > 7, saignement, inactivité 7 jours)
+- Alertes médicales automatiques via pictogrammes de symptômes (`triggers_alert`) et inactivité 7 jours
 - Authentification patient (code 6 chiffres, expiration 48h)
 - Exports PDF/CSV RGPD
 
@@ -325,31 +332,26 @@ Une branche par feature, PR obligatoire pour merge sur `dev` et sur `main`. La b
 
 Code organisé par domaine métier. Chaque feature est un module autonome avec ses propres composants, services et tests.
 
-### Backend (Hono) — Feature-based, 3 couches par feature
+### Backend (Hono) — Feature-based + Clean Architecture
 
-Architecture router / service / repository. Les services concentrent la logique métier et sont couverts en TDD.
+4 couches par feature. Dépendances : `presentation → application → domain ← infrastructure`. La logique métier est isolée dans `domain/` — testable sans base de données.
 
-```
+```text
 apps/backend/src/
   features/
     patients/
-      patients.router.ts      ← routes Hono + validation Zod
-      patients.service.ts     ← logique métier (TDD)
-      patients.repository.ts  ← requêtes Drizzle/PostgreSQL
-    sync/
-      sync.router.ts
-      sync.service.ts         ← server-wins, versioning schéma (TDD)
-      sync.repository.ts
-    alerts/
-      alerts.router.ts
-      alerts.service.ts       ← seuils douleur, saignement (TDD)
-      alerts.repository.ts
-    exports/
-      exports.router.ts
-      exports.service.ts      ← PDF, CSV RGPD
-    auth/
-      auth.router.ts
-      auth.service.ts         ← Better Auth, MFA, codes 6 chiffres (TDD)
+      presentation/
+        patients.router.ts      ← routes Hono + validation Zod
+      application/
+        patients.usecase.ts     ← orchestration (TDD)
+      domain/
+        patients.domain.ts      ← règles métier pures (TDD)
+      infrastructure/
+        patients.repository.ts  ← requêtes Drizzle/PostgreSQL
+    sync/     ← même structure (server-wins, versioning schéma)
+    alerts/   ← même structure (triggers_alert pictogrammes)
+    exports/  ← même structure (PDF, CSV RGPD)
+    auth/     ← même structure (Better Auth, MFA, codes 6 chiffres)
   shared/
     middleware/               ← audit Pino, auth guard
     database/                 ← Drizzle client, migrations
@@ -360,7 +362,7 @@ apps/backend/src/
 
 La structure de Next.js App Router organise les pages. Les composants et hooks réutilisables sont regroupés dans `components/` et `hooks/`. Plus pragmatique pour une équipe qui découvre Next.js.
 
-```
+```text
 apps/web/src/
   app/                        ← routing Next.js natif
     dashboard/
@@ -377,7 +379,7 @@ apps/web/src/
 
 Chaque feature gère son propre état SQLite local et sa queue de sync. La couche `storage/` par feature est essentielle pour isoler la logique offline de chaque domaine.
 
-```
+```text
 apps/mobile/src/
   features/
     consent/                  ← consentement RGPD (premier écran obligatoire)

@@ -60,7 +60,7 @@ Le format de branche est obligatoire : `feature/XXX-00-nom` (ex: `feature/AUTH-0
 - **TDD obligatoire** : écrire les tests avant le code sur toutes les features critiques (auth, sync, alertes, exports)
 - **Jamais de `console.log`** : utiliser le logger Pino backend — toujours importer le symbole `logger` depuis `apps/backend/src/shared/logger.ts` via l'alias `@shared/logger` (configuré dans `apps/backend/tsconfig.json`)
 - **Types** : toujours importer depuis `@sauver-la-face/shared`, jamais redéfinir
-- **Backend** : router → service → repository. La logique métier va dans le service uniquement
+- **Backend** : Clean Architecture par feature — `presentation → application → domain ← infrastructure`. La logique métier va dans `domain/` uniquement
 
 ### Soumettre une PR
 
@@ -94,7 +94,7 @@ Stratégie **server-wins** : en cas de conflit entre une donnée mobile et une d
 
 ## Docker — développement vs production
 
-Docker Compose orchestre **5 services** : backend Hono, Caddy (reverse proxy), PostgreSQL, MinIO, pgAdmin.
+Docker Compose orchestre **4 services en production** : backend Hono, Caddy (reverse proxy), PostgreSQL, MinIO. pgAdmin est disponible uniquement en développement via `docker compose --profile dev up`.
 
 Le `Dockerfile` du backend utilise un **multi-stage build** avec trois étapes :
 

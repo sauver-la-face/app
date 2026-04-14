@@ -101,16 +101,45 @@ Même client S3 dans le code — seules les variables d'environnement changent e
 
 ---
 
-## Architecture backend — 3 couches par feature
+## Architecture backend — Feature-based + Clean Architecture
+
+Chaque feature suit les 4 couches Clean Architecture. Les dépendances ne vont que vers l'intérieur : `presentation → application → domain ← infrastructure`.
 
 ```text
 feature/
-  feature.router.ts      ← reçoit la requête HTTP, valide avec Zod, appelle le service
-  feature.service.ts     ← logique métier uniquement, appelle le repository
-  feature.repository.ts  ← requêtes SQL via Drizzle, aucune logique métier
+  presentation/
+    feature.router.ts      ← reçoit HTTP, valide avec Zod, appelle l'application
+  application/
+    feature.usecase.ts     ← orchestre : appelle domain + infrastructure
+  domain/
+    feature.domain.ts      ← règles métier pures, entités, value objects — aucune dépendance externe
+  infrastructure/
+    feature.repository.ts  ← requêtes SQL via Drizzle, aucune logique métier
 ```
 
-**Règle absolue** : la logique métier ne doit jamais être dans le router ni dans le repository. Le router ne fait que valider et router. Le repository ne fait que lire/écrire en base.
+**Règles absolues :**
+- `domain` ne connaît ni Drizzle, ni Hono, ni rien d'externe — testable sans rien monter
+- `presentation` ne contient aucune logique métier — valide et délègue uniquement
+- `infrastructure` ne contient aucune logique métier — lit/écrit uniquement
+- La logique métier va dans `domain` uniquement (ex: `isCodeExpired()`, `canRenewCode()`)
+
+---
+
+## Architecture web — Séparation UI / logique
+
+Next.js App Router. La logique est isolée dans les hooks — les composants ne connaissent pas l'API.
+
+```text
+feature/
+  components/        ← UI pure (JSX uniquement, aucun appel API direct)
+  hooks/             ← logique métier + appels API via TanStack Query
+  actions/           ← Server Actions Next.js (mutations : créer, modifier, supprimer)
+```
+
+**Règles absolues :**
+- `components/` reçoit des props et consomme des hooks — jamais de `fetch` direct
+- `hooks/` contient toute la logique — `usePatients()`, `useAlerts()`, etc.
+- `actions/` pour les mutations côté serveur
 
 ---
 
@@ -146,6 +175,35 @@ Toutes les migrations sont **additives** : on n'ajoute que des colonnes nullable
 | Intégrité photos | Checksum SHA-256 calculé mobile, vérifié backend |
 | Consentement | Écran RGPD obligatoire au premier lancement (date sauvegardée) |
 | Hébergement | OVH Cloud certifié HDS |
+| CSRF | Cookies `SameSite=Strict` sur le dashboard web (géré par Better Auth) |
+| Audit logs | Chaque accès aux données médicales loggé — rétention 1 an (HDS) — voir AUDIT-01 |
+
+### JWT — durée de vie et renouvellement
+
+| Profil | Expiration | Renouvellement |
+|---|---|---|
+| Médecin (web) | 2h d'inactivité | Silencieux automatique tant qu'actif — déconnexion si inactif 2h |
+| Patient (mobile) | Jamais | Aucun — valide pour toujours une fois connecté |
+
+### Rate limiting — protection force brute
+
+| Endpoint | Seuil | Blocage |
+|---|---|---|
+| Code 6 chiffres (patient) | 3 tentatives échouées | 15 minutes par IP |
+| Login médecin | 3 tentatives échouées | 15 minutes par IP |
+
+Les deux mécanismes sont indépendants : le blocage 15 min protège contre la force brute, l'expiration 48h gère le cycle de vie du code patient.
+
+### Rotation des secrets (production uniquement)
+
+| Secret | Fréquence |
+|---|---|
+| Clés JWT | Tous les 90 jours |
+| Credentials OVH Object Storage (S3) | Tous les 90 jours |
+
+> Dev : pas de rotation obligatoire — credentials dans `.env.local` uniquement.
+
+> Détails d'implémentation : voir `docs/cdc.md`
 
 ---
 

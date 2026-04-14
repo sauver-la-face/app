@@ -18,12 +18,15 @@
 - Soft delete automatique après 48h si le code n'est pas utilisé (job cron)
 - Une fois utilisé (`used_at NOT NULL`), le code est valide pour toujours
 - Renouvellement uniquement par un médecin
+- JWT patient : valide pour toujours — le patient ne doit jamais être déconnecté
+- Rate limiting : 3 tentatives échouées → blocage 15 minutes par IP (indépendant de l'expiration 48h)
 
 **Règles de code :**
 
 - La logique de validation du code va dans `auth.service.ts` uniquement
 - Le cron de soft delete est un service séparé `auth.cron.ts`
-- Tester : génération, expiration 48h, soft delete, renouvellement, tentative sur code supprimé
+- Le rate limiting est un middleware branché sur l'endpoint de validation du code
+- Tester : génération, expiration 48h, soft delete, renouvellement, tentative sur code supprimé, blocage après 3 tentatives
 
 ---
 
@@ -35,12 +38,14 @@
 
 - MFA TOTP obligatoire via Better Auth
 - Session timeout 2h d'inactivité
-- Tokens JWT signés HMAC-SHA256, renouvellement silencieux
+- Tokens JWT signés HMAC-SHA256, renouvellement silencieux automatique tant que le médecin est actif
+- Rate limiting : 3 tentatives échouées → blocage 15 minutes par IP
 
 **Règles de code :**
 
 - Utiliser Better Auth sans couche custom — ne pas réinventer la gestion de session
-- Tester : login sans MFA rejeté, session expirée rejetée, refresh silencieux
+- Le rate limiting est un middleware branché sur l'endpoint de login
+- Tester : login sans MFA rejeté, session expirée rejetée, refresh silencieux, blocage après 3 tentatives
 
 ---
 
@@ -598,10 +603,15 @@ gh pr create --base dev --title "feat: XXX-00 nom de la feature" --body "..."
 - **TDD obligatoire sur toutes les features** : l'agent écrit les tests en premier, génère l'implémentation pour les faire passer, puis le développeur valide. Ne jamais générer du code sans test associé.
 
 - **Types** : toujours importer depuis `@sauver-la-face/shared`, jamais redéfinir
-- **Backend** : router → service → repository. La logique métier va dans le service uniquement
+- **Backend — Clean Architecture** : chaque feature suit 4 couches (`presentation → application → domain ← infrastructure`). La logique métier va dans `domain/` uniquement — jamais dans `presentation/` ni `infrastructure/`
+- **Web — Séparation UI/logique** : `components/` = UI pure sans `fetch`, `hooks/` = logique + TanStack Query, `actions/` = mutations Server Actions
 - **Mobile** : toute donnée est d'abord écrite en SQLite, puis ajoutée à la `sync_queue`
 - **Migrations** : additives uniquement (colonnes nullable), jamais de suppression
-- **Nommage fichiers** : `feature.router.ts` / `feature.service.ts` / `feature.repository.ts`
-- **Tests** : un fichier `feature.service.test.ts` par service critique
-- **Logs** : utiliser Pino pour tout log backend — pas de `console.log`
+- **Nommage fichiers backend** :
+  - `presentation/feature.router.ts`
+  - `application/feature.usecase.ts`
+  - `domain/feature.domain.ts`
+  - `infrastructure/feature.repository.ts`
+- **Tests** : un fichier `feature.domain.test.ts` par domain (testable sans BDD), un fichier `feature.usecase.test.ts` par use case critique
+- **Logs** : utiliser Pino via `@shared/logger` — pas de `console.log`
 - **Erreurs** : retourner des codes d'erreur explicites (`APP_UPDATE_REQUIRED`, `PHOTO_INTEGRITY_ERROR`, etc.)

@@ -34,7 +34,7 @@ Bibliothèque qui permet d'écrire les requêtes SQL en TypeScript au lieu d'éc
 ### Pino
 Bibliothèque de logs pour le backend. Remplace `console.log` avec des niveaux structurés (`debug`, `info`, `warn`, `error`, `fatal`) et un format JSON adapté à la production.
 - Instance centralisée : `apps/backend/src/shared/logger.ts`
-- Niveau contrôlé par `LOG_LEVEL` dans `.env.local`
+- Niveau contrôlé par `LOG_LEVEL` — via `.env.local` en dev, via la plateforme d'hébergement en prod
 
 ### Better Auth
 Bibliothèque d'authentification qui gère les sessions, tokens JWT, et MFA (double authentification). Évite de coder l'auth from scratch.
@@ -84,7 +84,12 @@ Framework CSS utilitaire. Les styles sont écrits directement dans le JSX avec d
 ## Infrastructure
 
 ### Docker + Docker Compose
-Outils pour lancer l'environnement de développement complet (PostgreSQL, MinIO, pgAdmin) en une seule commande (`docker compose up`).
+Outils pour lancer l'environnement de développement complet en une seule commande. 4 services en production : PostgreSQL, MinIO, backend Hono, Caddy. pgAdmin disponible uniquement en dev via `docker compose --profile dev up`.
+
+### Caddy
+Reverse proxy qui se place devant le backend. Termine le TLS 1.3, génère les certificats Let's Encrypt automatiquement, et redirige le trafic vers Hono. Hono ne reçoit jamais directement les connexions internet.
+- En dev : certificat auto-signé (`tls internal`)
+- En prod : certificat Let's Encrypt automatique sur le domaine OVH
 
 ### GitHub Actions
 Système d'intégration continue (CI). Lance automatiquement les tests et le lint à chaque push, et gère les transitions de statut des features dans `features.md`.
@@ -108,6 +113,12 @@ Méthode de développement où les tests sont écrits **avant** le code. On écr
 ### Soft delete
 Supprimer logiquement un enregistrement sans l'effacer physiquement de la base de données. On marque l'enregistrement comme supprimé (ex: `deleted_at` non null) mais il reste en base.
 - Utilisé pour : les codes patients non utilisés après 48h
+
+### Rate limiting
+Mécanisme qui bloque les tentatives répétées de connexion. Dans ce projet : 3 tentatives échouées → blocage 15 minutes par IP, pour les patients (code 6 chiffres) et les médecins. Protège contre les attaques par force brute.
+
+### Pictogrammes de symptômes
+Interface visuelle pour que le patient évalue ses symptômes sans lire de chiffres. Remplace le champ `severity` numérique. La liste définitive est à valider avec les chirurgiens toulousains (MED-01). Les pictogrammes marqués `triggers_alert` déclenchent une alerte automatique au médecin.
 
 ### MFA TOTP
 Double authentification par code temporaire (Google Authenticator, Authy). Le médecin entre son mot de passe + un code à 6 chiffres qui change toutes les 30 secondes.
