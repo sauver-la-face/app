@@ -105,23 +105,32 @@ Même client S3 dans le code — seules les variables d'environnement changent e
 
 Chaque feature suit les 4 couches Clean Architecture. Les dépendances ne vont que vers l'intérieur : `presentation → application → domain ← infrastructure`.
 
+**Convention de nommage : `camelCase` pour tous les fichiers sans exception.**
+
 ```text
-feature/
+features/auth/
   presentation/
-    feature.router.ts      ← reçoit HTTP, valide avec Zod, appelle l'application
+    authRouter.ts              ← reçoit HTTP, valide avec Zod, appelle l'application
   application/
-    feature.usecase.ts     ← orchestre : appelle domain + infrastructure
+    authUsecase.ts             ← orchestre la logique métier, appelle domain + infrastructure
   domain/
-    feature.domain.ts      ← règles métier pures, entités, value objects — aucune dépendance externe
+    physicianRepository.ts     ← interface (port) — aucune dépendance externe
+    patientCodeRepository.ts   ← interface (port) — aucune dépendance externe
   infrastructure/
-    feature.repository.ts  ← requêtes SQL via Drizzle, aucune logique métier
+    physicianRepository.ts     ← implémentation Drizzle (adapter)
+    patientCodeRepository.ts   ← implémentation Drizzle (adapter)
 ```
 
+**État actuel — pragmatique :**
+- `domain/` contient les interfaces de repository (ports) et les types d'entités
+- La logique métier est dans `application/` pour l'instant
+- Les entités riches, Value Objects et Aggregates seront ajoutés quand la complexité le justifie
+
 **Règles absolues :**
-- `domain` ne connaît ni Drizzle, ni Hono, ni rien d'externe — testable sans rien monter
-- `presentation` ne contient aucune logique métier — valide et délègue uniquement
-- `infrastructure` ne contient aucune logique métier — lit/écrit uniquement
-- La logique métier va dans `domain` uniquement (ex: `isCodeExpired()`, `canRenewCode()`)
+- `domain/` ne connaît ni Drizzle, ni Hono, ni rien d'externe
+- `presentation/` ne contient aucune logique métier — valide et délègue uniquement
+- `infrastructure/` ne contient aucune logique métier — lit/écrit uniquement
+- Même fichier `camelCase` dans `domain/` (interface) et `infrastructure/` (implémentation) — le dossier distingue les deux
 
 ---
 
@@ -147,9 +156,9 @@ feature/
 
 ```text
 feature/
-  feature.screen.tsx     ← composant UI
-  feature.storage.ts     ← lecture/écriture SQLite local
-  feature.service.ts     ← orchestration : storage → sync_queue → API
+  [feature]Screen.tsx    ← composant UI
+  [feature]Storage.ts    ← lecture/écriture SQLite local
+  [feature]Service.ts    ← orchestration : storage → sync_queue → API
 ```
 
 **Règle absolue** : toute donnée est d'abord écrite en SQLite (`feature.storage.ts`) avant tout appel réseau. L'appel réseau est géré par la queue de sync, pas directement dans l'UI.

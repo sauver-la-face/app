@@ -1,4 +1,13 @@
-import { boolean, date, integer, pgTable, text, timestamp, uuid, varchar } from 'drizzle-orm/pg-core';
+import {
+  boolean,
+  date,
+  integer,
+  pgTable,
+  text,
+  timestamp,
+  uuid,
+  varchar,
+} from 'drizzle-orm/pg-core';
 
 export const physician = pgTable('physician', {
   uuid_physician: uuid('uuid_physician').primaryKey().defaultRandom(),

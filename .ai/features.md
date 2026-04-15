@@ -23,8 +23,9 @@
 
 **Règles de code :**
 
-- La logique de validation du code va dans `auth.service.ts` uniquement
-- Le cron de soft delete est un service séparé `auth.cron.ts`
+- La logique de validation du code va dans `auth/domain/auth.domain.ts` uniquement
+- L'orchestration (générer, vérifier, renouveler) va dans `auth/application/auth.usecase.ts`
+- Le cron de soft delete est un service séparé `auth/application/auth.cron.ts`
 - Le rate limiting est un middleware branché sur l'endpoint de validation du code
 - Tester : génération, expiration 48h, soft delete, renouvellement, tentative sur code supprimé, blocage après 3 tentatives
 
@@ -56,14 +57,38 @@
 **Comportement attendu :**
 
 - Réception du payload offline du mobile
-- Résolution des conflits : le serveur a toujours raison
+- Résolution des conflits : le serveur a toujours raison — PostgreSQL gagne toujours
 - Versioning de schéma : accepte `N` et `N-1`, rejette `> N` avec `APP_UPDATE_REQUIRED`
 - Log du delta en cas de conflit
+- Renvoi de la version serveur au mobile après résolution — le mobile met à jour son SQLite
+
+**Partition des responsabilités (conflits quasi impossibles par design) :**
+
+| Table | Propriétaire | Conflit possible |
+|---|---|---|
+| `medical_event_symptom` | Patient uniquement | ❌ Non |
+| `media` | Patient uniquement | ❌ Non |
+| `instructions.acknowledged_at` | Patient uniquement | ❌ Non |
+| `medical_procedure`, `medical_event`, `instructions`, `symptom` | Médecin uniquement | ❌ Non |
+
+Le server-wins reste en place comme filet de sécurité mais ne sera quasiment jamais déclenché grâce à cette partition.
+
+**Flow complet :**
+
+```text
+Mobile (SQLite) → Hono sync.usecase.ts → compare avec PostgreSQL
+                        ↓
+               conflit ? → version PostgreSQL gagne → log Pino
+                        ↓
+               réponse avec version serveur → mobile met à jour SQLite
+```
 
 **Règles de code :**
 
-- La logique server-wins va dans `sync.service.ts`
-- Ne jamais écraser un enregistrement sans logger le conflit
+- La logique server-wins va dans `sync/application/sync.usecase.ts`
+- La comparaison de versions va dans `sync/domain/sync.domain.ts`
+- Ne jamais écraser un enregistrement sans logger le conflit via `@shared/logger`
+- Tester : payload normal, conflit server-wins, version schéma incompatible, renvoi version serveur
 - Tester : payload normal, conflit server-wins, version schéma incompatible
 
 ---
@@ -100,7 +125,8 @@
 
 **Règles de code :**
 
-- La validation checksum se fait dans `photos.service.ts` avant tout stockage
+- La validation checksum se fait dans `photos/domain/photos.domain.ts` avant tout stockage
+- L'orchestration (valider + stocker) va dans `photos/application/photos.usecase.ts`
 - Le client MinIO est dans `apps/backend/src/shared/storage/`
 
 ---
@@ -117,7 +143,8 @@
 
 **Règles de code :**
 
-- La génération des fichiers va dans `exports.service.ts`
+- La génération des fichiers va dans `exports/application/exports.usecase.ts`
+- Les règles d'anonymisation RGPD vont dans `exports/domain/exports.domain.ts`
 - Les données anonymisées : supprimer `first_name`, `last_name`, `birthdate` du CSV
 - Tester : structure du PDF, anonymisation CSV, format JSON portabilité
 
@@ -363,7 +390,7 @@
 
 **Règles de code :**
 
-- La queue est traitée dans `sync.service.ts` (orchestration) et `sync.queue.ts` (table SQLite)
+- La queue est traitée dans `syncService.ts` (orchestration) et `syncQueue.ts` (table SQLite)
 - Tester : envoi séquentiel, retry backoff, abandon après 4 tentatives, purge quota
 
 ---
@@ -428,7 +455,7 @@
 
 - `expo-notifications` est déjà installé dans `apps/mobile/package.json`
 - Demander la permission de notifications au premier lancement (après MOB-01)
-- Les notifications locales sont gérées dans `notifications/local.service.ts`
+- Les notifications locales sont gérées dans `notifications/localService.ts`
 - Les notifications push nécessitent l'enregistrement du token Expo côté backend — stocker le token dans `expo-secure-store`
 - L'interface des notifications est en khmer par défaut — dépend de **I18N-01**
 - Tester : permission accordée/refusée, rappel local programmé, réception notification push
@@ -607,11 +634,12 @@ gh pr create --base dev --title "feat: XXX-00 nom de la feature" --body "..."
 - **Web — Séparation UI/logique** : `components/` = UI pure sans `fetch`, `hooks/` = logique + TanStack Query, `actions/` = mutations Server Actions
 - **Mobile** : toute donnée est d'abord écrite en SQLite, puis ajoutée à la `sync_queue`
 - **Migrations** : additives uniquement (colonnes nullable), jamais de suppression
-- **Nommage fichiers backend** :
-  - `presentation/feature.router.ts`
-  - `application/feature.usecase.ts`
-  - `domain/feature.domain.ts`
-  - `infrastructure/feature.repository.ts`
-- **Tests** : un fichier `feature.domain.test.ts` par domain (testable sans BDD), un fichier `feature.usecase.test.ts` par use case critique
+- **Nommage fichiers** : `camelCase` pour tous les fichiers sans exception (backend, web, mobile)
+- **Nommage backend** :
+  - `presentation/[feature]Router.ts`
+  - `application/[feature]Usecase.ts`
+  - `domain/[entity].ts` (entité) · `domain/[entity]Repository.ts` (interface)
+  - `infrastructure/[entity]Repository.ts` (implémentation Drizzle)
+- **Tests** : un fichier `[feature]Domain.test.ts` par domain (testable sans BDD), un fichier `[feature]Usecase.test.ts` par use case critique
 - **Logs** : utiliser Pino via `@shared/logger` — pas de `console.log`
 - **Erreurs** : retourner des codes d'erreur explicites (`APP_UPDATE_REQUIRED`, `PHOTO_INTEGRITY_ERROR`, etc.)

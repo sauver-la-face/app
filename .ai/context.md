@@ -44,18 +44,15 @@ Application de suivi post-opératoire pour patients cambodgiens opérés lors de
 ### Backend — Feature-based + Clean Architecture (4 couches par feature)
 
 Dépendances : `presentation → application → domain ← infrastructure`
+Convention de nommage : **`camelCase` pour tous les fichiers sans exception**
 
 ```text
 apps/backend/src/features/
-  patients/
-    presentation/   → patients.router.ts
-    application/    → patients.usecase.ts
-    domain/         → patients.domain.ts (règles métier pures)
-    infrastructure/ → patients.repository.ts
-  sync/             → même structure (logique server-wins, TDD)
-  alerts/           → même structure (triggers_alert, TDD)
-  exports/          → même structure (PDF, CSV RGPD)
-  auth/             → même structure (Better Auth, MFA, codes 6 chiffres, TDD)
+  [feature]/
+    presentation/   → [feature]Router.ts
+    application/    → [feature]Usecase.ts
+    domain/         → [entity].ts (entité) · [entity]Repository.ts (interface)
+    infrastructure/ → [entity]Repository.ts (implémentation Drizzle)
 ```
 
 ### Dashboard web — Séparation UI / logique (Next.js App Router)

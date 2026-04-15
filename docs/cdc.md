@@ -400,11 +400,11 @@ apps/mobile/src/
       hooks/
       storage/                ← cache offline instructions
     sync/
-      sync.service.ts         ← orchestration queue SQLite
-      sync.queue.ts           ← table sync_queue, retry logic
+      syncService.ts          ← orchestration queue SQLite
+      syncQueue.ts            ← table sync_queue, retry logic
     notifications/
-      local.service.ts        ← rappels hebdomadaires offline
-      push.service.ts         ← token Expo + notifications serveur
+      localService.ts         ← rappels hebdomadaires offline
+      pushService.ts          ← token Expo + notifications serveur
   shared/
     components/               ← pictogrammes, boutons
     i18n/                     ← khmer / français / anglais (i18next)

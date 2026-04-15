@@ -10,13 +10,26 @@
 ## Architecture backend — Clean Architecture par feature
 
 Chaque feature backend suit 4 couches. Dépendances : `presentation → application → domain ← infrastructure`
+Convention de nommage : **`camelCase` pour tous les fichiers sans exception**
 
-- `presentation/feature.router.ts` — HTTP + validation Zod uniquement, appelle l'application
-- `application/feature.usecase.ts` — orchestration uniquement, appelle domain + infrastructure
-- `domain/feature.domain.ts` — règles métier pures (ex: `isCodeExpired()`), aucune dépendance externe
-- `infrastructure/feature.repository.ts` — SQL Drizzle uniquement, aucune logique métier
+```text
+features/[feature]/
+  presentation/
+    [feature]Router.ts          ← HTTP + validation Zod, appelle application
+  application/
+    [feature]Usecase.ts         ← orchestration + logique métier
+  domain/
+    [entity].ts                 ← entité avec règles métier si nécessaire
+    [entity]Repository.ts       ← interface (port), aucune dépendance externe
+  infrastructure/
+    [entity]Repository.ts       ← implémentation Drizzle (adapter)
+```
 
-**Règle absolue** : toute logique métier va dans `domain/` — jamais dans `presentation/` ni `infrastructure/`
+**Règles absolues :**
+- `domain/` ne connaît ni Drizzle ni Hono — interfaces et entités uniquement
+- `presentation/` ne contient aucune logique métier
+- `infrastructure/` ne contient aucune logique métier
+- Même nom `camelCase` dans `domain/` (interface) et `infrastructure/` (implémentation) — le dossier distingue les deux
 
 ## Architecture web — Séparation UI / logique
 
