@@ -101,7 +101,7 @@ Même client S3 dans le code — seules les variables d'environnement changent e
 
 ---
 
-## Architecture backend — Feature-based + Clean Architecture
+## Architecture backend — Feature-based + Clean Architecture + DDD
 
 Chaque feature suit les 4 couches Clean Architecture. Les dépendances ne vont que vers l'intérieur : `presentation → application → domain ← infrastructure`.
 
@@ -110,21 +110,33 @@ Chaque feature suit les 4 couches Clean Architecture. Les dépendances ne vont q
 ```text
 features/auth/
   presentation/
-    authRouter.ts              ← reçoit HTTP, valide avec Zod, appelle l'application
+    authRouter.ts              ← reçoit HTTP, valide avec Zod, appelle application
   application/
-    authUsecase.ts             ← orchestre la logique métier, appelle domain + infrastructure
+    authUsecase.ts             ← orchestration : appelle domain + repo, aucune règle métier
   domain/
+    physician.ts               ← Entity DDD (UUID, identité persistante, règles métier)
     physicianRepository.ts     ← interface (port) — aucune dépendance externe
+    patientCode.ts             ← Entity DDD
     patientCodeRepository.ts   ← interface (port) — aucune dépendance externe
+    patientCodeValue.ts        ← Value Object DDD (pas d'UUID, immuable, create() valide)
   infrastructure/
     physicianRepository.ts     ← implémentation Drizzle (adapter)
     patientCodeRepository.ts   ← implémentation Drizzle (adapter)
 ```
 
-**État actuel — pragmatique :**
-- `domain/` contient les interfaces de repository (ports) et les types d'entités
-- La logique métier est dans `application/` pour l'instant
-- Les entités riches, Value Objects et Aggregates seront ajoutés quand la complexité le justifie
+**Couche `application/` :**
+- Chef d'orchestre : reçoit une commande, appelle le domaine, appelle l'infra via les interfaces
+- Délègue toute règle métier aux Entities et Value Objects de `domain/`
+- N'appelle jamais l'implémentation Drizzle directement — uniquement les interfaces
+
+**Couche `domain/` — DDD :**
+- **Entity** : a un UUID, identité persistante même si les attributs changent
+- **Value Object** : pas d'UUID, défini par sa valeur, immuable, constructeur privé + `create()` qui valide
+- Les règles métier et validations vivent ici — jamais dans `application/`
+
+**Répartition domain/ vs packages/shared :**
+- Concept utilisé par une seule app → `domain/` de la feature
+- Concept utilisé par plusieurs apps → `packages/shared/src/domain/`
 
 **Règles absolues :**
 - `domain/` ne connaît ni Drizzle, ni Hono, ni rien d'externe
@@ -192,7 +204,7 @@ Toutes les migrations sont **additives** : on n'ajoute que des colonnes nullable
 | Profil | Expiration | Renouvellement |
 |---|---|---|
 | Médecin (web) | 2h d'inactivité | Silencieux automatique tant qu'actif — déconnexion si inactif 2h |
-| Patient (mobile) | Jamais | Aucun — valide pour toujours une fois connecté |
+| Patient (mobile) | 1 an | Renouvelé automatiquement à chaque connexion — révocation explicite possible par le médecin |
 
 ### Rate limiting — protection force brute
 

@@ -3,6 +3,9 @@
 # Fonctionnalités à implémenter — Sauver la Face
 
 > Statuts : `[ ]` à faire · `[~]` en cours · `[x]` terminé
+> Priorités : 🔴 Critique (bloque d'autres features ou obligation légale) · 🟡 Majeur (core métier) · 🟢 Mineur (confort, ne bloque rien)
+>
+> **Règle** : toute nouvelle feature ajoutée dans ce fichier doit obligatoirement avoir un niveau de priorité défini.
 
 ---
 
@@ -10,7 +13,7 @@
 
 ### AUTH-01 — Authentification patients (codes 6 chiffres)
 
-`[ ]` `apps/backend/src/features/auth/`
+`[ ]` 🔴 Critique · `apps/backend/src/features/auth/`
 
 **Comportement attendu :**
 
@@ -18,7 +21,9 @@
 - Soft delete automatique après 48h si le code n'est pas utilisé (job cron)
 - Une fois utilisé (`used_at NOT NULL`), le code est valide pour toujours
 - Renouvellement uniquement par un médecin
-- JWT patient : valide pour toujours — le patient ne doit jamais être déconnecté
+- JWT patient : TTL 1 an — contexte offline-first, patients parfois déconnectés plusieurs semaines
+- Révocation explicite possible par le médecin depuis le dashboard (`patient_code.revoked_at` vérifié à chaque requête)
+- Renouvellement automatique du token à chaque connexion réussie
 - Rate limiting : 3 tentatives échouées → blocage 15 minutes par IP (indépendant de l'expiration 48h)
 
 **Règles de code :**
@@ -33,7 +38,7 @@
 
 ### AUTH-02 — Authentification médecins (MFA TOTP)
 
-`[ ]` `apps/backend/src/features/auth/`
+`[ ]` 🔴 Critique · `apps/backend/src/features/auth/`
 
 **Comportement attendu :**
 
@@ -52,7 +57,7 @@
 
 ### SYNC-01 — Réception et résolution des conflits (server-wins)
 
-`[ ]` `apps/backend/src/features/sync/`
+`[ ]` 🔴 Critique · `apps/backend/src/features/sync/`
 
 **Comportement attendu :**
 
@@ -89,13 +94,12 @@ Mobile (SQLite) → Hono sync.usecase.ts → compare avec PostgreSQL
 - La comparaison de versions va dans `sync/domain/sync.domain.ts`
 - Ne jamais écraser un enregistrement sans logger le conflit via `@shared/logger`
 - Tester : payload normal, conflit server-wins, version schéma incompatible, renvoi version serveur
-- Tester : payload normal, conflit server-wins, version schéma incompatible
 
 ---
 
 ### ALERT-01 — Système d'alertes automatiques
 
-`[ ]` `apps/backend/src/features/alerts/`
+`[ ]` 🟡 Majeur · `apps/backend/src/features/alerts/`
 
 **Comportement attendu :**
 
@@ -113,7 +117,7 @@ Mobile (SQLite) → Hono sync.usecase.ts → compare avec PostgreSQL
 
 ### PHOTO-01 — Stockage et validation des photos
 
-`[ ]` · `apps/backend/src/features/photos/`
+`[ ]` 🟡 Majeur · `apps/backend/src/features/photos/`
 
 **Comportement attendu :**
 
@@ -133,7 +137,7 @@ Mobile (SQLite) → Hono sync.usecase.ts → compare avec PostgreSQL
 
 ### EXPORT-01 — Export PDF / CSV RGPD
 
-`[ ]` `apps/backend/src/features/exports/`
+`[ ]` 🟢 Mineur · `apps/backend/src/features/exports/`
 
 **Comportement attendu :**
 
@@ -152,7 +156,7 @@ Mobile (SQLite) → Hono sync.usecase.ts → compare avec PostgreSQL
 
 ### AUDIT-01 — Middleware d'audit logs
 
-`[ ]` `apps/backend/src/shared/middleware/audit.middleware.ts`
+`[ ]` 🟡 Majeur · `apps/backend/src/shared/middleware/audit.middleware.ts`
 
 **Comportement attendu :**
 
@@ -185,7 +189,7 @@ Mobile (SQLite) → Hono sync.usecase.ts → compare avec PostgreSQL
 
 ### API-01 — Documentation OpenAPI auto-générée (Swagger UI)
 
-`[ ]` `apps/backend/src/index.ts`
+`[ ]` 🟢 Mineur · `apps/backend/src/index.ts`
 
 **Comportement attendu :**
 
@@ -206,7 +210,7 @@ Mobile (SQLite) → Hono sync.usecase.ts → compare avec PostgreSQL
 
 ### PATIENT-01 — CRUD patients et gestion utilisateurs
 
-`[ ]` · `apps/backend/src/features/patients/`
+`[ ]` 🟡 Majeur · `apps/backend/src/features/patients/`
 
 **Comportement attendu :**
 
@@ -223,7 +227,7 @@ Mobile (SQLite) → Hono sync.usecase.ts → compare avec PostgreSQL
 
 ### INSTRUCTION-01 — Envoi d'instructions médicales
 
-`[ ]` · `apps/backend/src/features/instructions/`
+`[ ]` 🟡 Majeur · `apps/backend/src/features/instructions/`
 
 **Comportement attendu :**
 
@@ -242,7 +246,7 @@ Mobile (SQLite) → Hono sync.usecase.ts → compare avec PostgreSQL
 
 ### WEB-01 — Tableau de bord médecin
 
-`[ ]` · `apps/web/src/app/dashboard/`
+`[ ]` 🟡 Majeur · `apps/web/src/app/dashboard/`
 
 **Comportement attendu :**
 
@@ -260,7 +264,7 @@ Mobile (SQLite) → Hono sync.usecase.ts → compare avec PostgreSQL
 
 ### WEB-02 — Visualisation chronologique patient
 
-`[ ]` · `apps/web/src/app/patients/[id]/`
+`[ ]` 🟡 Majeur · `apps/web/src/app/patients/[id]/`
 
 **Comportement attendu :**
 
@@ -277,7 +281,7 @@ Mobile (SQLite) → Hono sync.usecase.ts → compare avec PostgreSQL
 
 ### WEB-03 — Gestion des utilisateurs et codes d'accès
 
-`[ ]` · `apps/web/src/app/patients/`
+`[ ]` 🟡 Majeur · `apps/web/src/app/patients/`
 
 **Comportement attendu :**
 
@@ -294,7 +298,7 @@ Mobile (SQLite) → Hono sync.usecase.ts → compare avec PostgreSQL
 
 ### WEB-04 — Export données (PDF / CSV)
 
-`[ ]` · `apps/web/src/app/exports/`
+`[ ]` 🟢 Mineur · `apps/web/src/app/exports/`
 
 **Comportement attendu :**
 
@@ -310,7 +314,7 @@ Mobile (SQLite) → Hono sync.usecase.ts → compare avec PostgreSQL
 
 ### WEB-05 — Envoi d'instructions pictographiques
 
-`[ ]` · `apps/web/src/app/patients/[id]/instructions/`
+`[ ]` 🟡 Majeur · `apps/web/src/app/patients/[id]/instructions/`
 
 **Comportement attendu :**
 
@@ -323,13 +327,13 @@ Mobile (SQLite) → Hono sync.usecase.ts → compare avec PostgreSQL
 
 ### MOB-02 — Authentification patient (code 6 chiffres)
 
-`[ ]` `apps/mobile/src/features/auth/`
+`[ ]` 🔴 Critique · `apps/mobile/src/features/auth/`
 
 **Comportement attendu :**
 
 - Écran de saisie du code 6 chiffres (clavier numérique)
 - Stockage du token JWT dans `expo-secure-store` (AES-256)
-- Session valide pour toujours une fois connecté
+- Session valide 1 an — renouvelée automatiquement à chaque connexion réussie
 
 **Règles de code :**
 
@@ -341,7 +345,7 @@ Mobile (SQLite) → Hono sync.usecase.ts → compare avec PostgreSQL
 
 ### MOB-03 — Questionnaire symptômes (offline)
 
-`[ ]` · `apps/mobile/src/features/questionnaire/`
+`[ ]` 🟡 Majeur · `apps/mobile/src/features/questionnaire/`
 
 **Comportement attendu :**
 
@@ -359,7 +363,7 @@ Mobile (SQLite) → Hono sync.usecase.ts → compare avec PostgreSQL
 
 ### MOB-04 — Capture et compression de photos
 
-`[ ]` `apps/mobile/src/features/photos/`
+`[ ]` 🟡 Majeur · `apps/mobile/src/features/photos/`
 
 **Comportement attendu :**
 
@@ -379,7 +383,7 @@ Mobile (SQLite) → Hono sync.usecase.ts → compare avec PostgreSQL
 
 ### MOB-05 — Queue de synchronisation (offline → backend)
 
-`[ ]` `apps/mobile/src/features/sync/`
+`[ ]` 🔴 Critique · `apps/mobile/src/features/sync/`
 
 **Comportement attendu :**
 
@@ -397,7 +401,7 @@ Mobile (SQLite) → Hono sync.usecase.ts → compare avec PostgreSQL
 
 ### MOB-01 — Consentement RGPD première connexion
 
-`[ ]` `apps/mobile/src/features/consent/`
+`[ ]` 🔴 Critique · `apps/mobile/src/features/consent/`
 
 **Comportement attendu :**
 
@@ -421,7 +425,7 @@ Mobile (SQLite) → Hono sync.usecase.ts → compare avec PostgreSQL
 
 ### MOB-06 — Consultation des instructions médicales
 
-`[ ]` · `apps/mobile/src/features/instructions/`
+`[ ]` 🟢 Mineur · `apps/mobile/src/features/instructions/`
 
 **Comportement attendu :**
 
@@ -438,7 +442,7 @@ Mobile (SQLite) → Hono sync.usecase.ts → compare avec PostgreSQL
 
 ### MOB-07 — Notifications (locales et push)
 
-`[ ]` `apps/mobile/src/features/notifications/`
+`[ ]` 🟢 Mineur · `apps/mobile/src/features/notifications/`
 
 **Comportement attendu :**
 
@@ -466,7 +470,7 @@ Mobile (SQLite) → Hono sync.usecase.ts → compare avec PostgreSQL
 
 ### I18N-01 — Internationalisation de l'application mobile (khmer / français)
 
-`[ ]` `apps/mobile/src/i18n/`
+`[ ]` 🟡 Majeur · `apps/mobile/src/i18n/`
 
 **Comportement attendu :**
 
@@ -497,7 +501,7 @@ Mobile (SQLite) → Hono sync.usecase.ts → compare avec PostgreSQL
 
 ### MED-01 — Définition des pictogrammes de symptômes
 
-`[ ]` `packages/shared/src/schema.ts` · à valider avec les chirurgiens toulousains
+`[ ]` 🔴 Critique · `apps/backend/src/infrastructure/schema.ts` · à valider avec les chirurgiens toulousains
 
 **Contexte :**
 
@@ -528,7 +532,7 @@ Le patient évalue ses symptômes via des pictogrammes visuels — pas de chiffr
 
 ### DEVOPS-03 — Automatisation statut features (workflows + authentification bot)
 
-`[ ]` `.github/workflows/feature-in-progress.yml` · `.github/workflows/update-feature-status.yml`
+`[ ]` 🔴 Critique · `.github/workflows/feature-in-progress.yml` · `.github/workflows/update-feature-status.yml`
 
 **Comportement attendu :**
 
@@ -560,7 +564,7 @@ Un PAT lié à un compte personnel crée une dépendance à une personne. Si le 
 
 ### DEVOPS-02 — Reverse proxy Caddy avec TLS 1.3
 
-`[ ]` `Caddyfile` · `docker-compose.yml`
+`[ ]` 🟡 Majeur · `Caddyfile` · `docker-compose.yml`
 
 **Comportement attendu :**
 
@@ -585,7 +589,7 @@ Un PAT lié à un compte personnel crée une dépendance à une personne. Si le 
 
 ### DEVOPS-01 — Interface d'administration PostgreSQL (pgAdmin)
 
-`[ ]` `docker-compose.yml`
+`[ ]` 🟢 Mineur · `docker-compose.yml`
 
 **Comportement attendu :**
 
@@ -630,7 +634,7 @@ gh pr create --base dev --title "feat: XXX-00 nom de la feature" --body "..."
 - **TDD obligatoire sur toutes les features** : l'agent écrit les tests en premier, génère l'implémentation pour les faire passer, puis le développeur valide. Ne jamais générer du code sans test associé.
 
 - **Types** : toujours importer depuis `@sauver-la-face/shared`, jamais redéfinir
-- **Backend — Clean Architecture** : chaque feature suit 4 couches (`presentation → application → domain ← infrastructure`). La logique métier va dans `domain/` uniquement — jamais dans `presentation/` ni `infrastructure/`
+- **Backend — Clean Architecture + DDD** : chaque feature suit 4 couches (`presentation → application → domain ← infrastructure`). Entities et Value Objects dans `domain/`, orchestration dans `application/` sans règle métier. Concepts partagés (ex: `PatientCodeValue`, `ChecksumSHA256`) → `packages/shared/src/domain/`
 - **Web — Séparation UI/logique** : `components/` = UI pure sans `fetch`, `hooks/` = logique + TanStack Query, `actions/` = mutations Server Actions
 - **Mobile** : toute donnée est d'abord écrite en SQLite, puis ajoutée à la `sync_queue`
 - **Migrations** : additives uniquement (colonnes nullable), jamais de suppression

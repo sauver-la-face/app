@@ -1,10 +1,14 @@
+import { sql } from 'drizzle-orm';
 import {
   boolean,
   date,
+  index,
   integer,
   pgTable,
+  primaryKey,
   text,
   timestamp,
+  uniqueIndex,
   uuid,
   varchar,
 } from 'drizzle-orm/pg-core';
@@ -29,17 +33,33 @@ export const patient = pgTable('patient', {
 
 // Soft delete automatique après 48h si le code n'a pas été utilisé (job cron)
 // Une fois utilisé (used_at NOT NULL), le code est valide pour toujours
-export const patientCode = pgTable('patient_code', {
-  uuid_patient_code: uuid('uuid_patient_code').primaryKey().defaultRandom(),
-  uuid_patient: uuid('uuid_patient')
-    .notNull()
-    .references(() => patient.uuid_patient),
-  code: varchar('code', { length: 6 }).notNull(),
-  created_at: timestamp('created_at').notNull().defaultNow(),
-  used_at: timestamp('used_at'), // null = jamais utilisé
-  deleted_at: timestamp('deleted_at'), // soft delete si used_at IS NULL après 48h
-  is_active: integer('is_active').notNull().default(1), // boolean: 1 = actif, 0 = inactif
-});
+export const patientCode = pgTable(
+  'patient_code',
+  {
+    uuid_patient_code: uuid('uuid_patient_code').primaryKey().defaultRandom(),
+    uuid_patient: uuid('uuid_patient')
+      .notNull()
+      .references(() => patient.uuid_patient),
+    code: varchar('code', { length: 6 }).notNull(),
+    created_at: timestamp('created_at').notNull().defaultNow(),
+    used_at: timestamp('used_at'), // null = jamais utilisé
+    deleted_at: timestamp('deleted_at'), // soft delete si used_at IS NULL après 48h
+    is_active: integer('is_active').notNull().default(1), // boolean: 1 = actif, 0 = inactif
+    revoked_at: timestamp('revoked_at'), // null = non révoqué, renseigné par le médecin pour couper l'accès
+  },
+  (t) => [
+    // Un seul code actif possible par valeur (empêche deux patients avec le même code actif)
+    uniqueIndex('patient_code_code_active_unique')
+      .on(t.code)
+      .where(sql`is_active = 1 AND used_at IS NULL AND deleted_at IS NULL`),
+    // Un seul code actif possible par patient
+    uniqueIndex('patient_code_patient_active_unique')
+      .on(t.uuid_patient)
+      .where(sql`is_active = 1 AND used_at IS NULL AND deleted_at IS NULL`),
+    // Accélère la recherche de tous les codes d'un patient (actifs + historique)
+    index('patient_code_uuid_patient_idx').on(t.uuid_patient),
+  ],
+);
 
 export const medicalProcedure = pgTable('medical_procedure', {
   uuid_medical_procedure: uuid('uuid_medical_procedure').primaryKey().defaultRandom(),
@@ -75,15 +95,18 @@ export const symptom = pgTable('symptom', {
 });
 
 // Relation N-N entre un événement médical et les symptômes sélectionnés par le patient
-export const medicalEventSymptom = pgTable('medical_event_symptom', {
-  uuid_medical_event_symptom: uuid('uuid_medical_event_symptom').primaryKey().defaultRandom(),
-  uuid_event: uuid('uuid_event')
-    .notNull()
-    .references(() => medicalEvent.uuid_event),
-  uuid_symptom: uuid('uuid_symptom')
-    .notNull()
-    .references(() => symptom.uuid_symptom),
-});
+export const medicalEventSymptom = pgTable(
+  'medical_event_symptom',
+  {
+    uuid_event: uuid('uuid_event')
+      .notNull()
+      .references(() => medicalEvent.uuid_event),
+    uuid_symptom: uuid('uuid_symptom')
+      .notNull()
+      .references(() => symptom.uuid_symptom),
+  },
+  (t) => [primaryKey({ columns: [t.uuid_event, t.uuid_symptom] })],
+);
 
 export const media = pgTable('media', {
   uuid_media: uuid('uuid_media').primaryKey().defaultRandom(),

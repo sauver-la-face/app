@@ -61,6 +61,7 @@ Base de données SQLite embarquée dans l'application mobile. Permet de stocker 
 ### expo-secure-store
 Stockage chiffré sur l'appareil (AES-256). Utilisé pour stocker le token JWT du patient de façon sécurisée.
 - Jamais stocker de token dans AsyncStorage (non chiffré)
+- **Limite** : ne stocke que des strings — sérialiser les objets en JSON avant de les stocker (`JSON.stringify` / `JSON.parse`)
 
 ### Queue de synchronisation
 Table SQLite `sync_queue` qui enregistre toutes les actions effectuées offline. Quand la connexion revient, les actions sont envoyées au backend dans l'ordre, avec retry automatique en cas d'échec.

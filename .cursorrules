@@ -5,7 +5,7 @@
 
 > `docs/cdc.md` est disponible comme référence complète si besoin d'approfondissement.
 
-## Architecture backend — Clean Architecture par feature
+## Architecture backend — Clean Architecture + DDD par feature
 
 Chaque feature backend suit 4 couches. Dépendances : `presentation → application → domain ← infrastructure`
 Convention de nommage : **`camelCase` pour tous les fichiers sans exception**
@@ -15,18 +15,34 @@ features/[feature]/
   presentation/
     [feature]Router.ts          ← HTTP + validation Zod, appelle application
   application/
-    [feature]Usecase.ts         ← orchestration + logique métier
+    [feature]Usecase.ts         ← orchestration : appelle domain + repo, aucune règle métier
   domain/
-    [entity].ts                 ← entité avec règles métier si nécessaire
+    [entity].ts                 ← Entity DDD (UUID, identité persistante, règles métier)
     [entity]Repository.ts       ← interface (port), aucune dépendance externe
+    [valueObject].ts            ← Value Object DDD (pas d'UUID, immuable, constructeur privé + create())
   infrastructure/
     [entity]Repository.ts       ← implémentation Drizzle (adapter)
 ```
 
+**Couche `application/` — règles :**
+- Chef d'orchestre uniquement : reçoit une commande, appelle le domaine, appelle l'infra via les interfaces
+- Appelle les Entities et Value Objects de `domain/` pour déléguer la logique métier
+- Appelle uniquement les interfaces Repository de `domain/` — jamais l'implémentation directement
+- Ne connaît ni Drizzle ni Hono
+
+**Couche `domain/` — règles DDD :**
+- **Entity** : a un UUID, identité persistante même si les attributs changent (`Patient`, `Physician`, `MedicalEvent`)
+- **Value Object** : pas d'UUID, défini par sa valeur, immuable, constructeur privé + méthode statique `create()` qui valide (`Email`, `PatientCodeValue`, `ChecksumSHA256`)
+- Les règles métier et validations vivent ici — jamais dans `application/` ni `presentation/`
+- Ne connaît ni Drizzle ni Hono
+
+**Répartition domain/ vs packages/shared :**
+- Concept utilisé par une seule app → `domain/` de la feature concernée
+- Concept utilisé par plusieurs apps (ex: backend + mobile) → `packages/shared/src/domain/`
+
 **Règles absolues :**
-- `domain/` ne connaît ni Drizzle ni Hono — interfaces et entités uniquement
-- `presentation/` ne contient aucune logique métier
-- `infrastructure/` ne contient aucune logique métier
+- `presentation/` ne contient aucune logique métier — valide et délègue uniquement
+- `infrastructure/` ne contient aucune logique métier — lit et écrit uniquement
 - Même nom `camelCase` dans `domain/` (interface) et `infrastructure/` (implémentation) — le dossier distingue les deux
 
 ## Architecture web — Séparation UI / logique
@@ -40,6 +56,17 @@ features/[feature]/
 - `@shared/*` → `apps/backend/src/shared/*`
 - Toujours utiliser cet alias pour importer depuis `shared/` — jamais de chemin relatif `../../shared/`
 - Exemples : `import { logger } from "@shared/logger"` · `import { auditMiddleware } from "@shared/middleware/audit.middleware"`
+
+## Règles mobile
+
+- `expo-secure-store` ne stocke que des **strings** — toujours sérialiser les objets avec `JSON.stringify` avant stockage et `JSON.parse` à la lecture
+- Jamais stocker de token dans `AsyncStorage` (non chiffré) — uniquement `expo-secure-store`
+
+## Règles features
+
+- Toute nouvelle feature ajoutée dans `.ai/features.md` doit obligatoirement avoir un niveau de priorité : 🔴 Critique · 🟡 Majeur · 🟢 Mineur
+- 🔴 Critique = bloque d'autres features ou obligation légale · 🟡 Majeur = core métier · 🟢 Mineur = confort, ne bloque rien
+- Commencer par les features 🔴 Critique avant toute autre
 
 ## Règles Markdown
 

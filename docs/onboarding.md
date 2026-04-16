@@ -60,7 +60,7 @@ Le format de branche est obligatoire : `feature/XXX-00-nom` (ex: `feature/AUTH-0
 - **TDD obligatoire** : écrire les tests avant le code sur toutes les features critiques (auth, sync, alertes, exports)
 - **Jamais de `console.log`** : utiliser le logger Pino backend — toujours importer le symbole `logger` depuis `apps/backend/src/shared/logger.ts` via l'alias `@shared/logger` (configuré dans `apps/backend/tsconfig.json`)
 - **Types** : toujours importer depuis `@sauver-la-face/shared`, jamais redéfinir
-- **Backend** : Clean Architecture par feature — `presentation → application → domain ← infrastructure`. La logique métier va dans `domain/` uniquement
+- **Backend** : Clean Architecture + DDD par feature — `presentation → application → domain ← infrastructure`. Les Entities et Value Objects vivent dans `domain/`. `application/` orchestre sans contenir de règle métier. Concepts partagés entre apps → `packages/shared/src/domain/`
 
 ### Soumettre une PR
 

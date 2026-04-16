@@ -37,7 +37,7 @@ Développer une application de suivi post-opératoire permettant aux patients ca
 
 ### 📱 Mobile (patient)
 1. **Consentement RGPD** : écran obligatoire au premier lancement avant toute collecte, acceptation ou refus explicite avec pictogrammes, date de consentement sauvegardée
-2. **Authentification patient** : connexion code 6 chiffres, JWT valide pour toujours une fois activé, code expiré après 48h si non utilisé, renouvellement du code par médecin local uniquement
+2. **Authentification patient** : connexion code 6 chiffres, JWT TTL 1 an (offline-first — patients parfois déconnectés plusieurs semaines), révocation explicite par le médecin, code expiré après 48h si non utilisé, renouvellement du code par médecin local uniquement
 3. **Interface pictographique** : navigation max 2 clics, boutons min 48x48 dp, langues khmer/français/anglais
 4. **Capture photos cicatrices** : appareil photo intégré, compression automatique, horodatage
 5. **Questionnaire symptômes** : questions visuelles via pictogrammes, réponses simples par tap
@@ -119,7 +119,7 @@ Développer une application de suivi post-opératoire permettant aux patients ca
 ### Sécurité
 
 **Authentification :**
-- Patients : code numérique 6 chiffres, JWT valide pour toujours une fois activé, expiration du code après 48h si non utilisé, renouvellement du code par médecin local uniquement
+- Patients : code numérique 6 chiffres, JWT TTL 1 an renouvelé à chaque connexion, révocation explicite par le médecin, expiration du code après 48h si non utilisé, renouvellement du code par médecin local uniquement
 - Médecins web : MFA obligatoire TOTP, session timeout 2h d'inactivité (postes partagés hôpitaux), renouvellement silencieux automatique tant qu'actif
 - Tokens JWT signés HMAC-SHA256
 
@@ -256,6 +256,7 @@ SQLite embarqué, 100% fonctionnel sans réseau. Transactions ACID pour la cohé
 
 #### 13. Sécurité locale — expo-secure-store
 Chiffrement AES-256 des tokens JWT. Utilise le Keystore Android et le Keychain iOS. Résiste à l'extraction même sur appareils rootés.
+- **Limite** : API clé/valeur strings uniquement — sérialiser les objets avec `JSON.stringify` avant stockage, désérialiser avec `JSON.parse` à la lecture.
 
 #### 14. Internationalisation — i18next + expo-localization
 Khmer (défaut) / français / anglais. Détection automatique de la locale système. Chargement lazy pour maintenir l'APK < 30 Mo.
@@ -332,22 +333,28 @@ Une branche par feature, PR obligatoire pour merge sur `dev` et sur `main`. La b
 
 Code organisé par domaine métier. Chaque feature est un module autonome avec ses propres composants, services et tests.
 
-### Backend (Hono) — Feature-based + Clean Architecture
+### Backend (Hono) — Feature-based + Clean Architecture + DDD
 
-4 couches par feature. Dépendances : `presentation → application → domain ← infrastructure`. La logique métier est isolée dans `domain/` — testable sans base de données.
+4 couches par feature. Dépendances : `presentation → application → domain ← infrastructure`. Les règles métier sont dans `domain/` — testable sans base de données.
 
 ```text
 apps/backend/src/
   features/
-    patients/
+    auth/
       presentation/
-        patients.router.ts      ← routes Hono + validation Zod
+        authRouter.ts           ← routes Hono + validation Zod, délègue à application
       application/
-        patients.usecase.ts     ← orchestration (TDD)
+        authUsecase.ts          ← orchestration, aucune règle métier (TDD)
       domain/
-        patients.domain.ts      ← règles métier pures (TDD)
+        physician.ts            ← Entity DDD (UUID, règles métier)
+        physicianRepository.ts  ← interface (port)
+        email.ts                ← Value Object DDD (backend uniquement)
       infrastructure/
-        patients.repository.ts  ← requêtes Drizzle/PostgreSQL
+        physicianRepository.ts  ← requêtes Drizzle/PostgreSQL
+
+packages/shared/src/domain/
+  patientCodeValue.ts           ← Value Object partagé (backend + mobile)
+  checksumSHA256.ts             ← Value Object partagé (backend + mobile)
     sync/     ← même structure (server-wins, versioning schéma)
     alerts/   ← même structure (triggers_alert pictogrammes)
     exports/  ← même structure (PDF, CSV RGPD)
@@ -478,7 +485,7 @@ Retry : backoff 2s puis 4s, abandon à la 4e tentative avec alerte dashboard mé
 Basé sur le MCD validé. `PatientCode` supporte plusieurs codes dans le temps par patient, un seul actif à la fois (le dernier non expiré et non utilisé).
 
 ```typescript
-// packages/shared/src/schema.ts — voir le fichier source pour le schéma complet et à jour
+// apps/backend/src/infrastructure/schema.ts — voir le fichier source pour le schéma complet et à jour
 
 export const physician = pgTable('physician', { /* uuid, first_name, last_name, phone_number, mail, password_hash */ })
 export const patient = pgTable('patient', { /* uuid, first_name, last_name, sex, birthdate, region */ })
@@ -494,7 +501,7 @@ export const media = pgTable('media', { /* uuid, uuid_event FK, file_url, file_t
 export const instructions = pgTable('instructions', { /* uuid, uuid_physician FK, uuid_medical_procedure FK, content, created_at, acknowledged_at */ })
 ```
 
-> Le schéma complet et à jour est dans `packages/shared/src/schema.ts` — cette section est un résumé.
+> Le schéma complet et à jour est dans `apps/backend/src/infrastructure/schema.ts` — cette section est un résumé.
 
 ---
 

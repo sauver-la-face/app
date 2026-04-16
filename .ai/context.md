@@ -41,7 +41,7 @@ Application de suivi post-opératoire pour patients cambodgiens opérés lors de
 
 ## Architecture du code
 
-### Backend — Feature-based + Clean Architecture (4 couches par feature)
+### Backend — Feature-based + Clean Architecture + DDD (4 couches par feature)
 
 Dépendances : `presentation → application → domain ← infrastructure`
 Convention de nommage : **`camelCase` pour tous les fichiers sans exception**
@@ -49,11 +49,17 @@ Convention de nommage : **`camelCase` pour tous les fichiers sans exception**
 ```text
 apps/backend/src/features/
   [feature]/
-    presentation/   → [feature]Router.ts
-    application/    → [feature]Usecase.ts
-    domain/         → [entity].ts (entité) · [entity]Repository.ts (interface)
-    infrastructure/ → [entity]Repository.ts (implémentation Drizzle)
+    presentation/   → [feature]Router.ts         ← HTTP + Zod, délègue à application
+    application/    → [feature]Usecase.ts         ← orchestration, aucune règle métier
+    domain/         → [entity].ts                 ← Entity DDD (UUID, règles métier)
+                    → [entity]Repository.ts        ← interface (port)
+                    → [valueObject].ts             ← Value Object DDD (pas d'UUID, immuable)
+    infrastructure/ → [entity]Repository.ts       ← implémentation Drizzle
 ```
+
+**Règle de répartition :**
+- Concept utilisé par une seule app → `domain/` de la feature
+- Concept utilisé par plusieurs apps → `packages/shared/src/domain/`
 
 ### Dashboard web — Séparation UI / logique (Next.js App Router)
 
@@ -108,6 +114,7 @@ apps/mobile/src/features/
 ### Codes patients
 - Code numérique 6 chiffres, soft delete automatique après 48h si non utilisé
 - Une fois utilisé (`used_at NOT NULL`), valide pour toujours
+- JWT patient : TTL 1 an, renouvelé à chaque connexion, révocable par le médecin via `patient_code.revoked_at`
 - Renouvellement uniquement par le médecin local
 
 ### Logs
@@ -142,7 +149,7 @@ apps/mobile/src/features/
 
 ## Schéma de base de données (Drizzle)
 
-Voir `packages/shared/src/schema.ts` pour le schéma complet.
+Voir `apps/backend/src/infrastructure/schema.ts` pour le schéma complet.
 
 Tables principales :
 - `physician` — médecins et chirurgiens (mêmes droits)
