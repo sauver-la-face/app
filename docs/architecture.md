@@ -86,6 +86,7 @@ Les workflows qui commitent automatiquement sur `dev` (mise à jour `features.md
 - TanStack Query gère le polling avec `refetchInterval` en une ligne
 - Moins de surface d'attaque pour la sécurité
 - Plus simple à débugger et maintenir
+- Optimisation HTTP 304 : le backend calcule un ETag (hash MD5 des alertes actives) — si rien n'a changé, répond `304 Not Modified` sans body, TanStack Query conserve son cache automatiquement
 
 ### Pourquoi Pino au lieu de Winston ou console.log
 - Le plus rapide des loggers Node.js (format JSON natif, pas de sérialisation coûteuse)
@@ -146,15 +147,18 @@ features/auth/
 
 ---
 
-## Architecture web — Séparation UI / logique
+## Architecture web — Feature-based (Next.js App Router)
 
-Next.js App Router. La logique est isolée dans les hooks — les composants ne connaissent pas l'API.
+Pages fines dans `app/`, toute la logique dans `features/`.
 
 ```text
-feature/
-  components/        ← UI pure (JSX uniquement, aucun appel API direct)
-  hooks/             ← logique métier + appels API via TanStack Query
-  actions/           ← Server Actions Next.js (mutations : créer, modifier, supprimer)
+apps/web/src/
+  app/                        ← routing Next.js (pages fines — importent depuis features/)
+  features/
+    [feature]/
+      components/             ← UI pure (JSX uniquement, aucun appel API direct)
+      hooks/                  ← logique métier + appels API via TanStack Query
+      actions/                ← Server Actions Next.js (mutations : créer, modifier, supprimer)
 ```
 
 **Règles absolues :**

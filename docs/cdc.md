@@ -367,19 +367,25 @@ packages/shared/src/domain/
 
 ### Dashboard web (Next.js) — App Router natif
 
-La structure de Next.js App Router organise les pages. Les composants et hooks réutilisables sont regroupés dans `components/` et `hooks/`. Plus pragmatique pour une équipe qui découvre Next.js.
+Pages fines dans `app/`, toute la logique dans `features/`. Cohérent avec l'architecture backend et mobile.
 
 ```text
 apps/web/src/
-  app/                        ← routing Next.js natif
+  app/                        ← routing Next.js (pages fines — importent depuis features/)
     dashboard/
     patients/[id]/
     alerts/
     exports/
     auth/
-  components/                 ← composants réutilisables
-  hooks/                      ← TanStack Query hooks
-  lib/                        ← helpers, formatters
+  features/
+    dashboard/
+      components/             ← UI pure, jamais de fetch direct
+      hooks/                  ← TanStack Query hooks
+      actions/                ← Server Actions Next.js (mutations)
+    patients/
+      components/
+      hooks/
+      actions/
 ```
 
 ### Mobile (React Native) — Feature-based avec storage offline par feature

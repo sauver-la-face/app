@@ -61,17 +61,18 @@ apps/backend/src/features/
 - Concept utilisé par une seule app → `domain/` de la feature
 - Concept utilisé par plusieurs apps → `packages/shared/src/domain/`
 
-### Dashboard web — Séparation UI / logique (Next.js App Router)
+### Dashboard web — Feature-based (Next.js App Router)
 
-UI isolée dans `components/`, logique dans `hooks/`, mutations dans `actions/`. Les composants ne font jamais de `fetch` direct.
+Pages fines dans `app/`, toute la logique dans `features/`. Les composants ne font jamais de `fetch` direct.
 
 ```text
 apps/web/src/
-  app/          → routing natif Next.js
-  components/   → UI pure (JSX uniquement, consomme les hooks)
-  hooks/        → TanStack Query hooks (logique + appels API)
-  actions/      → Server Actions Next.js (mutations)
-  lib/          → helpers, formatters
+  app/              → routing Next.js (pages fines — importent depuis features/)
+  features/
+    [feature]/
+      components/   → UI pure (JSX uniquement, consomme les hooks)
+      hooks/        → TanStack Query hooks (logique + appels API)
+      actions/      → Server Actions Next.js (mutations)
 ```
 
 ### Mobile — Feature-based avec storage offline par feature

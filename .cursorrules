@@ -45,11 +45,23 @@ features/[feature]/
 - `infrastructure/` ne contient aucune logique métier — lit et écrit uniquement
 - Même nom `camelCase` dans `domain/` (interface) et `infrastructure/` (implémentation) — le dossier distingue les deux
 
-## Architecture web — Séparation UI / logique
+## Architecture web — Feature-based (Next.js App Router)
 
-- `components/` — UI pure uniquement, jamais de `fetch` direct — consomme les hooks
-- `hooks/` — toute la logique métier + appels API via TanStack Query (`usePatients()`, `useAlerts()`)
-- `actions/` — Server Actions Next.js pour les mutations (créer, modifier, supprimer)
+```text
+apps/web/src/
+  app/                        ← routing Next.js (pages fines — importent depuis features/)
+  features/
+    [feature]/
+      components/             ← UI pure, jamais de fetch direct — consomme les hooks
+      hooks/                  ← logique métier + appels API via TanStack Query
+      actions/                ← Server Actions Next.js (mutations : créer, modifier, supprimer)
+```
+
+**Règles absolues :**
+- `app/` contient uniquement les pages — elles importent depuis `features/` et ne contiennent aucune logique
+- `components/` reçoit des props et consomme des hooks — jamais de `fetch` direct
+- `hooks/` contient toute la logique — `usePatients()`, `useAlerts()`, etc.
+- `actions/` pour les mutations côté serveur
 
 ## Alias TypeScript (backend)
 

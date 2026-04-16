@@ -111,7 +111,8 @@ Mobile (SQLite) → Hono sync.usecase.ts → compare avec PostgreSQL
 
 - La logique d'alerte lit `triggers_alert` depuis la table `symptom` — si un jour un nouveau symptôme déclencheur est ajouté, aucun code à changer
 - Dépend de **MED-01** pour la liste définitive des symptômes
-- Tester : symptôme déclencheur → alerte, symptôme non déclencheur → pas d'alerte, absence de sync 7j → alerte
+- Implémenter HTTP 304 via ETag : calculer un hash MD5 des alertes actives, comparer avec `If-None-Match` du client — répondre `304` sans body si identique, `200` avec body si changement
+- Tester : symptôme déclencheur → alerte, symptôme non déclencheur → pas d'alerte, absence de sync 7j → alerte, poll sans changement → 304, poll avec nouvelle alerte → 200
 
 ---
 
@@ -256,7 +257,7 @@ Mobile (SQLite) → Hono sync.usecase.ts → compare avec PostgreSQL
 
 **Règles de code :**
 
-- Les appels API dans des hooks TanStack Query dans `apps/web/src/hooks/`
+- Les appels API dans des hooks TanStack Query dans `apps/web/src/features/dashboard/hooks/`
 - Pas de `fetch` direct dans les composants
 - Pas de `BETTER_AUTH_SECRET` côté web — auth déléguée au backend
 
@@ -635,7 +636,7 @@ gh pr create --base dev --title "feat: XXX-00 nom de la feature" --body "..."
 
 - **Types** : toujours importer depuis `@sauver-la-face/shared`, jamais redéfinir
 - **Backend — Clean Architecture + DDD** : chaque feature suit 4 couches (`presentation → application → domain ← infrastructure`). Entities et Value Objects dans `domain/`, orchestration dans `application/` sans règle métier. Concepts partagés (ex: `PatientCodeValue`, `ChecksumSHA256`) → `packages/shared/src/domain/`
-- **Web — Séparation UI/logique** : `components/` = UI pure sans `fetch`, `hooks/` = logique + TanStack Query, `actions/` = mutations Server Actions
+- **Web — Feature-based** : `app/` = pages fines uniquement, `features/[feature]/components/` = UI pure sans `fetch`, `features/[feature]/hooks/` = logique + TanStack Query, `features/[feature]/actions/` = mutations Server Actions
 - **Mobile** : toute donnée est d'abord écrite en SQLite, puis ajoutée à la `sync_queue`
 - **Migrations** : additives uniquement (colonnes nullable), jamais de suppression
 - **Nommage fichiers** : `camelCase` pour tous les fichiers sans exception (backend, web, mobile)
