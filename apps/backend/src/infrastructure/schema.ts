@@ -40,6 +40,11 @@ export const patientCode = pgTable(
     uuid_patient: uuid('uuid_patient')
       .notNull()
       .references(() => patient.uuid_patient),
+    // varchar(6) garantit la longueur max uniquement — pas le format numérique.
+    // La validation "6 chiffres stricts" est intentionnellement dans le Value Object
+    // PatientCodeValue (packages/shared/src/domain/) et non en contrainte CHECK SQL.
+    // Raison : les règles métier vivent dans le domaine (DDD), pas dans la base de données.
+    // PatientCodeValue doit être créé et utilisé dans auth/domain/ avant toute insertion.
     code: varchar('code', { length: 6 }).notNull(),
     created_at: timestamp('created_at').notNull().defaultNow(),
     used_at: timestamp('used_at'), // null = jamais utilisé
@@ -51,11 +56,11 @@ export const patientCode = pgTable(
     // Un seul code actif possible par valeur (empêche deux patients avec le même code actif)
     uniqueIndex('patient_code_code_active_unique')
       .on(t.code)
-      .where(sql`is_active = 1 AND used_at IS NULL AND deleted_at IS NULL`),
+      .where(sql`is_active = 1 AND used_at IS NULL AND deleted_at IS NULL AND revoked_at IS NULL`),
     // Un seul code actif possible par patient
     uniqueIndex('patient_code_patient_active_unique')
       .on(t.uuid_patient)
-      .where(sql`is_active = 1 AND used_at IS NULL AND deleted_at IS NULL`),
+      .where(sql`is_active = 1 AND used_at IS NULL AND deleted_at IS NULL AND revoked_at IS NULL`),
     // Accélère la recherche de tous les codes d'un patient (actifs + historique)
     index('patient_code_uuid_patient_idx').on(t.uuid_patient),
   ],

@@ -133,7 +133,7 @@ Développer une application de suivi post-opératoire permettant aux patients ca
 **Chiffrement :**
 - AES-256-GCM en local sur l'appareil (expo-secure-store)
 - TLS 1.3 obligatoire en transit (terminé par Caddy)
-- Chiffrement disque au niveau infrastructure assuré par OVH HDS — pas de chiffrement colonne PostgreSQL nécessaire
+- Chiffrement at-rest (données stockées sur disque) assuré par OVH HDS — pas de chiffrement colonne PostgreSQL. Justification : le chiffrement disque OVH HDS est suffisant pour la conformité HDS ; le chiffrement colonne ajouterait une complexité significative sans gain de conformité. S'applique en production uniquement — pas de chiffrement at-rest en dev.
 - Rotation des clés JWT et credentials OVH S3 tous les 90 jours (production uniquement)
 
 **Logs audit :**
@@ -189,13 +189,13 @@ TypeScript natif sans transpilation. Performances I/O supérieures pour les uplo
 Framework léger, TypeScript-first, compatible Bun. Génération OpenAPI automatique via `@hono/zod-openapi` — la documentation API est générée depuis les schémas Zod sans effort manuel.
 
 #### 3. Base de données — PostgreSQL
-Conformité HDS avec chiffrement au niveau colonnes pour données médicales. Transactions ACID pour garantir la cohérence lors des synchronisations offline. Support JSON natif pour les métadonnées photos.
+Conformité HDS via chiffrement at-rest au niveau disque (OVH HDS) — pas de chiffrement colonne PostgreSQL. Transactions ACID pour garantir la cohérence lors des synchronisations offline. Support JSON natif pour les métadonnées photos.
 
 #### 4. ORM — Drizzle
 TypeScript-first, performances proches du SQL brut, migrations versionnées via `drizzle-kit`. Les types de schéma sont partageables avec le package `shared/` pour cohérence totale entre la base de données et les trois apps.
 
 #### 5. Authentification — Better Auth
-MFA TOTP obligatoire pour les médecins web. Gestion des codes 6 chiffres patients avec session expirant après 48h d'inactivité. Compatible expo-secure-store pour le stockage sécurisé des tokens mobiles. Sessions stockées en PostgreSQL.
+MFA TOTP obligatoire pour les médecins web. Gestion des codes 6 chiffres patients : le code expire après 48h s'il n'est pas utilisé, mais une fois activé le JWT patient est valide 1 an (offline-first). Compatible expo-secure-store pour le stockage sécurisé des tokens mobiles. Sessions stockées en PostgreSQL.
 
 #### 6. Stockage photos — MinIO
 Stockage S3-compatible auto-hébergé sur OVH HDS. Versioning des photos cicatrices, chiffrement AES-256 at-rest. Réplication synchrone entre deux buckets OVH (Strasbourg ↔ Roubaix).
@@ -500,8 +500,9 @@ export const medicalProcedure = pgTable('medical_procedure', { /* uuid, uuid_pat
 export const medicalEvent = pgTable('medical_event', { /* uuid, uuid_medical_procedure FK, uuid_physician FK, event_type, event_title, description, created_at */ })
 
 // Pictogrammes de symptômes — liste à valider avec les chirurgiens (MED-01)
-export const symptom = pgTable('symptom', { /* uuid, code, label_fr, label_km, triggers_alert */ })
-export const medicalEventSymptom = pgTable('medical_event_symptom', { /* uuid, uuid_event FK, uuid_symptom FK */ })
+export const symptom = pgTable('symptom', { /* uuid_symptom PK, code unique, label_fr, label_km, triggers_alert */ })
+// Table de jointure N-N — PK composite (uuid_event, uuid_symptom), pas d'uuid dédié
+export const medicalEventSymptom = pgTable('medical_event_symptom', { /* uuid_event FK → medical_event, uuid_symptom FK → symptom, PK composite */ })
 
 export const media = pgTable('media', { /* uuid, uuid_event FK, file_url, file_type, taken_at, description */ })
 export const instructions = pgTable('instructions', { /* uuid, uuid_physician FK, uuid_medical_procedure FK, content, created_at, acknowledged_at */ })

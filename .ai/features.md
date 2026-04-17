@@ -28,6 +28,7 @@
 
 **Règles de code :**
 
+- La validation du format "6 chiffres" va dans `PatientCodeValue` (Value Object DDD dans `packages/shared/src/domain/`) — pas de contrainte CHECK SQL. Raison : les règles métier appartiennent au domaine, pas à la base de données. `varchar(6)` garantit uniquement la longueur max.
 - La logique de validation du code va dans `auth/domain/auth.domain.ts` uniquement
 - L'orchestration (générer, vérifier, renouveler) va dans `auth/application/auth.usecase.ts`
 - Le cron de soft delete est un service séparé `auth/application/auth.cron.ts`

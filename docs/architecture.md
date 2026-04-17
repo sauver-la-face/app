@@ -134,6 +134,7 @@ features/auth/
 - **Entity** : a un UUID, identité persistante même si les attributs changent
 - **Value Object** : pas d'UUID, défini par sa valeur, immuable, constructeur privé + `create()` qui valide
 - Les règles métier et validations vivent ici — jamais dans `application/`
+- **Pas de contrainte CHECK SQL** pour les règles métier — la validation appartient au Value Object, pas à la base de données. Exemple : le format "6 chiffres" du code patient est validé par `PatientCodeValue.create()`, pas par un `CHECK (code ~ '^[0-9]{6}$')` en SQL. Raison : DDD — les règles métier dans le domaine, la base de données ne connaît que la structure.
 
 **Répartition domain/ vs packages/shared :**
 - Concept utilisé par une seule app → `domain/` de la feature
@@ -227,7 +228,6 @@ Les deux mécanismes sont indépendants : le blocage 15 min protège contre la f
 | Credentials OVH Object Storage (S3) | Tous les 90 jours |
 
 > Dev : pas de rotation obligatoire — credentials dans `.env.local` uniquement.
-
 > Détails d'implémentation : voir `docs/cdc.md`
 
 ---
