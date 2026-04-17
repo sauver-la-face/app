@@ -1,5 +1,5 @@
 {
-  "id": "ebabf0d8-f64b-4a7d-aa77-b9558f0dedc6",
+  "id": "88b392a8-e885-4b87-99e3-c34fea96f3c8",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -310,7 +310,23 @@
           "notNull": true
         }
       },
-      "indexes": {},
+      "indexes": {
+        "medical_event_symptom_uuid_symptom_idx": {
+          "name": "medical_event_symptom_uuid_symptom_idx",
+          "columns": [
+            {
+              "expression": "uuid_symptom",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
       "foreignKeys": {
         "medical_event_symptom_uuid_event_medical_event_uuid_event_fk": {
           "name": "medical_event_symptom_uuid_event_medical_event_uuid_event_fk",

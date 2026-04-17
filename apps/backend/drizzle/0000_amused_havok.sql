@@ -91,6 +91,7 @@ CREATE INDEX "instructions_uuid_physician_idx" ON "instructions" USING btree ("u
 CREATE INDEX "instructions_uuid_medical_procedure_idx" ON "instructions" USING btree ("uuid_medical_procedure");--> statement-breakpoint
 CREATE INDEX "media_uuid_event_idx" ON "media" USING btree ("uuid_event");--> statement-breakpoint
 CREATE INDEX "medical_event_uuid_medical_procedure_idx" ON "medical_event" USING btree ("uuid_medical_procedure");--> statement-breakpoint
+CREATE INDEX "medical_event_symptom_uuid_symptom_idx" ON "medical_event_symptom" USING btree ("uuid_symptom");--> statement-breakpoint
 CREATE INDEX "medical_procedure_uuid_patient_idx" ON "medical_procedure" USING btree ("uuid_patient");--> statement-breakpoint
 CREATE UNIQUE INDEX "patient_code_code_active_unique" ON "patient_code" USING btree ("code") WHERE deleted_at IS NULL AND revoked_at IS NULL;--> statement-breakpoint
 CREATE UNIQUE INDEX "patient_code_patient_active_unique" ON "patient_code" USING btree ("uuid_patient") WHERE is_active = true AND used_at IS NULL AND deleted_at IS NULL AND revoked_at IS NULL;--> statement-breakpoint

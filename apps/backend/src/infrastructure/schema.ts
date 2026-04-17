@@ -127,7 +127,12 @@ export const medicalEventSymptom = pgTable(
       .notNull()
       .references(() => symptom.uuid_symptom),
   },
-  (t) => [primaryKey({ columns: [t.uuid_event, t.uuid_symptom] })],
+  (t) => [
+    primaryKey({ columns: [t.uuid_event, t.uuid_symptom] }),
+    // PK composite couvre les recherches par uuid_event (préfixe gauche)
+    // Index dédié nécessaire pour les recherches "tous les événements avec ce symptôme"
+    index('medical_event_symptom_uuid_symptom_idx').on(t.uuid_symptom),
+  ],
 );
 
 export const media = pgTable(
