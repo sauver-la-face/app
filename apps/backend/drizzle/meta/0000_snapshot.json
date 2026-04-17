@@ -1,5 +1,5 @@
 {
-  "id": "38630ab1-e8ca-4fdd-a26f-45bcf04411ca",
+  "id": "ebabf0d8-f64b-4a7d-aa77-b9558f0dedc6",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -645,18 +645,26 @@
           "notNull": true
         }
       },
-      "indexes": {},
-      "foreignKeys": {},
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {
+      "indexes": {
         "physician_mail_unique": {
           "name": "physician_mail_unique",
-          "nullsNotDistinct": false,
           "columns": [
-            "mail"
-          ]
+            {
+              "expression": "lower(\"mail\")",
+              "asc": true,
+              "isExpression": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": true,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
         }
       },
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
       "policies": {},
       "checkConstraints": {},
       "isRLSEnabled": false

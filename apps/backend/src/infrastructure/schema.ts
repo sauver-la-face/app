@@ -12,14 +12,19 @@ import {
   varchar,
 } from 'drizzle-orm/pg-core';
 
-export const physician = pgTable('physician', {
-  uuid_physician: uuid('uuid_physician').primaryKey().defaultRandom(),
-  first_name: varchar('first_name', { length: 100 }).notNull(),
-  last_name: varchar('last_name', { length: 100 }).notNull(),
-  phone_number: varchar('phone_number', { length: 20 }),
-  mail: varchar('mail', { length: 255 }).notNull().unique(),
-  password_hash: text('password_hash').notNull(),
-});
+export const physician = pgTable(
+  'physician',
+  {
+    uuid_physician: uuid('uuid_physician').primaryKey().defaultRandom(),
+    first_name: varchar('first_name', { length: 100 }).notNull(),
+    last_name: varchar('last_name', { length: 100 }).notNull(),
+    phone_number: varchar('phone_number', { length: 20 }),
+    // Index unique fonctionnel sur lower(mail) — empêche deux comptes différant uniquement par la casse
+    mail: varchar('mail', { length: 255 }).notNull(),
+    password_hash: text('password_hash').notNull(),
+  },
+  (t) => [uniqueIndex('physician_mail_unique').on(sql`lower(${t.mail})`)],
+);
 
 export const patient = pgTable('patient', {
   uuid_patient: uuid('uuid_patient').primaryKey().defaultRandom(),

@@ -66,8 +66,7 @@ CREATE TABLE "physician" (
 	"last_name" varchar(100) NOT NULL,
 	"phone_number" varchar(20),
 	"mail" varchar(255) NOT NULL,
-	"password_hash" text NOT NULL,
-	CONSTRAINT "physician_mail_unique" UNIQUE("mail")
+	"password_hash" text NOT NULL
 );
 --> statement-breakpoint
 CREATE TABLE "symptom" (
@@ -95,4 +94,5 @@ CREATE INDEX "medical_event_uuid_medical_procedure_idx" ON "medical_event" USING
 CREATE INDEX "medical_procedure_uuid_patient_idx" ON "medical_procedure" USING btree ("uuid_patient");--> statement-breakpoint
 CREATE UNIQUE INDEX "patient_code_code_active_unique" ON "patient_code" USING btree ("code") WHERE deleted_at IS NULL AND revoked_at IS NULL;--> statement-breakpoint
 CREATE UNIQUE INDEX "patient_code_patient_active_unique" ON "patient_code" USING btree ("uuid_patient") WHERE is_active = true AND used_at IS NULL AND deleted_at IS NULL AND revoked_at IS NULL;--> statement-breakpoint
-CREATE INDEX "patient_code_uuid_patient_idx" ON "patient_code" USING btree ("uuid_patient");
+CREATE INDEX "patient_code_uuid_patient_idx" ON "patient_code" USING btree ("uuid_patient");--> statement-breakpoint
+CREATE UNIQUE INDEX "physician_mail_unique" ON "physician" USING btree (lower("mail"));
