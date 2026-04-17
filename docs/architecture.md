@@ -1,4 +1,4 @@
-[← README](../README.md) · [Onboarding](onboarding.md) · [Lexique](lexique.md) · [CDC](cdc.md)
+[← README](../README.md) · [Onboarding](onboarding.md) · [Schéma BDD](schema.dbml) · [Lexique](lexique.md) · [CDC](cdc.md)
 
 # Architecture — Sauver la Face
 
@@ -208,6 +208,9 @@ Même principe pour `symptom.code` — cohérence avec `physician.mail`.
 
 **`is_active` — `boolean` natif PostgreSQL**
 `patient_code.is_active` utilise le type `boolean` (`true/false`) et non `integer` (`1/0`) — plus idiomatique, interdit les valeurs invalides.
+
+**Anonymisation RGPD — `patient.anonymized_at`**
+Le RGPD (art. 17) accorde un droit à l'effacement, mais l'art. 17.3.c prévoit une exception pour les données de santé nécessaires à des fins de santé publique. Conséquence : les données médicales (`medical_procedure`, `medical_event`, `media`) ne sont jamais supprimées. Seules les données d'identité (`first_name`, `last_name`, `birthdate`) sont mises à `NULL` lors d'une demande d'effacement, et `anonymized_at` est renseigné. L'UUID patient reste intact — tout l'historique médical reste traçable par UUID, mais plus rattachable à une personne identifiable.
 
 **Index partiels critiques**
 - `patient_code_code_active_unique` : `WHERE deleted_at IS NULL AND revoked_at IS NULL`

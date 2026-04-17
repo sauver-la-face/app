@@ -1,4 +1,4 @@
-[← README](../README.md) · [Onboarding](onboarding.md) · [Architecture](architecture.md) · [Lexique](lexique.md)
+[← README](../README.md) · [Onboarding](onboarding.md) · [Architecture](architecture.md) · [Schéma BDD](schema.dbml) · [Lexique](lexique.md)
 
 # Analyse Architecte — Sauver la Face
 > Version 4 — Choix révisés et alignés
@@ -192,7 +192,7 @@ Framework léger, TypeScript-first, compatible Bun. Génération OpenAPI automat
 Conformité HDS via chiffrement at-rest au niveau disque (OVH HDS) — pas de chiffrement colonne PostgreSQL. Transactions ACID pour garantir la cohérence lors des synchronisations offline. Support JSON natif pour les métadonnées photos.
 
 #### 4. ORM — Drizzle
-TypeScript-first, performances proches du SQL brut, migrations versionnées via `drizzle-kit`. Les types de schéma sont partageables avec le package `shared/` pour cohérence totale entre la base de données et les trois apps.
+TypeScript-first, performances proches du SQL brut, migrations versionnées via `drizzle-kit`. Le schéma Drizzle est dans `apps/backend/src/infrastructure/schema.ts` (infrastructure backend uniquement). Les Value Objects partagés (ex: `PatientCodeValue`, `ChecksumSHA256`) sont dans `packages/shared/src/domain/` — accessibles par le backend et le mobile.
 
 #### 5. Authentification — Better Auth
 MFA TOTP obligatoire pour les médecins web. Gestion des codes 6 chiffres patients : le code expire après 48h s'il n'est pas utilisé, mais une fois activé le JWT patient est valide 1 an (offline-first). Compatible expo-secure-store pour le stockage sécurisé des tokens mobiles. Sessions stockées en PostgreSQL.
@@ -217,7 +217,7 @@ Test runner natif Bun, zéro configuration, API compatible Jest. Couverture de c
 **Mobile :**
 - Queue de synchronisation SQLite (retry, backoff, purge)
 - Compression et validation photos (magic bytes, checksum)
-- Expiration session 48h et renouvellement de code
+- Expiration code 48h si non utilisé, JWT session valide 1 an (offline-first), révocable par le médecin
 - Gestion des conflits offline à la reconnexion
 
 **Dashboard web :**
@@ -490,11 +490,27 @@ Retry : backoff 2s puis 4s, abandon à la 4e tentative avec alerte dashboard mé
 
 Basé sur le MCD validé. `PatientCode` supporte plusieurs codes dans le temps par patient, un seul actif à la fois (le dernier non expiré et non utilisé).
 
+### Stratégie de suppression des données patient (RGPD)
+
+Le RGPD (art. 17) accorde aux patients un droit à l'effacement. Cependant, l'art. 17.3.c prévoit une exception explicite pour les données de santé nécessaires à des fins de santé publique — ce qui couvre les dossiers médicaux post-opératoires.
+
+**Conséquence pratique** : on ne supprime pas les données médicales (`medical_procedure`, `medical_event`, `media`, etc.) — elles sont légalement conservées. En revanche, les données d'identité du patient (`first_name`, `last_name`, `birthdate`) sont **pseudonymisées** à la demande : elles passent à `NULL` et `anonymized_at` est renseigné.
+
+L'UUID patient reste intact — tout l'historique médical reste traçable, mais plus rattachable à une personne identifiable.
+
+| Champ | Avant anonymisation | Après anonymisation |
+|---|---|---|
+| `first_name` | `"Sok"` | `NULL` |
+| `last_name` | `"Chan"` | `NULL` |
+| `birthdate` | `"1990-03-12"` | `NULL` |
+| `anonymized_at` | `NULL` | `2026-04-17T10:00:00Z` |
+| `uuid_patient` | inchangé | inchangé |
+
 ```typescript
 // apps/backend/src/infrastructure/schema.ts — voir le fichier source pour le schéma complet et à jour
 
 export const physician = pgTable('physician', { /* uuid, first_name, last_name, phone_number, mail, password_hash */ })
-export const patient = pgTable('patient', { /* uuid, first_name, last_name, sex, birthdate, region */ })
+export const patient = pgTable('patient', { /* uuid, first_name?, last_name?, sex, birthdate?, region, anonymized_at? */ })
 export const patientCode = pgTable('patient_code', { /* uuid, uuid_patient FK, code, created_at, used_at, deleted_at, is_active */ })
 export const medicalProcedure = pgTable('medical_procedure', { /* uuid, uuid_patient FK, procedure_type, date, hospital_name */ })
 export const medicalEvent = pgTable('medical_event', { /* uuid, uuid_medical_procedure FK, uuid_physician FK, event_type, event_title, description, created_at */ })

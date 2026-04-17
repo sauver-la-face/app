@@ -1,4 +1,4 @@
-[← README](../README.md) · [Onboarding](onboarding.md) · [Architecture](architecture.md) · [CDC](cdc.md)
+[← README](../README.md) · [Onboarding](onboarding.md) · [Architecture](architecture.md) · [Schéma BDD](schema.dbml) · [CDC](cdc.md)
 
 # Lexique technique — Sauver la Face
 

@@ -1,4 +1,4 @@
-[Onboarding](docs/onboarding.md) · [Architecture](docs/architecture.md) · [Lexique](docs/lexique.md) · [CDC](docs/cdc.md) · [Contexte IA](.ai/context.md) · [Features](.ai/features.md)
+[Onboarding](docs/onboarding.md) · [Architecture](docs/architecture.md) · [Schéma BDD](docs/schema.dbml) · [Lexique](docs/lexique.md) · [CDC](docs/cdc.md) · [Contexte IA](.ai/context.md) · [Features](.ai/features.md)
 
 # Sauver la Face
 
@@ -177,6 +177,7 @@ bun run docker:down
 ### Docs humaines
 - [Onboarding](docs/onboarding.md) — guide pour un nouveau développeur qui rejoint le projet
 - [Architecture](docs/architecture.md) — décisions techniques et pourquoi elles ont été prises
+- [Schéma BDD](docs/schema.dbml) — modèle logique de données (DBML — visualisable sur dbdiagram.io)
 - [Lexique technique](docs/lexique.md) — définitions des technologies et concepts utilisés dans le projet
 - [Cahier des charges](docs/cdc.md) — spécifications complètes du projet
 

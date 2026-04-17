@@ -28,11 +28,12 @@ export const physician = pgTable(
 
 export const patient = pgTable('patient', {
   uuid_patient: uuid('uuid_patient').primaryKey().defaultRandom(),
-  first_name: varchar('first_name', { length: 100 }).notNull(),
-  last_name: varchar('last_name', { length: 100 }).notNull(),
+  first_name: varchar('first_name', { length: 100 }), // null si patient anonymisé (RGPD art. 17.3.c)
+  last_name: varchar('last_name', { length: 100 }), // null si patient anonymisé (RGPD art. 17.3.c)
   sex: varchar('sex', { length: 10 }),
   birthdate: date('birthdate'),
   region: varchar('region', { length: 100 }),
+  anonymized_at: timestamp('anonymized_at', { withTimezone: true }), // renseigné lors d'une demande d'effacement RGPD
 });
 
 // Soft delete automatique après 48h si le code n'a pas été utilisé (job cron)

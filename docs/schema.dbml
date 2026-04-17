@@ -1,0 +1,121 @@
+// Schéma de base de données — Sauver la Face
+// Source de vérité : apps/backend/src/infrastructure/schema.ts
+// Visualiser sur https://dbdiagram.io
+
+Table physician {
+  uuid_physician uuid [pk, default: `gen_random_uuid()`]
+  first_name varchar(100) [not null]
+  last_name varchar(100) [not null]
+  phone_number varchar(20)
+  mail varchar(255) [not null, note: 'index unique fonctionnel sur lower(mail)']
+  password_hash text [not null]
+
+  indexes {
+    `lower(mail)` [unique, name: 'physician_mail_unique']
+  }
+}
+
+Table patient {
+  uuid_patient uuid [pk, default: `gen_random_uuid()`]
+  first_name varchar(100) [note: 'nullable — null si anonymisé (RGPD art. 17.3.c)']
+  last_name varchar(100) [note: 'nullable — null si anonymisé (RGPD art. 17.3.c)']
+  sex varchar(10)
+  birthdate date [note: 'nullable — null si anonymisé (RGPD art. 17.3.c)']
+  region varchar(100)
+  anonymized_at timestamptz [note: 'null = identité active — renseigné lors demande effacement RGPD']
+}
+
+Table patient_code {
+  uuid_patient_code uuid [pk, default: `gen_random_uuid()`]
+  uuid_patient uuid [not null, ref: > patient.uuid_patient]
+  code varchar(6) [not null, note: 'format 6 chiffres validé par PatientCodeValue (DDD) — varchar garantit longueur max uniquement']
+  created_at timestamptz [not null, default: `now()`]
+  used_at timestamptz [note: 'null = jamais utilisé — une fois renseigné, code valide pour toujours']
+  deleted_at timestamptz [note: 'soft delete automatique après 48h si used_at IS NULL']
+  is_active boolean [not null, default: true, note: 'false = révoqué ou supprimé']
+  revoked_at timestamptz [note: 'null = non révoqué — renseigné par le médecin pour couper l accès']
+
+  indexes {
+    (code) [unique, name: 'patient_code_code_active_unique', note: 'WHERE deleted_at IS NULL AND revoked_at IS NULL']
+    (uuid_patient) [unique, name: 'patient_code_patient_active_unique', note: 'WHERE is_active = true AND used_at IS NULL AND deleted_at IS NULL AND revoked_at IS NULL']
+    uuid_patient [name: 'patient_code_uuid_patient_idx']
+    created_at [name: 'patient_code_created_at_idx', note: 'optimise le cron soft delete 48h']
+  }
+}
+
+Table medical_procedure {
+  uuid_medical_procedure uuid [pk, default: `gen_random_uuid()`]
+  uuid_patient uuid [not null, ref: > patient.uuid_patient]
+  procedure_type varchar(100) [not null]
+  date date [not null]
+  hospital_name varchar(200)
+
+  indexes {
+    uuid_patient [name: 'medical_procedure_uuid_patient_idx']
+  }
+}
+
+Table medical_event {
+  uuid_event uuid [pk, default: `gen_random_uuid()`]
+  uuid_medical_procedure uuid [not null, ref: > medical_procedure.uuid_medical_procedure]
+  uuid_physician uuid [ref: > physician.uuid_physician, note: 'nullable — peut être créé sans médecin assigné']
+  event_type varchar(100) [not null]
+  event_title varchar(200)
+  description text
+  created_at timestamptz [not null, default: `now()`]
+
+  indexes {
+    uuid_medical_procedure [name: 'medical_event_uuid_medical_procedure_idx']
+    uuid_physician [name: 'medical_event_uuid_physician_idx']
+  }
+}
+
+Table symptom {
+  uuid_symptom uuid [pk, default: `gen_random_uuid()`]
+  code varchar(50) [not null, note: 'ex: pain_severe, bleeding — index unique sur lower(code)']
+  label_fr varchar(100) [not null]
+  label_km varchar(100) [not null, note: 'label en khmer']
+  triggers_alert boolean [not null, default: false, note: 'true = alerte automatique si sélectionné sur un medical_event']
+
+  indexes {
+    `lower(code)` [unique, name: 'symptom_code_unique']
+  }
+}
+
+Table medical_event_symptom {
+  uuid_event uuid [not null, ref: > medical_event.uuid_event]
+  uuid_symptom uuid [not null, ref: > symptom.uuid_symptom]
+
+  indexes {
+    (uuid_event, uuid_symptom) [pk, name: 'medical_event_symptom_pkey']
+    uuid_symptom [name: 'medical_event_symptom_uuid_symptom_idx', note: 'PK couvre les recherches par uuid_event (préfixe gauche) — index dédié pour recherches inverses']
+  }
+}
+
+Table media {
+  uuid_media uuid [pk, default: `gen_random_uuid()`]
+  uuid_event uuid [not null, ref: > medical_event.uuid_event]
+  file_url text [not null]
+  file_type varchar(20) [not null, note: 'jpeg, png']
+  taken_at timestamptz [not null]
+  description text
+
+  indexes {
+    uuid_event [name: 'media_uuid_event_idx']
+  }
+}
+
+Table instructions {
+  uuid_instructions uuid [pk, default: `gen_random_uuid()`]
+  uuid_physician uuid [not null, ref: > physician.uuid_physician]
+  uuid_medical_procedure uuid [not null, ref: > medical_procedure.uuid_medical_procedure]
+  content text [not null]
+  created_at timestamptz [not null, default: `now()`]
+  acknowledged_at timestamptz [note: 'null = non lu — renseigné à la lecture par le patient via sync_queue']
+
+  indexes {
+    uuid_physician [name: 'instructions_uuid_physician_idx']
+    uuid_medical_procedure [name: 'instructions_uuid_medical_procedure_idx']
+    (uuid_medical_procedure) [name: 'instructions_unread_idx', note: 'WHERE acknowledged_at IS NULL — optimise le polling alertes']
+  }
+}
