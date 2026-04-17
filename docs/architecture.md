@@ -188,6 +188,25 @@ feature/
 
 Toutes les migrations sont **additives** : on n'ajoute que des colonnes nullable, jamais de suppression ni de renommage. Raison : les appareils mobiles peuvent être désynchronisés depuis plusieurs semaines — un schéma incompatible bloquerait leur synchronisation.
 
+### Décisions de schéma
+
+**Timestamps — `timestamptz` obligatoire**
+Toutes les colonnes de date/heure utilisent `timestamp with time zone`. Les patients sont au Cambodge (UTC+7), les médecins en France (UTC+1/+2) — un `timestamp` sans timezone rendrait les horodatages ambigus. PostgreSQL stocke en UTC et convertit automatiquement.
+
+**Emails — index fonctionnel `lower(mail)`**
+`physician.mail` utilise un index unique fonctionnel sur `lower(mail)` plutôt qu'un unique inline. `Doctor@hopital.fr` et `doctor@hopital.fr` seraient deux comptes distincts avec un unique classique.
+
+**Codes symptômes — index fonctionnel `lower(code)`**
+Même principe pour `symptom.code` — cohérence avec `physician.mail`.
+
+**`is_active` — `boolean` natif PostgreSQL**
+`patient_code.is_active` utilise le type `boolean` (`true/false`) et non `integer` (`1/0`) — plus idiomatique, interdit les valeurs invalides.
+
+**Index partiels critiques**
+- `patient_code_code_active_unique` : `WHERE deleted_at IS NULL AND revoked_at IS NULL` — les codes consommés restent dans l'index pour empêcher toute réattribution
+- `patient_code_patient_active_unique` : `WHERE is_active = true AND used_at IS NULL AND ...` — un seul code actif par patient
+- `instructions_unread_idx` : `WHERE acknowledged_at IS NULL` — optimise le polling "instructions non lues" (requête critique pour les alertes)
+
 ---
 
 ## Sécurité
