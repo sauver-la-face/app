@@ -72,6 +72,8 @@ export const patientCode = pgTable(
       ),
     // Accélère la recherche de tous les codes d'un patient (actifs + historique)
     index('patient_code_uuid_patient_idx').on(t.uuid_patient),
+    // Optimise le cron de soft delete après 48h (WHERE created_at < now() - 48h AND used_at IS NULL)
+    index('patient_code_created_at_idx').on(t.created_at),
   ],
 );
 
@@ -103,18 +105,26 @@ export const medicalEvent = pgTable(
     created_at: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
     // severity remplacé par pictogrammes de symptômes (voir table symptom + medical_event_symptom)
   },
-  (t) => [index('medical_event_uuid_medical_procedure_idx').on(t.uuid_medical_procedure)],
+  (t) => [
+    index('medical_event_uuid_medical_procedure_idx').on(t.uuid_medical_procedure),
+    index('medical_event_uuid_physician_idx').on(t.uuid_physician),
+  ],
 );
 
 // Liste des pictogrammes de symptômes disponibles
 // La liste définitive est à valider avec les chirurgiens toulousains (MED-01)
-export const symptom = pgTable('symptom', {
-  uuid_symptom: uuid('uuid_symptom').primaryKey().defaultRandom(),
-  code: varchar('code', { length: 50 }).notNull().unique(), // ex: 'pain_severe', 'bleeding'
-  label_fr: varchar('label_fr', { length: 100 }).notNull(),
-  label_km: varchar('label_km', { length: 100 }).notNull(), // khmer
-  triggers_alert: boolean('triggers_alert').notNull().default(false), // true = alerte automatique si sélectionné
-});
+export const symptom = pgTable(
+  'symptom',
+  {
+    uuid_symptom: uuid('uuid_symptom').primaryKey().defaultRandom(),
+    // Index unique fonctionnel sur lower(code) — cohérent avec physician.mail
+    code: varchar('code', { length: 50 }).notNull(), // ex: 'pain_severe', 'bleeding'
+    label_fr: varchar('label_fr', { length: 100 }).notNull(),
+    label_km: varchar('label_km', { length: 100 }).notNull(), // khmer
+    triggers_alert: boolean('triggers_alert').notNull().default(false), // true = alerte automatique si sélectionné
+  },
+  (t) => [uniqueIndex('symptom_code_unique').on(sql`lower(${t.code})`)],
+);
 
 // Relation N-N entre un événement médical et les symptômes sélectionnés par le patient
 export const medicalEventSymptom = pgTable(
@@ -167,5 +177,9 @@ export const instructions = pgTable(
   (t) => [
     index('instructions_uuid_physician_idx').on(t.uuid_physician),
     index('instructions_uuid_medical_procedure_idx').on(t.uuid_medical_procedure),
+    // Optimise la requête "toutes les instructions non lues" (polling alertes)
+    index('instructions_unread_idx')
+      .on(t.uuid_medical_procedure)
+      .where(sql`acknowledged_at IS NULL`),
   ],
 );

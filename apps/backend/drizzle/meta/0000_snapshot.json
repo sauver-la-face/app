@@ -1,5 +1,5 @@
 {
-  "id": "88b392a8-e885-4b87-99e3-c34fea96f3c8",
+  "id": "553abd9f-0b2d-410b-8c41-a295c46dd077",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -74,6 +74,22 @@
             }
           ],
           "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "instructions_unread_idx": {
+          "name": "instructions_unread_idx",
+          "columns": [
+            {
+              "expression": "uuid_medical_procedure",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "where": "acknowledged_at IS NULL",
           "concurrently": false,
           "method": "btree",
           "with": {}
@@ -248,6 +264,21 @@
           "columns": [
             {
               "expression": "uuid_medical_procedure",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "medical_event_uuid_physician_idx": {
+          "name": "medical_event_uuid_physician_idx",
+          "columns": [
+            {
+              "expression": "uuid_physician",
               "isExpression": false,
               "asc": true,
               "nulls": "last"
@@ -596,6 +627,21 @@
           "concurrently": false,
           "method": "btree",
           "with": {}
+        },
+        "patient_code_created_at_idx": {
+          "name": "patient_code_created_at_idx",
+          "columns": [
+            {
+              "expression": "created_at",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
         }
       },
       "foreignKeys": {
@@ -722,18 +768,26 @@
           "default": false
         }
       },
-      "indexes": {},
-      "foreignKeys": {},
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {
+      "indexes": {
         "symptom_code_unique": {
           "name": "symptom_code_unique",
-          "nullsNotDistinct": false,
           "columns": [
-            "code"
-          ]
+            {
+              "expression": "lower(\"code\")",
+              "asc": true,
+              "isExpression": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": true,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
         }
       },
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
       "policies": {},
       "checkConstraints": {},
       "isRLSEnabled": false
