@@ -185,7 +185,7 @@ feature/
   [feature]Service.ts    ← orchestration : storage → sync_queue → API
 ```
 
-**Règle absolue** : toute donnée est d'abord écrite en SQLite (`feature.storage.ts`) avant tout appel réseau. L'appel réseau est géré par la queue de sync, pas directement dans l'UI.
+**Règle absolue** : toute donnée est d'abord écrite en SQLite (`featureStorage.ts`) avant tout appel réseau. L'appel réseau est géré par la queue de sync, pas directement dans l'UI.
 
 ---
 
