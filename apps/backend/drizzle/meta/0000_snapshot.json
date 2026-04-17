@@ -1,5 +1,5 @@
 {
-  "id": "c973e00e-f313-41a7-a836-2385098cf34d",
+  "id": "38630ab1-e8ca-4fdd-a26f-45bcf04411ca",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -35,19 +35,50 @@
         },
         "created_at": {
           "name": "created_at",
-          "type": "timestamp",
+          "type": "timestamp with time zone",
           "primaryKey": false,
           "notNull": true,
           "default": "now()"
         },
         "acknowledged_at": {
           "name": "acknowledged_at",
-          "type": "timestamp",
+          "type": "timestamp with time zone",
           "primaryKey": false,
           "notNull": false
         }
       },
-      "indexes": {},
+      "indexes": {
+        "instructions_uuid_physician_idx": {
+          "name": "instructions_uuid_physician_idx",
+          "columns": [
+            {
+              "expression": "uuid_physician",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "instructions_uuid_medical_procedure_idx": {
+          "name": "instructions_uuid_medical_procedure_idx",
+          "columns": [
+            {
+              "expression": "uuid_medical_procedure",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
       "foreignKeys": {
         "instructions_uuid_physician_physician_uuid_physician_fk": {
           "name": "instructions_uuid_physician_physician_uuid_physician_fk",
@@ -113,7 +144,7 @@
         },
         "taken_at": {
           "name": "taken_at",
-          "type": "timestamp",
+          "type": "timestamp with time zone",
           "primaryKey": false,
           "notNull": true
         },
@@ -124,7 +155,23 @@
           "notNull": false
         }
       },
-      "indexes": {},
+      "indexes": {
+        "media_uuid_event_idx": {
+          "name": "media_uuid_event_idx",
+          "columns": [
+            {
+              "expression": "uuid_event",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
       "foreignKeys": {
         "media_uuid_event_medical_event_uuid_event_fk": {
           "name": "media_uuid_event_medical_event_uuid_event_fk",
@@ -189,13 +236,29 @@
         },
         "created_at": {
           "name": "created_at",
-          "type": "timestamp",
+          "type": "timestamp with time zone",
           "primaryKey": false,
           "notNull": true,
           "default": "now()"
         }
       },
-      "indexes": {},
+      "indexes": {
+        "medical_event_uuid_medical_procedure_idx": {
+          "name": "medical_event_uuid_medical_procedure_idx",
+          "columns": [
+            {
+              "expression": "uuid_medical_procedure",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
       "foreignKeys": {
         "medical_event_uuid_medical_procedure_medical_procedure_uuid_medical_procedure_fk": {
           "name": "medical_event_uuid_medical_procedure_medical_procedure_uuid_medical_procedure_fk",
@@ -326,7 +389,23 @@
           "notNull": false
         }
       },
-      "indexes": {},
+      "indexes": {
+        "medical_procedure_uuid_patient_idx": {
+          "name": "medical_procedure_uuid_patient_idx",
+          "columns": [
+            {
+              "expression": "uuid_patient",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
       "foreignKeys": {
         "medical_procedure_uuid_patient_patient_uuid_patient_fk": {
           "name": "medical_procedure_uuid_patient_patient_uuid_patient_fk",
@@ -423,33 +502,33 @@
         },
         "created_at": {
           "name": "created_at",
-          "type": "timestamp",
+          "type": "timestamp with time zone",
           "primaryKey": false,
           "notNull": true,
           "default": "now()"
         },
         "used_at": {
           "name": "used_at",
-          "type": "timestamp",
+          "type": "timestamp with time zone",
           "primaryKey": false,
           "notNull": false
         },
         "deleted_at": {
           "name": "deleted_at",
-          "type": "timestamp",
+          "type": "timestamp with time zone",
           "primaryKey": false,
           "notNull": false
         },
         "is_active": {
           "name": "is_active",
-          "type": "integer",
+          "type": "boolean",
           "primaryKey": false,
           "notNull": true,
-          "default": 1
+          "default": true
         },
         "revoked_at": {
           "name": "revoked_at",
-          "type": "timestamp",
+          "type": "timestamp with time zone",
           "primaryKey": false,
           "notNull": false
         }
@@ -482,7 +561,7 @@
             }
           ],
           "isUnique": true,
-          "where": "is_active = 1 AND used_at IS NULL AND deleted_at IS NULL AND revoked_at IS NULL",
+          "where": "is_active = true AND used_at IS NULL AND deleted_at IS NULL AND revoked_at IS NULL",
           "concurrently": false,
           "method": "btree",
           "with": {}

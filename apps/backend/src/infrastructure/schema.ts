@@ -3,7 +3,6 @@ import {
   boolean,
   date,
   index,
-  integer,
   pgTable,
   primaryKey,
   text,
@@ -46,11 +45,11 @@ export const patientCode = pgTable(
     // Raison : les règles métier vivent dans le domaine (DDD), pas dans la base de données.
     // PatientCodeValue doit être créé et utilisé dans auth/domain/ avant toute insertion.
     code: varchar('code', { length: 6 }).notNull(),
-    created_at: timestamp('created_at').notNull().defaultNow(),
-    used_at: timestamp('used_at'), // null = jamais utilisé
-    deleted_at: timestamp('deleted_at'), // soft delete si used_at IS NULL après 48h
-    is_active: integer('is_active').notNull().default(1), // boolean: 1 = actif, 0 = inactif
-    revoked_at: timestamp('revoked_at'), // null = non révoqué, renseigné par le médecin pour couper l'accès
+    created_at: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+    used_at: timestamp('used_at', { withTimezone: true }), // null = jamais utilisé
+    deleted_at: timestamp('deleted_at', { withTimezone: true }), // soft delete si used_at IS NULL après 48h
+    is_active: boolean('is_active').notNull().default(true), // false = désactivé (révoqué ou supprimé)
+    revoked_at: timestamp('revoked_at', { withTimezone: true }), // null = non révoqué, renseigné par le médecin pour couper l'accès
   },
   (t) => [
     // Unicité globale du code (actif ou consommé) — empêche la réattribution d'un code déjà utilisé.
@@ -63,34 +62,46 @@ export const patientCode = pgTable(
     // Un seul code actif possible par patient
     uniqueIndex('patient_code_patient_active_unique')
       .on(t.uuid_patient)
-      .where(sql`is_active = 1 AND used_at IS NULL AND deleted_at IS NULL AND revoked_at IS NULL`),
+      .where(sql`is_active = true AND used_at IS NULL AND deleted_at IS NULL AND revoked_at IS NULL`),
     // Accélère la recherche de tous les codes d'un patient (actifs + historique)
     index('patient_code_uuid_patient_idx').on(t.uuid_patient),
   ],
 );
 
-export const medicalProcedure = pgTable('medical_procedure', {
-  uuid_medical_procedure: uuid('uuid_medical_procedure').primaryKey().defaultRandom(),
-  uuid_patient: uuid('uuid_patient')
-    .notNull()
-    .references(() => patient.uuid_patient),
-  procedure_type: varchar('procedure_type', { length: 100 }).notNull(),
-  date: date('date').notNull(),
-  hospital_name: varchar('hospital_name', { length: 200 }),
-});
+export const medicalProcedure = pgTable(
+  'medical_procedure',
+  {
+    uuid_medical_procedure: uuid('uuid_medical_procedure').primaryKey().defaultRandom(),
+    uuid_patient: uuid('uuid_patient')
+      .notNull()
+      .references(() => patient.uuid_patient),
+    procedure_type: varchar('procedure_type', { length: 100 }).notNull(),
+    date: date('date').notNull(),
+    hospital_name: varchar('hospital_name', { length: 200 }),
+  },
+  (t) => [
+    index('medical_procedure_uuid_patient_idx').on(t.uuid_patient),
+  ],
+);
 
-export const medicalEvent = pgTable('medical_event', {
-  uuid_event: uuid('uuid_event').primaryKey().defaultRandom(),
-  uuid_medical_procedure: uuid('uuid_medical_procedure')
-    .notNull()
-    .references(() => medicalProcedure.uuid_medical_procedure),
-  uuid_physician: uuid('uuid_physician').references(() => physician.uuid_physician),
-  event_type: varchar('event_type', { length: 100 }).notNull(),
-  event_title: varchar('event_title', { length: 200 }),
-  description: text('description'),
-  created_at: timestamp('created_at').notNull().defaultNow(),
-  // severity remplacé par pictogrammes de symptômes (voir table symptom + medical_event_symptom)
-});
+export const medicalEvent = pgTable(
+  'medical_event',
+  {
+    uuid_event: uuid('uuid_event').primaryKey().defaultRandom(),
+    uuid_medical_procedure: uuid('uuid_medical_procedure')
+      .notNull()
+      .references(() => medicalProcedure.uuid_medical_procedure),
+    uuid_physician: uuid('uuid_physician').references(() => physician.uuid_physician),
+    event_type: varchar('event_type', { length: 100 }).notNull(),
+    event_title: varchar('event_title', { length: 200 }),
+    description: text('description'),
+    created_at: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+    // severity remplacé par pictogrammes de symptômes (voir table symptom + medical_event_symptom)
+  },
+  (t) => [
+    index('medical_event_uuid_medical_procedure_idx').on(t.uuid_medical_procedure),
+  ],
+);
 
 // Liste des pictogrammes de symptômes disponibles
 // La liste définitive est à valider avec les chirurgiens toulousains (MED-01)
@@ -116,26 +127,39 @@ export const medicalEventSymptom = pgTable(
   (t) => [primaryKey({ columns: [t.uuid_event, t.uuid_symptom] })],
 );
 
-export const media = pgTable('media', {
-  uuid_media: uuid('uuid_media').primaryKey().defaultRandom(),
-  uuid_event: uuid('uuid_event')
-    .notNull()
-    .references(() => medicalEvent.uuid_event),
-  file_url: text('file_url').notNull(),
-  file_type: varchar('file_type', { length: 20 }).notNull(), // jpeg, png
-  taken_at: timestamp('taken_at').notNull(),
-  description: text('description'),
-});
+export const media = pgTable(
+  'media',
+  {
+    uuid_media: uuid('uuid_media').primaryKey().defaultRandom(),
+    uuid_event: uuid('uuid_event')
+      .notNull()
+      .references(() => medicalEvent.uuid_event),
+    file_url: text('file_url').notNull(),
+    file_type: varchar('file_type', { length: 20 }).notNull(), // jpeg, png
+    taken_at: timestamp('taken_at', { withTimezone: true }).notNull(),
+    description: text('description'),
+  },
+  (t) => [
+    index('media_uuid_event_idx').on(t.uuid_event),
+  ],
+);
 
-export const instructions = pgTable('instructions', {
-  uuid_instructions: uuid('uuid_instructions').primaryKey().defaultRandom(),
-  uuid_physician: uuid('uuid_physician')
-    .notNull()
-    .references(() => physician.uuid_physician),
-  uuid_medical_procedure: uuid('uuid_medical_procedure')
-    .notNull()
-    .references(() => medicalProcedure.uuid_medical_procedure),
-  content: text('content').notNull(),
-  created_at: timestamp('created_at').notNull().defaultNow(),
-  acknowledged_at: timestamp('acknowledged_at'), // null = non lu, renseigné à la lecture par le patient
-});
+export const instructions = pgTable(
+  'instructions',
+  {
+    uuid_instructions: uuid('uuid_instructions').primaryKey().defaultRandom(),
+    uuid_physician: uuid('uuid_physician')
+      .notNull()
+      .references(() => physician.uuid_physician),
+    uuid_medical_procedure: uuid('uuid_medical_procedure')
+      .notNull()
+      .references(() => medicalProcedure.uuid_medical_procedure),
+    content: text('content').notNull(),
+    created_at: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+    acknowledged_at: timestamp('acknowledged_at', { withTimezone: true }), // null = non lu, renseigné à la lecture par le patient
+  },
+  (t) => [
+    index('instructions_uuid_physician_idx').on(t.uuid_physician),
+    index('instructions_uuid_medical_procedure_idx').on(t.uuid_medical_procedure),
+  ],
+);

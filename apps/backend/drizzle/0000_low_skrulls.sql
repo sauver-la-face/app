@@ -3,8 +3,8 @@ CREATE TABLE "instructions" (
 	"uuid_physician" uuid NOT NULL,
 	"uuid_medical_procedure" uuid NOT NULL,
 	"content" text NOT NULL,
-	"created_at" timestamp DEFAULT now() NOT NULL,
-	"acknowledged_at" timestamp
+	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
+	"acknowledged_at" timestamp with time zone
 );
 --> statement-breakpoint
 CREATE TABLE "media" (
@@ -12,7 +12,7 @@ CREATE TABLE "media" (
 	"uuid_event" uuid NOT NULL,
 	"file_url" text NOT NULL,
 	"file_type" varchar(20) NOT NULL,
-	"taken_at" timestamp NOT NULL,
+	"taken_at" timestamp with time zone NOT NULL,
 	"description" text
 );
 --> statement-breakpoint
@@ -23,7 +23,7 @@ CREATE TABLE "medical_event" (
 	"event_type" varchar(100) NOT NULL,
 	"event_title" varchar(200),
 	"description" text,
-	"created_at" timestamp DEFAULT now() NOT NULL
+	"created_at" timestamp with time zone DEFAULT now() NOT NULL
 );
 --> statement-breakpoint
 CREATE TABLE "medical_event_symptom" (
@@ -53,11 +53,11 @@ CREATE TABLE "patient_code" (
 	"uuid_patient_code" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"uuid_patient" uuid NOT NULL,
 	"code" varchar(6) NOT NULL,
-	"created_at" timestamp DEFAULT now() NOT NULL,
-	"used_at" timestamp,
-	"deleted_at" timestamp,
-	"is_active" integer DEFAULT 1 NOT NULL,
-	"revoked_at" timestamp
+	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
+	"used_at" timestamp with time zone,
+	"deleted_at" timestamp with time zone,
+	"is_active" boolean DEFAULT true NOT NULL,
+	"revoked_at" timestamp with time zone
 );
 --> statement-breakpoint
 CREATE TABLE "physician" (
@@ -88,6 +88,11 @@ ALTER TABLE "medical_event_symptom" ADD CONSTRAINT "medical_event_symptom_uuid_e
 ALTER TABLE "medical_event_symptom" ADD CONSTRAINT "medical_event_symptom_uuid_symptom_symptom_uuid_symptom_fk" FOREIGN KEY ("uuid_symptom") REFERENCES "public"."symptom"("uuid_symptom") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "medical_procedure" ADD CONSTRAINT "medical_procedure_uuid_patient_patient_uuid_patient_fk" FOREIGN KEY ("uuid_patient") REFERENCES "public"."patient"("uuid_patient") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "patient_code" ADD CONSTRAINT "patient_code_uuid_patient_patient_uuid_patient_fk" FOREIGN KEY ("uuid_patient") REFERENCES "public"."patient"("uuid_patient") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+CREATE INDEX "instructions_uuid_physician_idx" ON "instructions" USING btree ("uuid_physician");--> statement-breakpoint
+CREATE INDEX "instructions_uuid_medical_procedure_idx" ON "instructions" USING btree ("uuid_medical_procedure");--> statement-breakpoint
+CREATE INDEX "media_uuid_event_idx" ON "media" USING btree ("uuid_event");--> statement-breakpoint
+CREATE INDEX "medical_event_uuid_medical_procedure_idx" ON "medical_event" USING btree ("uuid_medical_procedure");--> statement-breakpoint
+CREATE INDEX "medical_procedure_uuid_patient_idx" ON "medical_procedure" USING btree ("uuid_patient");--> statement-breakpoint
 CREATE UNIQUE INDEX "patient_code_code_active_unique" ON "patient_code" USING btree ("code") WHERE deleted_at IS NULL AND revoked_at IS NULL;--> statement-breakpoint
-CREATE UNIQUE INDEX "patient_code_patient_active_unique" ON "patient_code" USING btree ("uuid_patient") WHERE is_active = 1 AND used_at IS NULL AND deleted_at IS NULL AND revoked_at IS NULL;--> statement-breakpoint
+CREATE UNIQUE INDEX "patient_code_patient_active_unique" ON "patient_code" USING btree ("uuid_patient") WHERE is_active = true AND used_at IS NULL AND deleted_at IS NULL AND revoked_at IS NULL;--> statement-breakpoint
 CREATE INDEX "patient_code_uuid_patient_idx" ON "patient_code" USING btree ("uuid_patient");
