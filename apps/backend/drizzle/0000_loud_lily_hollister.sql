@@ -88,6 +88,6 @@ ALTER TABLE "medical_event_symptom" ADD CONSTRAINT "medical_event_symptom_uuid_e
 ALTER TABLE "medical_event_symptom" ADD CONSTRAINT "medical_event_symptom_uuid_symptom_symptom_uuid_symptom_fk" FOREIGN KEY ("uuid_symptom") REFERENCES "public"."symptom"("uuid_symptom") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "medical_procedure" ADD CONSTRAINT "medical_procedure_uuid_patient_patient_uuid_patient_fk" FOREIGN KEY ("uuid_patient") REFERENCES "public"."patient"("uuid_patient") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "patient_code" ADD CONSTRAINT "patient_code_uuid_patient_patient_uuid_patient_fk" FOREIGN KEY ("uuid_patient") REFERENCES "public"."patient"("uuid_patient") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
-CREATE UNIQUE INDEX "patient_code_code_active_unique" ON "patient_code" USING btree ("code") WHERE is_active = 1 AND used_at IS NULL AND deleted_at IS NULL AND revoked_at IS NULL;--> statement-breakpoint
+CREATE UNIQUE INDEX "patient_code_code_active_unique" ON "patient_code" USING btree ("code") WHERE deleted_at IS NULL AND revoked_at IS NULL;--> statement-breakpoint
 CREATE UNIQUE INDEX "patient_code_patient_active_unique" ON "patient_code" USING btree ("uuid_patient") WHERE is_active = 1 AND used_at IS NULL AND deleted_at IS NULL AND revoked_at IS NULL;--> statement-breakpoint
 CREATE INDEX "patient_code_uuid_patient_idx" ON "patient_code" USING btree ("uuid_patient");

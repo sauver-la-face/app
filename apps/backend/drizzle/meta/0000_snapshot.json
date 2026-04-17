@@ -1,5 +1,5 @@
 {
-  "id": "962899bb-1078-48f8-93ad-803991ef92f7",
+  "id": "c973e00e-f313-41a7-a836-2385098cf34d",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -466,7 +466,7 @@
             }
           ],
           "isUnique": true,
-          "where": "is_active = 1 AND used_at IS NULL AND deleted_at IS NULL AND revoked_at IS NULL",
+          "where": "deleted_at IS NULL AND revoked_at IS NULL",
           "concurrently": false,
           "method": "btree",
           "with": {}

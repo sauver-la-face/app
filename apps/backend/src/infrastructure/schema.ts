@@ -53,10 +53,13 @@ export const patientCode = pgTable(
     revoked_at: timestamp('revoked_at'), // null = non révoqué, renseigné par le médecin pour couper l'accès
   },
   (t) => [
-    // Un seul code actif possible par valeur (empêche deux patients avec le même code actif)
+    // Unicité globale du code (actif ou consommé) — empêche la réattribution d'un code déjà utilisé.
+    // is_active et used_at intentionnellement absents : un code peut sortir de ces états sans que
+    // deleted_at ou revoked_at soit renseigné, ce qui le rendrait réattribuable à tort.
+    // Seuls deleted_at et revoked_at garantissent qu'un code ne sera jamais réutilisé.
     uniqueIndex('patient_code_code_active_unique')
       .on(t.code)
-      .where(sql`is_active = 1 AND used_at IS NULL AND deleted_at IS NULL AND revoked_at IS NULL`),
+      .where(sql`deleted_at IS NULL AND revoked_at IS NULL`),
     // Un seul code actif possible par patient
     uniqueIndex('patient_code_patient_active_unique')
       .on(t.uuid_patient)
