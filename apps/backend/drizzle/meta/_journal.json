@@ -1,19 +1,12 @@
 {
-  "version": "5",
-  "dialect": "pg",
+  "version": "7",
+  "dialect": "postgresql",
   "entries": [
     {
       "idx": 0,
-      "version": "5",
-      "when": 1775651027993,
-      "tag": "0000_pretty_the_renegades",
-      "breakpoints": true
-    },
-    {
-      "idx": 1,
-      "version": "5",
-      "when": 1775651383099,
-      "tag": "0001_bumpy_guardian",
+      "version": "7",
+      "when": 1776410504597,
+      "tag": "0000_lyrical_prima",
       "breakpoints": true
     }
   ]

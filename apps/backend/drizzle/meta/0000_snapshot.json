@@ -1,10 +1,10 @@
 {
-  "id": "a5cc8ca1-5b6c-4ba7-8417-e6cd9b5a02b7",
+  "id": "962899bb-1078-48f8-93ad-803991ef92f7",
   "prevId": "00000000-0000-0000-0000-000000000000",
-  "version": "5",
-  "dialect": "pg",
+  "version": "7",
+  "dialect": "postgresql",
   "tables": {
-    "instructions": {
+    "public.instructions": {
       "name": "instructions",
       "schema": "",
       "columns": {
@@ -53,8 +53,12 @@
           "name": "instructions_uuid_physician_physician_uuid_physician_fk",
           "tableFrom": "instructions",
           "tableTo": "physician",
-          "columnsFrom": ["uuid_physician"],
-          "columnsTo": ["uuid_physician"],
+          "columnsFrom": [
+            "uuid_physician"
+          ],
+          "columnsTo": [
+            "uuid_physician"
+          ],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -62,16 +66,23 @@
           "name": "instructions_uuid_medical_procedure_medical_procedure_uuid_medical_procedure_fk",
           "tableFrom": "instructions",
           "tableTo": "medical_procedure",
-          "columnsFrom": ["uuid_medical_procedure"],
-          "columnsTo": ["uuid_medical_procedure"],
+          "columnsFrom": [
+            "uuid_medical_procedure"
+          ],
+          "columnsTo": [
+            "uuid_medical_procedure"
+          ],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
       },
       "compositePrimaryKeys": {},
-      "uniqueConstraints": {}
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
     },
-    "media": {
+    "public.media": {
       "name": "media",
       "schema": "",
       "columns": {
@@ -119,16 +130,23 @@
           "name": "media_uuid_event_medical_event_uuid_event_fk",
           "tableFrom": "media",
           "tableTo": "medical_event",
-          "columnsFrom": ["uuid_event"],
-          "columnsTo": ["uuid_event"],
+          "columnsFrom": [
+            "uuid_event"
+          ],
+          "columnsTo": [
+            "uuid_event"
+          ],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
       },
       "compositePrimaryKeys": {},
-      "uniqueConstraints": {}
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
     },
-    "medical_event": {
+    "public.medical_event": {
       "name": "medical_event",
       "schema": "",
       "columns": {
@@ -175,12 +193,6 @@
           "primaryKey": false,
           "notNull": true,
           "default": "now()"
-        },
-        "severity": {
-          "name": "severity",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": false
         }
       },
       "indexes": {},
@@ -189,8 +201,12 @@
           "name": "medical_event_uuid_medical_procedure_medical_procedure_uuid_medical_procedure_fk",
           "tableFrom": "medical_event",
           "tableTo": "medical_procedure",
-          "columnsFrom": ["uuid_medical_procedure"],
-          "columnsTo": ["uuid_medical_procedure"],
+          "columnsFrom": [
+            "uuid_medical_procedure"
+          ],
+          "columnsTo": [
+            "uuid_medical_procedure"
+          ],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -198,16 +214,83 @@
           "name": "medical_event_uuid_physician_physician_uuid_physician_fk",
           "tableFrom": "medical_event",
           "tableTo": "physician",
-          "columnsFrom": ["uuid_physician"],
-          "columnsTo": ["uuid_physician"],
+          "columnsFrom": [
+            "uuid_physician"
+          ],
+          "columnsTo": [
+            "uuid_physician"
+          ],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
       },
       "compositePrimaryKeys": {},
-      "uniqueConstraints": {}
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
     },
-    "medical_procedure": {
+    "public.medical_event_symptom": {
+      "name": "medical_event_symptom",
+      "schema": "",
+      "columns": {
+        "uuid_event": {
+          "name": "uuid_event",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "uuid_symptom": {
+          "name": "uuid_symptom",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "medical_event_symptom_uuid_event_medical_event_uuid_event_fk": {
+          "name": "medical_event_symptom_uuid_event_medical_event_uuid_event_fk",
+          "tableFrom": "medical_event_symptom",
+          "tableTo": "medical_event",
+          "columnsFrom": [
+            "uuid_event"
+          ],
+          "columnsTo": [
+            "uuid_event"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "medical_event_symptom_uuid_symptom_symptom_uuid_symptom_fk": {
+          "name": "medical_event_symptom_uuid_symptom_symptom_uuid_symptom_fk",
+          "tableFrom": "medical_event_symptom",
+          "tableTo": "symptom",
+          "columnsFrom": [
+            "uuid_symptom"
+          ],
+          "columnsTo": [
+            "uuid_symptom"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {
+        "medical_event_symptom_uuid_event_uuid_symptom_pk": {
+          "name": "medical_event_symptom_uuid_event_uuid_symptom_pk",
+          "columns": [
+            "uuid_event",
+            "uuid_symptom"
+          ]
+        }
+      },
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.medical_procedure": {
       "name": "medical_procedure",
       "schema": "",
       "columns": {
@@ -249,16 +332,23 @@
           "name": "medical_procedure_uuid_patient_patient_uuid_patient_fk",
           "tableFrom": "medical_procedure",
           "tableTo": "patient",
-          "columnsFrom": ["uuid_patient"],
-          "columnsTo": ["uuid_patient"],
+          "columnsFrom": [
+            "uuid_patient"
+          ],
+          "columnsTo": [
+            "uuid_patient"
+          ],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
       },
       "compositePrimaryKeys": {},
-      "uniqueConstraints": {}
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
     },
-    "patient": {
+    "public.patient": {
       "name": "patient",
       "schema": "",
       "columns": {
@@ -303,9 +393,12 @@
       "indexes": {},
       "foreignKeys": {},
       "compositePrimaryKeys": {},
-      "uniqueConstraints": {}
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
     },
-    "patient_code": {
+    "public.patient_code": {
       "name": "patient_code",
       "schema": "",
       "columns": {
@@ -346,24 +439,92 @@
           "type": "timestamp",
           "primaryKey": false,
           "notNull": false
+        },
+        "is_active": {
+          "name": "is_active",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 1
+        },
+        "revoked_at": {
+          "name": "revoked_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false
         }
       },
-      "indexes": {},
+      "indexes": {
+        "patient_code_code_active_unique": {
+          "name": "patient_code_code_active_unique",
+          "columns": [
+            {
+              "expression": "code",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": true,
+          "where": "is_active = 1 AND used_at IS NULL AND deleted_at IS NULL AND revoked_at IS NULL",
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "patient_code_patient_active_unique": {
+          "name": "patient_code_patient_active_unique",
+          "columns": [
+            {
+              "expression": "uuid_patient",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": true,
+          "where": "is_active = 1 AND used_at IS NULL AND deleted_at IS NULL AND revoked_at IS NULL",
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "patient_code_uuid_patient_idx": {
+          "name": "patient_code_uuid_patient_idx",
+          "columns": [
+            {
+              "expression": "uuid_patient",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
       "foreignKeys": {
         "patient_code_uuid_patient_patient_uuid_patient_fk": {
           "name": "patient_code_uuid_patient_patient_uuid_patient_fk",
           "tableFrom": "patient_code",
           "tableTo": "patient",
-          "columnsFrom": ["uuid_patient"],
-          "columnsTo": ["uuid_patient"],
+          "columnsFrom": [
+            "uuid_patient"
+          ],
+          "columnsTo": [
+            "uuid_patient"
+          ],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
       },
       "compositePrimaryKeys": {},
-      "uniqueConstraints": {}
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
     },
-    "physician": {
+    "public.physician": {
       "name": "physician",
       "schema": "",
       "columns": {
@@ -412,13 +573,75 @@
         "physician_mail_unique": {
           "name": "physician_mail_unique",
           "nullsNotDistinct": false,
-          "columns": ["mail"]
+          "columns": [
+            "mail"
+          ]
         }
-      }
+      },
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.symptom": {
+      "name": "symptom",
+      "schema": "",
+      "columns": {
+        "uuid_symptom": {
+          "name": "uuid_symptom",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "code": {
+          "name": "code",
+          "type": "varchar(50)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "label_fr": {
+          "name": "label_fr",
+          "type": "varchar(100)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "label_km": {
+          "name": "label_km",
+          "type": "varchar(100)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "triggers_alert": {
+          "name": "triggers_alert",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "symptom_code_unique": {
+          "name": "symptom_code_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "code"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
     }
   },
   "enums": {},
   "schemas": {},
+  "sequences": {},
+  "roles": {},
+  "policies": {},
+  "views": {},
   "_meta": {
     "columns": {},
     "schemas": {},
