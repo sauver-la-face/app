@@ -62,7 +62,9 @@ export const patientCode = pgTable(
     // Un seul code actif possible par patient
     uniqueIndex('patient_code_patient_active_unique')
       .on(t.uuid_patient)
-      .where(sql`is_active = true AND used_at IS NULL AND deleted_at IS NULL AND revoked_at IS NULL`),
+      .where(
+        sql`is_active = true AND used_at IS NULL AND deleted_at IS NULL AND revoked_at IS NULL`,
+      ),
     // Accélère la recherche de tous les codes d'un patient (actifs + historique)
     index('patient_code_uuid_patient_idx').on(t.uuid_patient),
   ],
@@ -79,9 +81,7 @@ export const medicalProcedure = pgTable(
     date: date('date').notNull(),
     hospital_name: varchar('hospital_name', { length: 200 }),
   },
-  (t) => [
-    index('medical_procedure_uuid_patient_idx').on(t.uuid_patient),
-  ],
+  (t) => [index('medical_procedure_uuid_patient_idx').on(t.uuid_patient)],
 );
 
 export const medicalEvent = pgTable(
@@ -98,9 +98,7 @@ export const medicalEvent = pgTable(
     created_at: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
     // severity remplacé par pictogrammes de symptômes (voir table symptom + medical_event_symptom)
   },
-  (t) => [
-    index('medical_event_uuid_medical_procedure_idx').on(t.uuid_medical_procedure),
-  ],
+  (t) => [index('medical_event_uuid_medical_procedure_idx').on(t.uuid_medical_procedure)],
 );
 
 // Liste des pictogrammes de symptômes disponibles
@@ -139,9 +137,7 @@ export const media = pgTable(
     taken_at: timestamp('taken_at', { withTimezone: true }).notNull(),
     description: text('description'),
   },
-  (t) => [
-    index('media_uuid_event_idx').on(t.uuid_event),
-  ],
+  (t) => [index('media_uuid_event_idx').on(t.uuid_event)],
 );
 
 export const instructions = pgTable(
