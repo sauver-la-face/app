@@ -210,8 +210,9 @@ Même principe pour `symptom.code` — cohérence avec `physician.mail`.
 `patient_code.is_active` utilise le type `boolean` (`true/false`) et non `integer` (`1/0`) — plus idiomatique, interdit les valeurs invalides.
 
 **Index partiels critiques**
-- `patient_code_code_active_unique` : `WHERE deleted_at IS NULL AND revoked_at IS NULL` — les codes consommés restent dans l'index pour empêcher toute réattribution
-- `patient_code_patient_active_unique` : `WHERE is_active = true AND used_at IS NULL AND ...` — un seul code actif par patient
+- `patient_code_code_active_unique` : `WHERE deleted_at IS NULL AND revoked_at IS NULL`
+  — `used_at IS NULL` intentionnellement absent : un code consommé qui sort de l'index (used_at renseigné) ne serait plus couvert par l'unicité, permettant sa réattribution à un autre patient. Seuls `deleted_at` et `revoked_at` garantissent qu'un code ne sera jamais réutilisé.
+- `patient_code_patient_active_unique` : `WHERE is_active = true AND used_at IS NULL AND deleted_at IS NULL AND revoked_at IS NULL` — un seul code actif non consommé par patient
 - `instructions_unread_idx` : `WHERE acknowledged_at IS NULL` — optimise le polling "instructions non lues" (requête critique pour les alertes)
 
 ---
