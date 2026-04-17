@@ -229,7 +229,7 @@ Même principe pour `symptom.code` — cohérence avec `physician.mail`.
 | Consentement | Écran RGPD obligatoire au premier lancement (date sauvegardée) |
 | Hébergement | OVH Cloud certifié HDS |
 | CSRF | Cookies `SameSite=Strict` sur le dashboard web (géré par Better Auth) |
-| Audit logs | Chaque accès aux données médicales loggé — rétention 1 an (HDS) — voir AUDIT-01 |
+| Audit logs | Chaque accès aux données médicales loggé — rétention 1 an (HDS) — voir [cdc.md](cdc.md) |
 
 ### JWT — durée de vie et renouvellement
 
