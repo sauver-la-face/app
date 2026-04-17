@@ -78,6 +78,11 @@ export const patientCode = pgTable(
   ],
 );
 
+// FK intentionnellement sans ON DELETE CASCADE sur toutes les tables liées à patient.
+// Raison : la suppression d'un patient n'est jamais un DELETE SQL — c'est une anonymisation
+// applicative (first_name/last_name/birthdate → NULL, anonymized_at renseigné).
+// Les données médicales sont conservées 20 ans (obligation HDS / Code de la santé publique,
+// art. L1110-4). Un CASCADE les détruirait et constituerait une violation légale.
 export const medicalProcedure = pgTable(
   'medical_procedure',
   {
