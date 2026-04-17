@@ -134,7 +134,14 @@ features/auth/
 - **Entity** : a un UUID, identité persistante même si les attributs changent
 - **Value Object** : pas d'UUID, défini par sa valeur, immuable, constructeur privé + `create()` qui valide
 - Les règles métier et validations vivent ici — jamais dans `application/`
-- **Pas de contrainte CHECK SQL** pour les règles métier — la validation appartient au Value Object, pas à la base de données. Exemple : le format "6 chiffres" du code patient est validé par `PatientCodeValue.create()`, pas par un `CHECK (code ~ '^[0-9]{6}$')` en SQL. Raison : DDD — les règles métier dans le domaine, la base de données ne connaît que la structure.
+- **Pas de contrainte CHECK SQL** pour les règles métier — la validation appartient au Value Object, pas à la base de données. Les index partiels sont acceptés car ils relèvent de l'intégrité opérationnelle et de la performance, pas de la logique métier.
+
+  | Mécanisme | Rôle | Où |
+  |---|---|---|
+  | `CHECK (code ~ '^[0-9]{6}$')` | Valider le format — règle métier | ❌ SQL → ✅ `PatientCodeValue.create()` |
+  | `UNIQUE WHERE deleted_at IS NULL` | Empêcher la réattribution d'un code — intégrité opérationnelle | ✅ Index partiel SQL |
+
+  Exemple : le format "6 chiffres" du code patient est une règle métier → `PatientCodeValue.create()`. En revanche, garantir qu'un code non supprimé ne peut pas être réattribué est une contrainte d'intégrité → index partiel `WHERE deleted_at IS NULL AND revoked_at IS NULL`.
 
 **Répartition domain/ vs packages/shared :**
 - Concept utilisé par une seule app → `domain/` de la feature
