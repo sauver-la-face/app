@@ -73,8 +73,11 @@ export const patientCode = pgTable(
       ),
     // Accélère la recherche de tous les codes d'un patient (actifs + historique)
     index('patient_code_uuid_patient_idx').on(t.uuid_patient),
-    // Optimise le cron de soft delete après 48h (WHERE created_at < now() - 48h AND used_at IS NULL)
-    index('patient_code_created_at_idx').on(t.created_at),
+    // Optimise le cron de soft delete après 48h (WHERE created_at < now() - 48h AND used_at IS NULL AND deleted_at IS NULL)
+    // Index partiel : couvre uniquement les codes non consommés et non supprimés — seuls candidats du cron
+    index('patient_code_created_at_idx')
+      .on(t.created_at)
+      .where(sql`used_at IS NULL AND deleted_at IS NULL`),
   ],
 );
 
