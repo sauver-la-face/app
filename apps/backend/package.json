@@ -3,22 +3,26 @@
   "version": "0.0.1",
   "private": true,
   "scripts": {
-    "dev": "bun run --watch src/index.ts",
-    "test": "bun test",
-    "db:generate": "drizzle-kit generate",
-    "db:migrate": "drizzle-kit migrate"
+    "dev": " dotenv -e .env.local -- bun run --watch src/index.ts",
+    "start": "dotenv -e .env.local -- bun run src/index.ts",
+    "test": "dotenv -e .env.local -- bun test",
+    "db:generate": "dotenv -e .env.local -- drizzle-kit generate",
+    "db:migrate": "dotenv -e .env.local -- drizzle-kit migrate",
+    "db:push": "dotenv -e .env.local -- drizzle-kit push"
   },
   "dependencies": {
-    "hono": "^4.0.0",
     "@hono/zod-openapi": "^0.16.0",
-    "drizzle-orm": "^0.30.0",
+    "@sauver-la-face/shared": "workspace:*",
     "better-auth": "^1.0.0",
-    "zod": "^3.0.0",
+    "dotenv": "^17.4.1",
+    "drizzle-orm": "^0.45.2",
+    "hono": "^4.0.0",
+    "pg": "^8.20.0",
     "pino": "^9.0.0",
-    "@sauver-la-face/shared": "workspace:*"
+    "zod": "^3.0.0"
   },
   "devDependencies": {
-    "drizzle-kit": "^0.20.0",
-    "typescript": "^5.0.0"
+    "dotenv-cli": "^11.0.0",
+    "drizzle-kit": "^0.31.10"
   }
 }

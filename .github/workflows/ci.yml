@@ -36,14 +36,27 @@ jobs:
       - name: Installer les dépendances
         run: bun install
 
+      - name: Compiler le package shared
+        run: bun run build:shared
+
       - name: Vérifier les types — backend
-        run: bun run --cwd apps/backend tsc --noEmit
+        run: cd apps/backend && bunx tsc --noEmit
 
       - name: Vérifier les types — web
-        run: bun run --cwd apps/web tsc --noEmit
+        run: |
+          if [ -d "apps/web/src" ]; then
+            cd apps/web && bunx tsc --noEmit
+          else
+            echo "apps/web/src non trouvé — typecheck ignoré (feature non implémentée)"
+          fi
 
       - name: Vérifier les types — mobile
-        run: bun run --cwd apps/mobile tsc --noEmit
+        run: |
+          if [ -d "apps/mobile/src" ]; then
+            cd apps/mobile && bunx tsc --noEmit
+          else
+            echo "apps/mobile/src non trouvé — typecheck ignoré (feature non implémentée)"
+          fi
 
   test:
     name: Tests (bun:test)

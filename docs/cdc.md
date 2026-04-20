@@ -1,3 +1,5 @@
+[← README](../README.md) · [Onboarding](onboarding.md) · [Architecture](architecture.md) · [Schéma BDD](schema.dbml) · [Lexique](lexique.md)
+
 # Analyse Architecte — Sauver la Face
 > Version 4 — Choix révisés et alignés
 
@@ -5,7 +7,7 @@
 
 ## 1. Objectifs du projet
 
-Développer une application de suivi post-opératoire permettant aux patients cambodgiens opérés lors de missions humanitaires de chirurgie maxillo-faciale de transmettre leurs informations médicales (photos, questionnaires) à leurs soignants en mode offline-first, avec synchronisation automatique. Fournir aux chirurgiens toulousains et médecins locaux un tableau de bord web pour surveiller les patients à distance, gérer les alertes et planifier les missions.
+Développer une application de suivi post-opératoire permettant aux patients cambodgiens opérés lors de missions humanitaires de chirurgie maxillo-faciale de transmettre leurs informations médicales (photos, questionnaires) à leurs soignants en mode offline-first, avec synchronisation automatique. Les chirurgiens toulousains effectuent des missions ponctuelles au Cambodge puis assurent le suivi à distance sur le long terme. Fournir aux chirurgiens toulousains et médecins locaux un tableau de bord web pour surveiller les patients à distance, gérer les alertes et planifier les missions.
 
 ---
 
@@ -34,13 +36,14 @@ Développer une application de suivi post-opératoire permettant aux patients ca
 ## 3. Fonctionnalités must-have
 
 ### 📱 Mobile (patient)
-1. **Authentification patient** : connexion code 6 chiffres, session expire après 48h d'inactivité, renouvellement du code par médecin local uniquement
-2. **Interface pictographique** : navigation max 2 clics, boutons min 48x48 dp, langues khmer/français/anglais
-3. **Capture photos cicatrices** : appareil photo intégré, compression automatique, horodatage
-4. **Questionnaire symptômes** : questions visuelles via pictogrammes, réponses simples par tap
-5. **Mode offline complet** : 100% fonctionnalités mobiles sans réseau, stockage local SQLite 50 Mo max
-6. **Synchronisation automatique** : détection connexion, upload silencieux, stratégie server-wins pour conflits
-7. **Instructions médicales** : consultation des consignes pictographiques envoyées par le chirurgien, accusé réception
+1. **Consentement RGPD** : écran obligatoire au premier lancement avant toute collecte, acceptation ou refus explicite avec pictogrammes, date de consentement sauvegardée
+2. **Authentification patient** : connexion code 6 chiffres, JWT TTL 1 an (offline-first — patients parfois déconnectés plusieurs semaines), révocation explicite par le médecin, code expiré après 48h si non utilisé, renouvellement du code par médecin local uniquement
+3. **Interface pictographique** : navigation max 2 clics, boutons min 48x48 dp, langues khmer/français/anglais
+4. **Capture photos cicatrices** : appareil photo intégré, compression automatique, horodatage
+5. **Questionnaire symptômes** : questions visuelles via pictogrammes, réponses simples par tap
+6. **Mode offline complet** : 100% fonctionnalités mobiles sans réseau, stockage local SQLite 50 Mo max
+7. **Synchronisation automatique** : détection connexion, upload silencieux, stratégie server-wins pour conflits
+8. **Instructions médicales** : consultation des consignes pictographiques envoyées par le chirurgien, accusé réception
 
 ### 🖥️ Frontend web (médecins)
 8. **Tableau de bord médecin** : liste patients, alertes symptômes critiques
@@ -51,7 +54,7 @@ Développer une application de suivi post-opératoire permettant aux patients ca
 
 ### ⚙️ Backend
 13. **API REST sécurisée** : endpoints authentifiés, validation Zod, documentation OpenAPI auto-générée
-14. **Système alertes** : seuils automatiques (douleur > 7, saignement présent), notifications temps réel médecins
+14. **Système alertes** : alertes automatiques via pictogrammes de symptômes (`triggers_alert`), notifications temps réel médecins
 15. **Gestion synchronisation** : réception données offline, résolution conflits server-wins, versioning schéma
 16. **Stockage photos** : réception, validation checksum SHA-256, stockage MinIO HDS
 17. **Authentification** : codes patients 6 chiffres + expiration 48h, MFA médecins web
@@ -116,20 +119,28 @@ Développer une application de suivi post-opératoire permettant aux patients ca
 ### Sécurité
 
 **Authentification :**
-- Patients : code numérique 6 chiffres, session expire après 48h d'inactivité, renouvellement du code par médecin local uniquement
-- Médecins web : MFA obligatoire TOTP/SMS, session timeout 2h inactivité (postes partagés hôpitaux)
-- Tokens JWT signés HMAC-SHA256, renouvellement automatique silencieux
+- Patients : code numérique 6 chiffres, JWT TTL 1 an renouvelé à chaque connexion, révocation explicite par le médecin, expiration du code après 48h si non utilisé, renouvellement du code par médecin local uniquement
+- Médecins web : MFA obligatoire TOTP, session timeout 2h d'inactivité (postes partagés hôpitaux), renouvellement silencieux automatique tant qu'actif
+- Tokens JWT signés HMAC-SHA256
+
+**Rate limiting :**
+- 3 tentatives échouées → blocage 15 minutes par IP (patients et médecins)
+- Indépendant de l'expiration 48h du code patient
+
+**CSRF :**
+- Cookies `SameSite=Strict` sur le dashboard web — géré par Better Auth
 
 **Chiffrement :**
 - AES-256-GCM en local sur l'appareil (expo-secure-store)
-- TLS 1.3 obligatoire en transit
-- Base PostgreSQL chiffrée au niveau colonnes pour données médicales
-- Rotation des clés tous les 90 jours
+- TLS 1.3 obligatoire en transit (terminé par Caddy)
+- Chiffrement at-rest (données stockées sur disque) assuré par OVH HDS — pas de chiffrement colonne PostgreSQL. Justification : le chiffrement disque OVH HDS est suffisant pour la conformité HDS ; le chiffrement colonne ajouterait une complexité significative sans gain de conformité. S'applique en production uniquement — pas de chiffrement at-rest en dev.
+- Rotation des clés JWT et credentials OVH S3 tous les 90 jours (production uniquement)
 
 **Logs audit :**
 - Connexions : horodatage UTC, IP, user-agent, succès/échec
 - Actions médicales : consultation dossier, modification, export
 - Rétention : 1 an logs audit, 3 mois logs techniques
+- Stockage : Pino écrit en fichier local, export journalier vers S3 (MinIO en dev, OVH Object Storage certifié HDS en prod) dans un bucket dédié `logs-audit`
 
 ### SLA
 - Disponibilité application mobile : 99.5% (mode offline compense les interruptions)
@@ -138,7 +149,7 @@ Développer une application de suivi post-opératoire permettant aux patients ca
 - Temps résolution incident mineur : 24h
 
 ### Légales
-- Hébergement : HDS certifié obligatoire (OVH Cloud ou AWS Healthcare — à décider)
+- Hébergement : HDS certifié obligatoire — **OVH Cloud retenu** (société française, données sous droit français — risque CLOUD Act réduit mais non nul ; mitigations : juridiction française, contrat DPA avec OVH, données chiffrées AES-256 au repos et TLS 1.3 en transit)
 - Juridiction : droit français, serveurs UE uniquement
 - Responsabilité médicale : app = outil d'aide à la décision, responsabilité médecin
 - Audit sécurité : annuel par organisme certifié
@@ -151,7 +162,7 @@ Développer une application de suivi post-opératoire permettant aux patients ca
 
 Un seul dépôt Git géré avec les workspaces natifs de Bun. Turborepo écarté — les volumes du projet ne justifient pas l'outil supplémentaire, Bun workspaces couvre tous les besoins.
 
-```
+```text
 sauver-la-face/
   apps/
     backend/        ← Bun + Hono
@@ -178,13 +189,13 @@ TypeScript natif sans transpilation. Performances I/O supérieures pour les uplo
 Framework léger, TypeScript-first, compatible Bun. Génération OpenAPI automatique via `@hono/zod-openapi` — la documentation API est générée depuis les schémas Zod sans effort manuel.
 
 #### 3. Base de données — PostgreSQL
-Conformité HDS avec chiffrement au niveau colonnes pour données médicales. Transactions ACID pour garantir la cohérence lors des synchronisations offline. Support JSON natif pour les métadonnées photos.
+Conformité HDS via chiffrement at-rest au niveau disque (OVH HDS) — pas de chiffrement colonne PostgreSQL. Transactions ACID pour garantir la cohérence lors des synchronisations offline. Support JSON natif pour les métadonnées photos.
 
 #### 4. ORM — Drizzle
-TypeScript-first, performances proches du SQL brut, migrations versionnées via `drizzle-kit`. Les types de schéma sont partageables avec le package `shared/` pour cohérence totale entre la base de données et les trois apps.
+TypeScript-first, performances proches du SQL brut, migrations versionnées via `drizzle-kit`. Le schéma Drizzle est dans `apps/backend/src/infrastructure/schema.ts` (infrastructure backend uniquement). Les Value Objects partagés (ex: `PatientCodeValue`, `ChecksumSHA256`) sont dans `packages/shared/src/domain/` — accessibles par le backend et le mobile.
 
 #### 5. Authentification — Better Auth
-MFA TOTP obligatoire pour les médecins web. Gestion des codes 6 chiffres patients avec session expirant après 48h d'inactivité. Compatible expo-secure-store pour le stockage sécurisé des tokens mobiles. Sessions stockées en PostgreSQL.
+MFA TOTP obligatoire pour les médecins web. Gestion des codes 6 chiffres patients : le code expire après 48h s'il n'est pas utilisé, mais une fois activé le JWT patient est valide 1 an (offline-first). Compatible expo-secure-store pour le stockage sécurisé des tokens mobiles. Sessions stockées en PostgreSQL.
 
 #### 6. Stockage photos — MinIO
 Stockage S3-compatible auto-hébergé sur OVH HDS. Versioning des photos cicatrices, chiffrement AES-256 at-rest. Réplication synchrone entre deux buckets OVH (Strasbourg ↔ Roubaix).
@@ -199,14 +210,14 @@ Test runner natif Bun, zéro configuration, API compatible Jest. Couverture de c
 
 **Backend :**
 - Logique de synchronisation offline (server-wins, conflits, versioning schéma)
-- Seuils d'alertes médicales (douleur > 7, saignement, inactivité 7 jours)
+- Alertes médicales automatiques via pictogrammes de symptômes (`triggers_alert`) et inactivité 7 jours
 - Authentification patient (code 6 chiffres, expiration 48h)
 - Exports PDF/CSV RGPD
 
 **Mobile :**
 - Queue de synchronisation SQLite (retry, backoff, purge)
 - Compression et validation photos (magic bytes, checksum)
-- Expiration session 48h et renouvellement de code
+- Expiration code 48h si non utilisé, JWT session valide 1 an (offline-first), révocable par le médecin
 - Gestion des conflits offline à la reconnexion
 
 **Dashboard web :**
@@ -245,12 +256,15 @@ SQLite embarqué, 100% fonctionnel sans réseau. Transactions ACID pour la cohé
 
 #### 13. Sécurité locale — expo-secure-store
 Chiffrement AES-256 des tokens JWT. Utilise le Keystore Android et le Keychain iOS. Résiste à l'extraction même sur appareils rootés.
+- **Limite** : API clé/valeur strings uniquement — sérialiser les objets avec `JSON.stringify` avant stockage, désérialiser avec `JSON.parse` à la lecture.
 
 #### 14. Internationalisation — i18next + expo-localization
 Khmer (défaut) / français / anglais. Détection automatique de la locale système. Chargement lazy pour maintenir l'APK < 30 Mo.
 
-#### 15. Notifications locales — expo-notifications
-Rappels générés localement sans serveur, via alarmes programmées. Fonctionnel en mode offline complet.
+#### 15. Notifications — expo-notifications
+Deux types de notifications :
+- **Locales** : rappels hebdomadaires générés directement par l'app (prise de photos, questionnaire) — fonctionnels en mode offline complet, sans serveur
+- **Push** : notifications envoyées depuis le backend via Expo Push Service (nouvelles instructions médicales) — nécessitent une connexion, token Expo stocké dans `expo-secure-store`
 
 ---
 
@@ -266,10 +280,13 @@ Schémas définis une seule fois dans `packages/shared/` et consommés par le ba
 #### 17. Monorepo — Bun Workspaces
 Workspaces natifs Bun pour gérer les dépendances entre apps et lier le package `shared/`. Turborepo écarté — Bun workspaces couvre tous les besoins du projet à ce stade.
 
-#### 18. Containers — Docker + Docker Compose
-Déploiement reproductible sur OVH HDS. Docker Compose orchestre **4 services** : backend Hono, PostgreSQL, MinIO, reverse proxy.
+#### 18. Reverse proxy — Caddy
+TLS 1.3 obligatoire pour les données de santé (RGPD + HDS) — Caddy le gère par défaut. Certificats Let's Encrypt automatiques, renouvellement inclus. En développement, certificat auto-signé en une ligne (`tls internal`). Hono ne termine jamais le TLS directement — Caddy est la seule porte d'entrée exposée à Internet. Choix retenu face à Nginx (configuration SSL manuelle complexe) et Traefik (courbe d'apprentissage élevée).
 
-#### 19. CI/CD — GitHub Actions
+#### 19. Containers — Docker + Docker Compose
+Déploiement reproductible sur OVH HDS. Docker Compose orchestre **4 services en production** : Caddy (reverse proxy), backend Hono, PostgreSQL, MinIO. pgAdmin est un outil d'administration réservé au développement — activé uniquement via `--profile dev`, jamais déployé en production.
+
+#### 20. CI/CD — GitHub Actions
 Tests automatisés, déploiements zero-downtime. Pipelines exécutés uniquement sur les packages affectés par chaque PR.
 
 **Workflows automatisés :**
@@ -283,11 +300,11 @@ Tests automatisés, déploiements zero-downtime. Pipelines exécutés uniquement
 
 **Règle de nommage des branches :** `feature/XXX-00-nom-de-la-feature` (ex: `feature/AUTH-01-authentification-patient`) — obligatoire pour que les workflows fonctionnent.
 
-#### 20. Linter / Formatter — Biome
+#### 21. Linter / Formatter — Biome
 Remplace ESLint + Prettier en un seul outil. Cohérent avec l'écosystème Bun. Configuration unique à la racine via `biome.json`.
 
-#### 21. Git workflow — GitHub Flow
-Une branche par feature, PR obligatoire pour merge sur `dev` et sur `main`. La branche `dev` est la référence pour récupérer le code à jour — chaque développeur rebase depuis `dev` avant de démarrer une feature. La branche `main` est réservée aux releases stables déployées en production. Règle de gel des migrations pendant les missions actives.
+#### 22. Git workflow — GitHub Flow
+Une branche par feature, PR obligatoire pour merge sur `dev` et sur `main`. La branche `dev` est la référence pour récupérer le code à jour — chaque développeur rebase depuis `dev` avant de démarrer une feature. La branche `main` est réservée aux releases stables déployées en production.
 
 **Reviewers :**
 - PR vers `dev` : review automatique par **CodeRabbit** (IA) — détection bugs, incohérences de types, problèmes de sécurité ligne par ligne
@@ -316,31 +333,32 @@ Une branche par feature, PR obligatoire pour merge sur `dev` et sur `main`. La b
 
 Code organisé par domaine métier. Chaque feature est un module autonome avec ses propres composants, services et tests.
 
-### Backend (Hono) — Feature-based, 3 couches par feature
+### Backend (Hono) — Feature-based + Clean Architecture + DDD
 
-Architecture router / service / repository. Les services concentrent la logique métier et sont couverts en TDD.
+4 couches par feature. Dépendances : `presentation → application → domain ← infrastructure`. Les règles métier sont dans `domain/` — testable sans base de données.
 
-```
+```text
 apps/backend/src/
   features/
-    patients/
-      patients.router.ts      ← routes Hono + validation Zod
-      patients.service.ts     ← logique métier (TDD)
-      patients.repository.ts  ← requêtes Drizzle/PostgreSQL
-    sync/
-      sync.router.ts
-      sync.service.ts         ← server-wins, versioning schéma (TDD)
-      sync.repository.ts
-    alerts/
-      alerts.router.ts
-      alerts.service.ts       ← seuils douleur, saignement (TDD)
-      alerts.repository.ts
-    exports/
-      exports.router.ts
-      exports.service.ts      ← PDF, CSV RGPD
     auth/
-      auth.router.ts
-      auth.service.ts         ← Better Auth, MFA, codes 6 chiffres (TDD)
+      presentation/
+        authRouter.ts           ← routes Hono + validation Zod, délègue à application
+      application/
+        authUsecase.ts          ← orchestration, aucune règle métier (TDD)
+      domain/
+        physician.ts            ← Entity DDD (UUID, règles métier)
+        physicianRepository.ts  ← interface (port)
+        email.ts                ← Value Object DDD (backend uniquement)
+      infrastructure/
+        physicianRepository.ts  ← requêtes Drizzle/PostgreSQL
+
+packages/shared/src/domain/
+  patientCodeValue.ts           ← Value Object partagé (backend + mobile)
+  checksumSHA256.ts             ← Value Object partagé (backend + mobile)
+    sync/     ← même structure (server-wins, versioning schéma)
+    alerts/   ← même structure (triggers_alert pictogrammes)
+    exports/  ← même structure (PDF, CSV RGPD)
+    auth/     ← même structure (Better Auth, MFA, codes 6 chiffres)
   shared/
     middleware/               ← audit Pino, auth guard
     database/                 ← Drizzle client, migrations
@@ -349,28 +367,35 @@ apps/backend/src/
 
 ### Dashboard web (Next.js) — App Router natif
 
-La structure de Next.js App Router organise les pages. Les composants et hooks réutilisables sont regroupés dans `components/` et `hooks/`. Plus pragmatique pour une équipe qui découvre Next.js.
+Pages fines dans `app/`, toute la logique dans `features/`. Cohérent avec l'architecture backend et mobile.
 
-```
+```text
 apps/web/src/
-  app/                        ← routing Next.js natif
+  app/                        ← routing Next.js (pages fines — importent depuis features/)
     dashboard/
     patients/[id]/
     alerts/
     exports/
     auth/
-  components/                 ← composants réutilisables
-  hooks/                      ← TanStack Query hooks
-  lib/                        ← helpers, formatters
+  features/
+    dashboard/
+      components/             ← UI pure, jamais de fetch direct
+      hooks/                  ← TanStack Query hooks
+      actions/                ← Server Actions Next.js (mutations)
+    patients/
+      components/
+      hooks/
+      actions/
 ```
 
 ### Mobile (React Native) — Feature-based avec storage offline par feature
 
 Chaque feature gère son propre état SQLite local et sa queue de sync. La couche `storage/` par feature est essentielle pour isoler la logique offline de chaque domaine.
 
-```
+```text
 apps/mobile/src/
   features/
+    consent/                  ← consentement RGPD (premier écran obligatoire)
     auth/
       screens/                ← écran code 6 chiffres
       hooks/                  ← session, expiration 48h
@@ -388,8 +413,11 @@ apps/mobile/src/
       hooks/
       storage/                ← cache offline instructions
     sync/
-      sync.service.ts         ← orchestration queue SQLite
-      sync.queue.ts           ← table sync_queue, retry logic
+      syncService.ts          ← orchestration queue SQLite
+      syncQueue.ts            ← table sync_queue, retry logic
+    notifications/
+      localService.ts         ← rappels hebdomadaires offline
+      pushService.ts          ← token Expo + notifications serveur
   shared/
     components/               ← pictogrammes, boutons
     i18n/                     ← khmer / français / anglais (i18next)
@@ -462,83 +490,50 @@ Retry : backoff 2s puis 4s, abandon à la 4e tentative avec alerte dashboard mé
 
 Basé sur le MCD validé. `PatientCode` supporte plusieurs codes dans le temps par patient, un seul actif à la fois (le dernier non expiré et non utilisé).
 
+### Stratégie de suppression des données patient (RGPD)
+
+Le RGPD (art. 17) accorde aux patients un droit à l'effacement. Cependant, l'art. 17.3.c prévoit une exception explicite pour les données de santé nécessaires à des fins de santé publique — ce qui couvre les dossiers médicaux post-opératoires.
+
+**Conséquence pratique** : on ne supprime pas les données médicales (`medical_procedure`, `medical_event`, `media`, etc.) — elles sont légalement conservées. En revanche, les données d'identité du patient (`first_name`, `last_name`, `birthdate`) sont **pseudonymisées** à la demande : elles passent à `NULL` et `anonymized_at` est renseigné.
+
+L'UUID patient reste intact — tout l'historique médical reste traçable, mais plus rattachable à une personne identifiable.
+
+| Champ | Avant anonymisation | Après anonymisation |
+|---|---|---|
+| `first_name` | `"Sok"` | `NULL` |
+| `last_name` | `"Chan"` | `NULL` |
+| `birthdate` | `"1990-03-12"` | `NULL` |
+| `anonymized_at` | `NULL` | `2026-04-17T10:00:00Z` |
+| `uuid_patient` | inchangé | inchangé |
+
 ```typescript
-// packages/shared/src/schema.ts
+// apps/backend/src/infrastructure/schema.ts — voir le fichier source pour le schéma complet et à jour
 
-import { pgTable, uuid, varchar, text, timestamp, date, integer } from 'drizzle-orm/pg-core'
+export const physician = pgTable('physician', { /* uuid, first_name, last_name, phone_number, mail, password_hash */ })
+export const patient = pgTable('patient', { /* uuid, first_name?, last_name?, sex, birthdate?, region, anonymized_at? */ })
+export const patientCode = pgTable('patient_code', { /* uuid, uuid_patient FK, code, created_at, used_at, deleted_at, is_active */ })
+export const medicalProcedure = pgTable('medical_procedure', { /* uuid, uuid_patient FK, procedure_type, date, hospital_name */ })
+export const medicalEvent = pgTable('medical_event', { /* uuid, uuid_medical_procedure FK, uuid_physician FK, event_type, event_title, description, created_at */ })
 
-export const physician = pgTable('physician', {
-  uuid_physician:  uuid('uuid_physician').primaryKey().defaultRandom(),
-  first_name:      varchar('first_name', { length: 100 }).notNull(),
-  last_name:       varchar('last_name', { length: 100 }).notNull(),
-  phone_number:    varchar('phone_number', { length: 20 }),
-  mail:            varchar('mail', { length: 255 }).notNull().unique(),
-  password_hash:   text('password_hash').notNull(),
-})
+// Pictogrammes de symptômes — liste à valider avec les chirurgiens (MED-01)
+export const symptom = pgTable('symptom', { /* uuid_symptom PK, code unique, label_fr, label_km, triggers_alert */ })
+// Table de jointure N-N — PK composite (uuid_event, uuid_symptom), pas d'uuid dédié
+export const medicalEventSymptom = pgTable('medical_event_symptom', { /* uuid_event FK → medical_event, uuid_symptom FK → symptom, PK composite */ })
 
-export const patient = pgTable('patient', {
-  uuid_patient:  uuid('uuid_patient').primaryKey().defaultRandom(),
-  first_name:    varchar('first_name', { length: 100 }).notNull(),
-  last_name:     varchar('last_name', { length: 100 }).notNull(),
-  sex:           varchar('sex', { length: 10 }),
-  birthdate:     date('birthdate'),
-  region:        varchar('region', { length: 100 }),
-})
-
-// Plusieurs codes par patient dans le temps, un seul actif (used_at NOT NULL)
-// Soft delete automatique après 48h si le code n'a pas été utilisé (job cron)
-export const patientCode = pgTable('patient_code', {
-  uuid_patient_code: uuid('uuid_patient_code').primaryKey().defaultRandom(),
-  uuid_patient:      uuid('uuid_patient').notNull().references(() => patient.uuid_patient),
-  code:              varchar('code', { length: 6 }).notNull(),
-  created_at:        timestamp('created_at').notNull().defaultNow(),
-  used_at:           timestamp('used_at'),    // null = jamais utilisé ; une fois renseigné, code valide pour toujours
-  deleted_at:        timestamp('deleted_at'), // soft delete si used_at IS NULL après 48h
-})
-
-export const medicalProcedure = pgTable('medical_procedure', {
-  uuid_medical_procedure: uuid('uuid_medical_procedure').primaryKey().defaultRandom(),
-  uuid_patient:           uuid('uuid_patient').notNull().references(() => patient.uuid_patient),
-  procedure_type:         varchar('procedure_type', { length: 100 }).notNull(),
-  date:                   date('date').notNull(),
-  hospital_name:          varchar('hospital_name', { length: 200 }),
-})
-
-export const medicalEvent = pgTable('medical_event', {
-  uuid_event:             uuid('uuid_event').primaryKey().defaultRandom(),
-  uuid_medical_procedure: uuid('uuid_medical_procedure').notNull().references(() => medicalProcedure.uuid_medical_procedure),
-  uuid_physician:         uuid('uuid_physician').references(() => physician.uuid_physician),
-  event_type:             varchar('event_type', { length: 100 }).notNull(),
-  event_title:            varchar('event_title', { length: 200 }),
-  description:            text('description'),
-  created_at:             timestamp('created_at').notNull().defaultNow(),
-  severity:               integer('severity'), // 1-10, seuil alerte > 7
-})
-
-export const media = pgTable('media', {
-  uuid_media:   uuid('uuid_media').primaryKey().defaultRandom(),
-  uuid_event:   uuid('uuid_event').notNull().references(() => medicalEvent.uuid_event),
-  file_url:     text('file_url').notNull(),
-  file_type:    varchar('file_type', { length: 20 }).notNull(), // jpeg, png
-  taken_at:     timestamp('taken_at').notNull(),
-  description:  text('description'),
-})
-
-export const instructions = pgTable('instructions', {
-  uuid_instructions:      uuid('uuid_instructions').primaryKey().defaultRandom(),
-  uuid_physician:         uuid('uuid_physician').notNull().references(() => physician.uuid_physician),
-  uuid_medical_procedure: uuid('uuid_medical_procedure').notNull().references(() => medicalProcedure.uuid_medical_procedure),
-  content:                text('content').notNull(),
-  created_at:             timestamp('created_at').notNull().defaultNow(),
-  acknowledged_at:        timestamp('acknowledged_at'), // null = non lu, renseigné à la lecture par le patient
-})
+export const media = pgTable('media', { /* uuid, uuid_event FK, file_url, file_type, taken_at, description */ })
+export const instructions = pgTable('instructions', { /* uuid, uuid_physician FK, uuid_medical_procedure FK, content, created_at, acknowledged_at */ })
 ```
+
+> Le schéma complet et à jour est dans `apps/backend/src/infrastructure/schema.ts` — cette section est un résumé.
 
 ---
 
 ## 13. Variables d'environnement
 
-Liste complète des variables nécessaires pour démarrer le projet. À placer dans les fichiers `.env` respectifs — **ne jamais committer ces fichiers**.
+Stratégie :
+- `.env` — valeurs dev par défaut, **commité** (sans secrets)
+- `.env.local` — overrides locaux du développeur, **gitignorés** (ne jamais utiliser en prod)
+- **Production** — variables d'environnement injectées par la plateforme (Docker secrets, variables d'environnement du service d'hébergement, ou gestionnaire de secrets) — jamais de fichier `.env.local` en prod
 
 ### Backend (`apps/backend/.env`)
 
@@ -562,8 +557,17 @@ MINIO_USE_SSL=false                  # true en production
 NODE_ENV=development
 PORT=3001
 
-# Missions (gel des déploiements de schéma)
-MISSION_ACTIVE=false
+# Logs (optionnel — niveaux : trace | debug | info | warn | error | fatal)
+# Par défaut : "debug" en développement, "info" en production
+LOG_LEVEL=
+
+# S3 — Logs d'audit (dev : MinIO local, prod : OVH Object Storage)
+S3_ENDPOINT=localhost          # prod : s3.gra.io.cloud.ovh.net
+S3_PORT=9000                   # prod : 443
+S3_USE_SSL=false               # prod : true
+S3_ACCESS_KEY=
+S3_SECRET_KEY=
+S3_BUCKET_LOGS=logs-audit
 ```
 
 ### Dashboard web (`apps/web/.env.local`)
@@ -607,8 +611,8 @@ Versions fixées pour garantir la reproductibilité entre les membres de l'équi
 |---|---|
 | hono | 4.x |
 | @hono/zod-openapi | 0.16.x |
-| drizzle-orm | 0.30.x |
-| drizzle-kit | 0.20.x |
+| drizzle-orm | 0.45.x |
+| drizzle-kit | 0.31.x |
 | better-auth | 1.x |
 | zod | 3.x |
 | pino | 9.x |

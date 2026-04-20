@@ -1,3 +1,5 @@
+[Onboarding](docs/onboarding.md) · [Architecture](docs/architecture.md) · [Schéma BDD](docs/schema.dbml) · [Lexique](docs/lexique.md) · [CDC](docs/cdc.md) · [Contexte IA](.ai/context.md) · [Features](.ai/features.md)
+
 # Sauver la Face
 
 Application de suivi post-opératoire pour patients cambodgiens opérés lors de missions humanitaires de chirurgie maxillo-faciale.
@@ -8,12 +10,12 @@ Application de suivi post-opératoire pour patients cambodgiens opérés lors de
 
 Installe ces outils avant de démarrer :
 
-| Outil | Version | Installation |
-|---|---|---|
-| [Bun](https://bun.sh) | 1.1.x+ | `winget install Oven-sh.Bun` (Windows) / `curl -fsSL https://bun.sh/install \| bash` (Mac/Linux) |
-| [Node.js](https://nodejs.org) | 20.x LTS | Requis pour Expo |
-| [Docker Desktop](https://www.docker.com/products/docker-desktop) | 24.x+ | Télécharger sur le site officiel |
-| [Git](https://git-scm.com) | — | Télécharger sur le site officiel |
+| Outil                                                            | Version  | Installation                                                                                     |
+| ---------------------------------------------------------------- | -------- | ------------------------------------------------------------------------------------------------ |
+| [Bun](https://bun.sh)                                            | 1.1.x+   | `winget install Oven-sh.Bun` (Windows) / `curl -fsSL https://bun.sh/install \| bash` (Mac/Linux) |
+| [Node.js](https://nodejs.org)                                    | 20.x LTS | Requis pour Expo                                                                                 |
+| [Docker Desktop](https://www.docker.com/products/docker-desktop) | 24.x+    | Télécharger sur le site officiel                                                                 |
+| [Git](https://git-scm.com)                                       | —        | Télécharger sur le site officiel                                                                 |
 
 ---
 
@@ -36,27 +38,34 @@ bun install
 
 ### 3. Configurer les variables d'environnement
 
-Copie les fichiers d'exemple et remplis les valeurs manquantes :
+Les fichiers `.env` avec les valeurs dev par défaut sont déjà committés. Tu dois seulement créer les fichiers locaux avec les vraies credentials :
 
 ```bash
-cp apps/backend/.env.example apps/backend/.env
-cp apps/web/.env.example apps/web/.env.local
-cp apps/mobile/.env.example apps/mobile/.env
-cp .env.example .env
+# Racine — variables Docker Compose (postgres, minio)
+cp .env.example .env.local
+
+# Backend — credentials réels (DATABASE_URL, secrets)
+cp apps/backend/.env.example apps/backend/.env.local
 ```
 
-> Les valeurs à renseigner sont indiquées dans chaque fichier `.env.example`.
+> Remplis les valeurs dans `.env.local` et `apps/backend/.env.local`. Ces fichiers sont gitignorés — ne jamais les committer.
 
 ### 4. Démarrer les services Docker
 
 ```bash
-docker compose up -d
+# Sans pgAdmin (défaut)
+bun run docker:up
+
+# Avec pgAdmin (interface admin PostgreSQL — dev uniquement)
+docker compose --profile dev up
 ```
 
 Cela démarre :
-- **PostgreSQL** sur le port `5432`
+
+- **PostgreSQL** sur le port défini dans `.env.local` (`POSTGRES_PORT`)
 - **MinIO** sur le port `9000` (console : `9001`)
 - **Caddy** (reverse proxy) sur les ports `80` / `443`
+- **pgAdmin** sur `http://localhost:8080` (uniquement avec `--profile dev`)
 
 Vérifie que les services sont bien lancés :
 
@@ -103,7 +112,9 @@ sauver-la-face/
   .ai/
     context.md      ← Contexte projet pour les agents IA
     features.md     ← Fonctionnalités à implémenter
-    cdc.md          ← Cahier des charges complet
+    cdc.md          ← Cahier des charges complet (déplacé dans docs/)
+  docs/
+    lexique.md      ← Lexique des technologies et concepts du projet
   docker-compose.yml
   biome.json
 ```
@@ -129,6 +140,7 @@ gh pr create --base dev --title "feat: AUTH-01 authentification patient"
 ```
 
 **Automatisations :**
+
 - Création de branche `feature/` → statut mis à jour automatiquement dans `features.md`
 - PR ouverte → **CodeRabbit** review automatiquement
 - CI bloquant → Biome + TypeScript + tests doivent passer
@@ -146,13 +158,33 @@ bun run format      # formate le code
 # Tests
 bun test --recursive
 
+# Installer Drizzle
+bun add drizzle-orm
+
 # Générer les migrations Drizzle
 bun run --cwd apps/backend db:generate
 
 # Arrêter Docker
-docker compose down
+bun run docker:down
 ```
 
 ---
 
-*Projet Sauver la Face — Ydays 2025/2026*
+---
+
+## Documentation
+
+### Docs humaines
+- [Onboarding](docs/onboarding.md) — guide pour un nouveau développeur qui rejoint le projet
+- [Architecture](docs/architecture.md) — décisions techniques et pourquoi elles ont été prises
+- [Schéma BDD](docs/schema.dbml) — modèle logique de données (DBML — visualisable sur dbdiagram.io)
+- [Lexique technique](docs/lexique.md) — définitions des technologies et concepts utilisés dans le projet
+- [Cahier des charges](docs/cdc.md) — spécifications complètes du projet
+
+### Contexte agent IA
+- [Contexte projet](.ai/context.md) — stack, architecture, règles critiques — **lire en premier**
+- [Features](.ai/features.md) — fonctionnalités à implémenter, en cours et terminées
+
+---
+
+_Projet Sauver la Face — Ydays 2025/2026_

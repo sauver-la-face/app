@@ -1,13 +1,11 @@
 {
-  "$schema": "https://biomejs.dev/schemas/1.8.0/schema.json",
-  "organizeImports": {
-    "enabled": true
+  "$schema": "https://biomejs.dev/schemas/2.4.11/schema.json",
+  "files": {
+    "includes": ["**", "!**/node_modules", "!**/dist", "!**/drizzle", "!**/.next", "!**/.expo"]
   },
   "linter": {
     "enabled": true,
-    "rules": {
-      "recommended": true
-    }
+    "rules": { "recommended": true }
   },
   "formatter": {
     "enabled": true,
@@ -17,16 +15,7 @@
   },
   "javascript": {
     "formatter": {
-      "quoteStyle": "single",
-      "trailingCommas": "es5"
+      "quoteStyle": "single"
     }
-  },
-  "files": {
-    "ignore": [
-      "node_modules",
-      ".next",
-      "dist",
-      ".expo"
-    ]
   }
 }

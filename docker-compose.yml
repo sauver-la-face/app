@@ -16,6 +16,21 @@ services:
       timeout: 5s
       retries: 5
 
+  pgadmin:
+    image: dpage/pgadmin4
+    restart: unless-stopped
+    profiles: ["dev"]
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_EMAIL}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_PASSWORD}
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+    ports:
+      - "127.0.0.1:8080:80"
+    depends_on:
+      postgres:
+        condition: service_healthy
+
   minio:
     image: minio/minio:latest
     restart: unless-stopped
@@ -36,11 +51,12 @@ services:
 
   backend:
     build:
-      context: ./apps/backend
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: apps/backend/Dockerfile
+      target: dev
     restart: unless-stopped
     env_file:
-      - ./apps/backend/.env
+      - ./apps/backend/.env.local
     ports:
       - "3001:3001"
     depends_on:
@@ -65,3 +81,4 @@ volumes:
   postgres_data:
   minio_data:
   caddy_data:
+  pgadmin_data:

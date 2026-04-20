@@ -19,7 +19,5 @@
     "react-i18next": "^14.0.0",
     "@sauver-la-face/shared": "workspace:*"
   },
-  "devDependencies": {
-    "typescript": "^5.0.0"
-  }
+  "devDependencies": {}
 }

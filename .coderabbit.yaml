@@ -42,6 +42,12 @@ reviews:
         Ce package est la source de vérité unique pour les types et schémas Zod.
         Vérifier qu'aucun type n'est redéfini dans les autres apps.
 
+  sequence_diagrams: true
+  related_issues: true
+  assess_linked_issues: true
+  estimate_code_review_effort: true
+  high_level_summary_in_walkthrough: true
+
   auto_review:
     enabled: true
     drafts: false

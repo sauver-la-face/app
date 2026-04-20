@@ -1,0 +1,10 @@
+{
+  "extends": "../../packages/config/tsconfig.base.json",
+  "compilerOptions": {
+    "types": ["bun-types"],
+    "baseUrl": ".",
+    "paths": {
+      "@shared/*": ["./src/shared/*"]
+    }
+  }
+}
