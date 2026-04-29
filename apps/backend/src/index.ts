@@ -1,8 +1,8 @@
+import { logger } from '@shared/logger';
 import { Hono } from 'hono';
 import { cors } from 'hono/cors';
 import { logger as honoLogger } from 'hono/logger';
 import { authRouter, type SessionVariables } from './features/auth/presentation/authRouter';
-import { logger } from '@shared/logger';
 
 const app = new Hono<{ Variables: SessionVariables }>();
 

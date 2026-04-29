@@ -62,7 +62,10 @@ describe('AUTH-02 — Authentification médecin', () => {
       let threw = false;
       try {
         await auth.api.signInEmail({
-          body: { email: 'unknown@sauver-la-face.test', password: TEST_PASSWORD },
+          body: {
+            email: 'unknown@sauver-la-face.test',
+            password: TEST_PASSWORD,
+          },
         });
       } catch {
         threw = true;
@@ -74,12 +77,12 @@ describe('AUTH-02 — Authentification médecin', () => {
   // ── MFA TOTP ─────────────────────────────────────────────────────────────────
 
   describe('MFA TOTP', () => {
-    it('le plugin twoFactor est configuré sur l\'instance auth', () => {
+    it("le plugin twoFactor est configuré sur l'instance auth", () => {
       const pluginIds = auth.options.plugins?.map((p: any) => p.id) ?? [];
       expect(pluginIds).toContain('two-factor');
     });
 
-    it('enableTwoFactor retourne un totpURI pour la configuration de l\'app authenticator', async () => {
+    it("enableTwoFactor retourne un totpURI pour la configuration de l'app authenticator", async () => {
       const cookie = await signInWithCookie();
 
       // L'activation du 2FA retourne totpURI + backupCodes (avant vérification TOTP)
@@ -118,7 +121,7 @@ describe('AUTH-02 — Authentification médecin', () => {
       expect(session?.user?.email).toBe(TEST_EMAIL);
     });
 
-    it('la durée d\'expiration de session est de 2h (7200s)', () => {
+    it("la durée d'expiration de session est de 2h (7200s)", () => {
       expect(auth.options.session?.expiresIn).toBe(7200);
     });
 
@@ -130,12 +133,12 @@ describe('AUTH-02 — Authentification médecin', () => {
   // ── Configuration ─────────────────────────────────────────────────────────────
 
   describe('Configuration', () => {
-    it('utilise Better Auth avec l\'adapter Drizzle (pg)', () => {
+    it("utilise Better Auth avec l'adapter Drizzle (pg)", () => {
       expect(auth).toBeTruthy();
       expect(auth.options.appName).toBe('Sauver la Face');
     });
 
-    it('l\'authentification email/password est activée', () => {
+    it("l'authentification email/password est activée", () => {
       expect(auth.options.emailAndPassword?.enabled).toBe(true);
     });
   });
