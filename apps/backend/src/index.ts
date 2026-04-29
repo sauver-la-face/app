@@ -33,8 +33,8 @@ export function createApp(): Hono {
     );
   }
 
-  app.use(
-  '/api/auth/**',
+app.use(
+  '/api/auth/*',
   cors({
     origin: process.env.WEB_URL ?? 'http://localhost:3000',
     allowHeaders: ['Content-Type', 'Authorization'],

@@ -64,7 +64,7 @@ authRouter.use('/api/auth/sign-in/email', async (c, next) => {
 });
 
 // Handler principal Better Auth — couvre toutes les routes /api/auth/*
-authRouter.on(['POST', 'GET'], '/api/auth/**', (c) => auth.handler(c.req.raw));
+authRouter.on(['POST', 'GET'], '/api/auth/*', (c) => auth.handler(c.req.raw));
 
 // Middleware d'injection de session pour les routes protégées
 export type SessionVariables = {
