@@ -49,8 +49,8 @@ jobs:
             exit 0
           fi
 
-          # Met à jour le statut sur la ligne suivante : [ ] → [~]
-          sed -i "$((LINE+1))s/\`\[ \]/\`[~]/" .ai/features.md
+          # Met à jour le statut sur la ligne +2 (header → ligne vide → statut)
+          sed -i "$((LINE+2))s/\`\[ \]/\`[~]/" .ai/features.md
           echo "Feature $FEATURE_ID marquée en cours [~]"
 
       - name: Commit et push sur dev
