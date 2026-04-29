@@ -1,7 +1,7 @@
-import { betterAuth } from 'better-auth';
-import { twoFactor } from 'better-auth/plugins';
 import { drizzleAdapter } from '@better-auth/drizzle-adapter';
 import { db } from '@shared/db';
+import { betterAuth } from 'better-auth';
+import { twoFactor } from 'better-auth/plugins';
 import * as schema from '../../../infrastructure/schema';
 
 if (!process.env.BETTER_AUTH_SECRET) {

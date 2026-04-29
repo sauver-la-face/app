@@ -1,6 +1,6 @@
+import { logger } from '@shared/logger';
 import { Hono } from 'hono';
 import { auth } from '../infrastructure/authConfig';
-import { logger } from '@shared/logger';
 
 // État en mémoire des tentatives échouées par IP.
 // Suffisant pour 20 utilisateurs web simultanés — pas besoin de Redis en v1.
@@ -32,7 +32,10 @@ function recordFailure(ip: string): void {
   state.failures += 1;
   if (state.failures >= MAX_FAILURES) {
     state.blockedUntil = Date.now() + BLOCK_DURATION_MS;
-    logger.warn({ ip, blockedUntil: new Date(state.blockedUntil).toISOString() }, 'IP bloquée après 3 tentatives échouées');
+    logger.warn(
+      { ip, blockedUntil: new Date(state.blockedUntil).toISOString() },
+      'IP bloquée après 3 tentatives échouées',
+    );
   }
   ipFailures.set(ip, state);
 }
@@ -49,7 +52,13 @@ authRouter.use('/api/auth/sign-in/email', async (c, next) => {
 
   if (isBlocked(ip)) {
     logger.warn({ ip }, 'Tentative de connexion depuis une IP bloquée');
-    return c.json({ error: 'TOO_MANY_ATTEMPTS', message: 'Trop de tentatives. Réessayez dans 15 minutes.' }, 429);
+    return c.json(
+      {
+        error: 'TOO_MANY_ATTEMPTS',
+        message: 'Trop de tentatives. Réessayez dans 15 minutes.',
+      },
+      429,
+    );
   }
 
   await next();

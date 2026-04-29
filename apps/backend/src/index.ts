@@ -1,6 +1,9 @@
 import { createDb } from '@shared/db';
-import { logger } from '@shared/logger';
 import { Hono } from 'hono';
+import { logger } from '@shared/logger';
+import { cors } from 'hono/cors';
+import { logger as honoLogger } from 'hono/logger';
+import { authRouter, type SessionVariables } from './features/auth/presentation/authRouter';
 
 import { PatientUsecase } from './features/patients/application/patientUsecase';
 import {
@@ -69,9 +72,6 @@ import { prettyJSON } from 'hono/pretty-json'
 app.use('*', poweredBy())
 // app.use('*', logger())
 // import { Hono } from 'hono';
-import { cors } from 'hono/cors';
-import { logger as honoLogger } from 'hono/logger';
-import { authRouter, type SessionVariables } from './features/auth/presentation/authRouter';
 // import { logger } from '@shared/logger';
 
 // const app = new Hono<{ Variables: SessionVariables }>();
