@@ -11,6 +11,7 @@
     "db:push": "dotenv -e .env.local -- drizzle-kit push"
   },
   "dependencies": {
+    "@better-auth/drizzle-adapter": "^1.6.9",
     "@hono/zod-openapi": "^0.16.0",
     "@sauver-la-face/shared": "workspace:*",
     "better-auth": "^1.0.0",
@@ -22,6 +23,7 @@
     "zod": "^3.0.0"
   },
   "devDependencies": {
+    "@types/pg": "^8.20.0",
     "dotenv-cli": "^11.0.0",
     "drizzle-kit": "^0.31.10"
   }
