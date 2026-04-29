@@ -534,7 +534,7 @@ Le patient évalue ses symptômes via des pictogrammes visuels — pas de chiffr
 
 ### DEVOPS-03 — Automatisation statut features (workflows + authentification bot)
 
-`[~]` 🔴 Critique · `.github/workflows/feature-in-progress.yml` · `.github/workflows/update-feature-status.yml`
+`[x]` 🔴 Critique · `.github/workflows/feature-in-progress.yml` · `.github/workflows/update-feature-status.yml`
 
 **Comportement attendu :**
 
