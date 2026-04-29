@@ -613,30 +613,6 @@ Une GitHub App n'appartient à aucune personne — elle est rattachée au repo. 
 
 ---
 
-## WORKFLOW OBLIGATOIRE POUR LES AGENTS
-
-### Démarrage d'une feature
-
-1. `git checkout dev && git pull origin dev`
-2. Créer la branche en respectant le format : `git checkout -b feature/XXX-00-nom`
-3. Le statut passe automatiquement de `[ ]` à `[~]` via GitHub Actions dès la création de la branche.
-
-### Clôture d'une feature (feature terminée)
-
-Quand le code est prêt et testé, l'agent crée la PR manuellement vers `dev` :
-
-```bash
-gh pr create --base dev --title "feat: XXX-00 nom de la feature" --body "..."
-```
-
-- CodeRabbit review automatiquement la PR
-- Une fois la PR mergée, le statut passe automatiquement de `[~]` à `[x]` via GitHub Actions
-
-> **Aucun push direct sur `dev` n'est autorisé.**
-> La PR est créée uniquement quand la feature est terminée et testée — pas avant.
-
----
-
 ## RÈGLES GLOBALES (toutes les features)
 
 - **TDD obligatoire sur toutes les features** : l'agent écrit les tests en premier, génère l'implémentation pour les faire passer, puis le développeur valide. Ne jamais générer du code sans test associé.

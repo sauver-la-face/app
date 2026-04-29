@@ -76,6 +76,27 @@ apps/web/src/
 - `expo-secure-store` ne stocke que des **strings** — toujours sérialiser les objets avec `JSON.stringify` avant stockage et `JSON.parse` à la lecture
 - Jamais stocker de token dans `AsyncStorage` (non chiffré) — uniquement `expo-secure-store`
 
+## Workflow Git — obligatoire avant toute feature
+
+**Démarrage :**
+
+```bash
+git checkout dev && git pull origin dev
+git checkout -b feature/XXX-00-nom
+```
+
+Le statut passe automatiquement de `[ ]` à `[~]` via GitHub Actions dès la création de la branche.
+
+**Clôture (feature terminée et testée) :**
+
+```bash
+gh pr create --base dev --title "feat: XXX-00 nom" --body "..."
+```
+
+- Aucun push direct sur `dev`
+- La PR est créée uniquement quand la feature est terminée et testée — pas avant
+- Une fois la PR mergée, le statut passe automatiquement de `[~]` à `[x]` via GitHub Actions
+
 ## Règles features
 
 - Toute nouvelle feature ajoutée dans `.ai/features.md` doit obligatoirement avoir un niveau de priorité : 🔴 Critique · 🟡 Majeur · 🟢 Mineur
