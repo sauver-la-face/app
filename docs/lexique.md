@@ -93,7 +93,7 @@ Reverse proxy qui se place devant le backend. Termine le TLS 1.3, génère les c
 - En prod : certificat Let's Encrypt automatique sur le domaine OVH
 
 ### GitHub Actions
-Système d'intégration continue (CI). Lance automatiquement les tests et le lint à chaque push, et gère les transitions de statut des features dans `features.md`.
+Système d'intégration continue (CI). Lance automatiquement les tests et le lint à chaque push, et gère les transitions de statut des features dans `features.md`. Les workflows qui écrivent sur `dev` utilisent une **GitHub App** (pas un PAT personnel) pour générer des tokens éphémères (1h) indépendants de toute personne.
 
 ### HDS (Hébergement de Données de Santé)
 Certification française obligatoire pour héberger des données médicales. Le projet est déployé uniquement sur des serveurs certifiés HDS (OVH Cloud).

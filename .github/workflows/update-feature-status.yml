@@ -12,11 +12,18 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      - name: Générer un token GitHub App
+        id: app-token
+        uses: actions/create-github-app-token@v1
+        with:
+          app-id: ${{ secrets.APP_ID }}
+          private-key: ${{ secrets.APP_PRIVATE_KEY }}
+
       - name: Checkout dev
         uses: actions/checkout@v4
         with:
           ref: dev
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ steps.app-token.outputs.token }}
 
       - name: Extraire l'ID de la feature depuis le nom de branche
         id: feature
@@ -55,4 +62,5 @@ jobs:
           git add .ai/features.md
           # Ne committe que si le fichier a changé
           git diff --staged --quiet || git commit -m "chore: feature ${{ steps.feature.outputs.id }} terminée [x]"
+          git pull --rebase origin dev
           git push origin dev

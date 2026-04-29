@@ -544,23 +544,29 @@ Le patient évalue ses symptômes via des pictogrammes visuels — pas de chiffr
 
 **Décision technique — authentification des workflows**
 
-Les workflows doivent pusher sur `dev`. Le `GITHUB_TOKEN` par défaut est en lecture seule — deux options :
+Les workflows doivent pusher sur `dev`. Le `GITHUB_TOKEN` par défaut est en lecture seule — trois options évaluées :
 
 | Option | Description | Avantages | Inconvénients |
 |---|---|---|---|
 | **PAT personnel** | Token généré depuis le compte du développeur | Simple, rapide à mettre en place | Lié à une personne — si elle quitte, les workflows cassent |
-| **Compte bot dédié** | Compte GitHub `sauver-la-face-bot` avec son propre PAT | Indépendant des personnes, révocable sans impact | Nécessite un second compte GitHub |
+| **Compte bot dédié** | Compte GitHub secondaire avec son propre PAT | Indépendant des personnes | Nécessite un second compte + email, PAT de longue durée |
+| **GitHub App** | Application enregistrée sur le repo, génère des tokens éphémères | Indépendant des personnes, tokens 1h (sécurisé), standard industrie | Setup légèrement plus long |
 
-**Choix retenu : compte bot dédié (`sauver-la-face-bot`)**
+**Choix retenu : GitHub App**
 
-Un PAT lié à un compte personnel crée une dépendance à une personne. Si le développeur quitte l'équipe ou change de compte, les workflows cassent silencieusement. Le compte bot est indépendant du turnover de l'équipe — c'est la pratique recommandée par GitHub pour les automatisations en équipe.
+Une GitHub App n'appartient à aucune personne — elle est rattachée au repo. Elle génère des tokens éphémères (1 heure) via `actions/create-github-app-token`, ce qui est plus sécurisé qu'un PAT de longue durée. C'est la pratique recommandée par GitHub pour les automatisations en équipe et la seule solution vraiment indépendante des personnes.
 
 **Règles de code :**
 
-- Créer le compte GitHub `sauver-la-face-bot` et lui donner accès au repo en tant que collaborateur
-- Générer un PAT Fine-grained depuis ce compte avec uniquement `Contents: Read and write` sur ce repo
-- Ajouter le token comme secret `GH_PAT` dans Settings → Secrets and variables → Actions
-- Remplacer `token: ${{ secrets.GITHUB_TOKEN }}` par `token: ${{ secrets.GH_PAT }}` dans les deux workflows
+- Créer la GitHub App dans Settings → Developer settings → GitHub Apps → New GitHub App
+  - Nom : `sauver-la-face-ci`
+  - Permissions : Repository permissions → Contents → `Read and write`
+  - Désactiver "Active" sous Webhook (pas nécessaire ici)
+- Installer l'App sur le repo (bouton Install App)
+- Stocker deux secrets dans Settings → Secrets and variables → Actions :
+  - `APP_ID` — l'identifiant numérique de l'App (visible dans ses settings)
+  - `APP_PRIVATE_KEY` — la clé privée `.pem` générée depuis l'App
+- Dans les deux workflows, ajouter un step `actions/create-github-app-token@v1` avant le checkout pour générer un token éphémère, puis utiliser `${{ steps.app-token.outputs.token }}` à la place de `${{ secrets.GITHUB_TOKEN }}`
 
 ---
 
