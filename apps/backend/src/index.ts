@@ -8,7 +8,7 @@ const app = new Hono<{ Variables: SessionVariables }>();
 
 // CORS — Better Auth nécessite credentials: true
 app.use(
-  '/api/auth/**',
+  '/api/auth/*',
   cors({
     origin: process.env.WEB_URL ?? 'http://localhost:3000',
     allowHeaders: ['Content-Type', 'Authorization'],
