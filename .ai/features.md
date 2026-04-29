@@ -58,7 +58,7 @@
 
 ### SYNC-01 — Réception et résolution des conflits (server-wins)
 
-`[~]` 🔴 Critique · `apps/backend/src/features/sync/`
+`[x]` 🔴 Critique · `apps/backend/src/features/sync/`
 
 **Comportement attendu :**
 
