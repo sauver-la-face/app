@@ -12,18 +12,32 @@ import {
   varchar,
 } from 'drizzle-orm/pg-core';
 
+// physician sert de table user pour Better Auth (field mapping via drizzleAdapter)
+// Les propriétés Drizzle correspondent aux noms attendus par Better Auth.
+// Les noms de colonnes SQL restent inchangés pour préserver les migrations existantes.
 export const physician = pgTable(
   'physician',
   {
-    uuid_physician: uuid('uuid_physician').primaryKey().defaultRandom(),
-    first_name: varchar('first_name', { length: 100 }).notNull(),
-    last_name: varchar('last_name', { length: 100 }).notNull(),
-    phone_number: varchar('phone_number', { length: 20 }),
-    // Index unique fonctionnel sur lower(mail) - empeche deux comptes differant uniquement par la casse
-    mail: varchar('mail', { length: 255 }).notNull(),
-    password_hash: text('password_hash').notNull(),
+    // Better Auth fields — noms de propriétés alignés sur ce qu'attend le drizzleAdapter
+    id: uuid('uuid_physician').primaryKey().defaultRandom(),
+    name: varchar('name', { length: 200 }),
+    email: varchar('mail', { length: 255 }).notNull(),
+    emailVerified: boolean('email_verified').notNull().default(false),
+    image: text('image'),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp('updated_at', { withTimezone: true })
+      .notNull()
+      .defaultNow()
+      .$onUpdateFn(() => new Date()),
+    twoFactorEnabled: boolean('two_factor_enabled').default(false),
+    // Domain fields — spécifiques au médecin
+    firstName: varchar('first_name', { length: 100 }),
+    lastName: varchar('last_name', { length: 100 }),
+    phoneNumber: varchar('phone_number', { length: 20 }),
+    // Conservé pour compatibilité migration — non utilisé par Better Auth (auth déléguée via account)
+    passwordHash: text('password_hash'),
   },
-  (t) => [uniqueIndex('physician_mail_unique').on(sql`lower(${t.mail})`)],
+  (t) => [uniqueIndex('physician_mail_unique').on(sql`lower(${t.email})`)],
 );
 
 export const patient = pgTable('patient', {
@@ -46,34 +60,23 @@ export const patientCode = pgTable(
     uuid_patient: uuid('uuid_patient')
       .notNull()
       .references(() => patient.uuid_patient),
-    // varchar(6) garantit la longueur max uniquement - pas le format numerique.
-    // La validation "6 chiffres stricts" est intentionnellement dans le Value Object
-    // PatientCodeValue (packages/shared/src/domain/) et non en contrainte CHECK SQL.
-    // Raison : les regles metier vivent dans le domaine (DDD), pas dans la base de donnees.
-    // PatientCodeValue doit etre cree et utilise dans auth/domain/ avant toute insertion.
     code: varchar('code', { length: 6 }).notNull(),
     created_at: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
-    used_at: timestamp('used_at', { withTimezone: true }), // null = jamais utilise
-    deleted_at: timestamp('deleted_at', { withTimezone: true }), // soft delete si used_at IS NULL apres 48h
-    is_active: boolean('is_active').notNull().default(true), // false = desactive (revoque ou supprime)
-    revoked_at: timestamp('revoked_at', { withTimezone: true }), // null = non revoque, renseigne par le medecin pour couper l'acces
+    used_at: timestamp('used_at', { withTimezone: true }),
+    deleted_at: timestamp('deleted_at', { withTimezone: true }),
+    is_active: boolean('is_active').notNull().default(true),
+    revoked_at: timestamp('revoked_at', { withTimezone: true }),
   },
   (t) => [
-    // Unicite globale du code (actif ou consomme) - empeche la reattribution d'un code deja utilise.
-    // is_active et used_at intentionnellement absents : un code peut sortir de ces etats sans que
-    // deleted_at ou revoked_at soit renseigne, ce qui le rendrait reattribuable a tort.
-    // Seuls deleted_at et revoked_at garantissent qu'un code ne sera jamais reutilise.
     uniqueIndex('patient_code_code_active_unique')
       .on(t.code)
       .where(sql`deleted_at IS NULL AND revoked_at IS NULL`),
-    // Un seul code actif possible par patient
     uniqueIndex('patient_code_patient_active_unique')
       .on(t.uuid_patient)
       .where(
         sql`is_active = true AND used_at IS NULL AND deleted_at IS NULL AND revoked_at IS NULL`,
       ),
     // Accelere la recherche de tous les codes d'un patient (actifs + historique)
-    index('patient_code_uuid_patient_idx').on(t.uuid_patient),
     // Optimise le cron de soft delete apres 48h (WHERE created_at < now() - 48h AND used_at IS NULL AND deleted_at IS NULL)
     // Index partiel : couvre uniquement les codes non consommes et non supprimes - seuls candidats du cron
     index('patient_code_created_at_idx')
@@ -108,12 +111,11 @@ export const medicalEvent = pgTable(
     uuid_medical_procedure: uuid('uuid_medical_procedure')
       .notNull()
       .references(() => medicalProcedure.uuid_medical_procedure),
-    uuid_physician: uuid('uuid_physician').references(() => physician.uuid_physician),
+    uuid_physician: uuid('uuid_physician').references(() => physician.id),
     event_type: varchar('event_type', { length: 100 }).notNull(),
     event_title: varchar('event_title', { length: 200 }),
     description: text('description'),
     created_at: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
-    // severity remplace par pictogrammes de symptomes (voir table symptom + medical_event_symptom)
   },
   (t) => [
     index('medical_event_uuid_medical_procedure_idx').on(t.uuid_medical_procedure),
@@ -121,22 +123,18 @@ export const medicalEvent = pgTable(
   ],
 );
 
-// Liste des pictogrammes de symptomes disponibles
-// La liste definitive est a valider avec les chirurgiens toulousains (MED-01)
 export const symptom = pgTable(
   'symptom',
   {
     uuid_symptom: uuid('uuid_symptom').primaryKey().defaultRandom(),
-    // Index unique fonctionnel sur lower(code) - coherent avec physician.mail
-    code: varchar('code', { length: 50 }).notNull(), // ex: 'pain_severe', 'bleeding'
+    code: varchar('code', { length: 50 }).notNull(),
     label_fr: varchar('label_fr', { length: 100 }).notNull(),
-    label_km: varchar('label_km', { length: 100 }).notNull(), // khmer
-    triggers_alert: boolean('triggers_alert').notNull().default(false), // true = alerte automatique si selectionne
+    label_km: varchar('label_km', { length: 100 }).notNull(),
+    triggers_alert: boolean('triggers_alert').notNull().default(false),
   },
   (t) => [uniqueIndex('symptom_code_unique').on(sql`lower(${t.code})`)],
 );
 
-// Relation N-N entre un evenement medical et les symptomes selectionnes par le patient
 export const medicalEventSymptom = pgTable(
   'medical_event_symptom',
   {
@@ -149,8 +147,6 @@ export const medicalEventSymptom = pgTable(
   },
   (t) => [
     primaryKey({ columns: [t.uuid_event, t.uuid_symptom] }),
-    // PK composite couvre les recherches par uuid_event (prefixe gauche)
-    // Index dedie necessaire pour les recherches "tous les evenements avec ce symptome"
     index('medical_event_symptom_uuid_symptom_idx').on(t.uuid_symptom),
   ],
 );
@@ -163,7 +159,7 @@ export const media = pgTable(
       .notNull()
       .references(() => medicalEvent.uuid_event),
     file_url: text('file_url').notNull(),
-    file_type: varchar('file_type', { length: 20 }).notNull(), // jpeg, png
+    file_type: varchar('file_type', { length: 20 }).notNull(),
     taken_at: timestamp('taken_at', { withTimezone: true }).notNull(),
     description: text('description'),
   },
@@ -176,20 +172,68 @@ export const instructions = pgTable(
     uuid_instructions: uuid('uuid_instructions').primaryKey().defaultRandom(),
     uuid_physician: uuid('uuid_physician')
       .notNull()
-      .references(() => physician.uuid_physician),
+      .references(() => physician.id),
     uuid_medical_procedure: uuid('uuid_medical_procedure')
       .notNull()
       .references(() => medicalProcedure.uuid_medical_procedure),
     content: text('content').notNull(),
     created_at: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
-    acknowledged_at: timestamp('acknowledged_at', { withTimezone: true }), // null = non lu, renseigne a la lecture par le patient
+    acknowledged_at: timestamp('acknowledged_at', { withTimezone: true }),
   },
   (t) => [
     index('instructions_uuid_physician_idx').on(t.uuid_physician),
     index('instructions_uuid_medical_procedure_idx').on(t.uuid_medical_procedure),
-    // Optimise la requete "toutes les instructions non lues" (polling alertes)
     index('instructions_unread_idx')
       .on(t.uuid_medical_procedure)
       .where(sql`acknowledged_at IS NULL`),
   ],
 );
+
+// ─── Tables Better Auth ───────────────────────────────────────────────────────
+// Ces tables sont gérées exclusivement par Better Auth.
+// Les noms de propriétés Drizzle correspondent exactement aux noms de champs
+// attendus par le drizzleAdapter de Better Auth.
+
+export const session = pgTable('session', {
+  id: text('id').primaryKey(),
+  expiresAt: timestamp('expires_at', { withTimezone: true }).notNull(),
+  token: text('token').notNull().unique(),
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull(),
+  updatedAt: timestamp('updated_at', { withTimezone: true }).notNull(),
+  ipAddress: text('ip_address'),
+  userAgent: text('user_agent'),
+  userId: text('user_id').notNull(),
+});
+
+export const account = pgTable('account', {
+  id: text('id').primaryKey(),
+  accountId: text('account_id').notNull(),
+  providerId: text('provider_id').notNull(),
+  userId: text('user_id').notNull(),
+  accessToken: text('access_token'),
+  refreshToken: text('refresh_token'),
+  idToken: text('id_token'),
+  accessTokenExpiresAt: timestamp('access_token_expires_at', { withTimezone: true }),
+  refreshTokenExpiresAt: timestamp('refresh_token_expires_at', { withTimezone: true }),
+  scope: text('scope'),
+  password: text('password'),
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull(),
+  updatedAt: timestamp('updated_at', { withTimezone: true }).notNull(),
+});
+
+export const verification = pgTable('verification', {
+  id: text('id').primaryKey(),
+  identifier: text('identifier').notNull(),
+  value: text('value').notNull(),
+  expiresAt: timestamp('expires_at', { withTimezone: true }).notNull(),
+  createdAt: timestamp('created_at', { withTimezone: true }),
+  updatedAt: timestamp('updated_at', { withTimezone: true }),
+});
+
+export const twoFactor = pgTable('two_factor', {
+  id: text('id').primaryKey(),
+  secret: text('secret').notNull(),
+  backupCodes: text('backup_codes').notNull(),
+  userId: text('user_id').notNull(),
+  verified: boolean('verified').default(false),
+});
