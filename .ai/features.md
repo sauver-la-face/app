@@ -13,7 +13,7 @@
 
 ### AUTH-01 — Authentification patients (codes 6 chiffres)
 
-`[ ]` 🔴 Critique · `apps/backend/src/features/auth/`
+`[~]` 🔴 Critique · `apps/backend/src/features/auth/`
 
 **Comportement attendu :**
 
