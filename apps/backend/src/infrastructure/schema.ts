@@ -19,7 +19,7 @@ export const physician = pgTable(
     first_name: varchar('first_name', { length: 100 }).notNull(),
     last_name: varchar('last_name', { length: 100 }).notNull(),
     phone_number: varchar('phone_number', { length: 20 }),
-    // Index unique fonctionnel sur lower(mail) — empêche deux comptes différant uniquement par la casse
+    // Index unique fonctionnel sur lower(mail) - empeche deux comptes differant uniquement par la casse
     mail: varchar('mail', { length: 255 }).notNull(),
     password_hash: text('password_hash').notNull(),
   },
@@ -28,16 +28,17 @@ export const physician = pgTable(
 
 export const patient = pgTable('patient', {
   uuid_patient: uuid('uuid_patient').primaryKey().defaultRandom(),
-  first_name: varchar('first_name', { length: 100 }), // null si patient anonymisé (RGPD art. 17.3.c)
-  last_name: varchar('last_name', { length: 100 }), // null si patient anonymisé (RGPD art. 17.3.c)
+  first_name: varchar('first_name', { length: 100 }), // null si patient anonymise (RGPD art. 17.3.c)
+  last_name: varchar('last_name', { length: 100 }), // null si patient anonymise (RGPD art. 17.3.c)
   sex: varchar('sex', { length: 10 }),
   birthdate: date('birthdate'),
   region: varchar('region', { length: 100 }),
-  anonymized_at: timestamp('anonymized_at', { withTimezone: true }), // renseigné lors d'une demande d'effacement RGPD
+  anonymized_at: timestamp('anonymized_at', { withTimezone: true }), // renseigne lors d'une demande d'effacement RGPD
+  last_synced_at: timestamp('last_synced_at', { withTimezone: true }), // mis a jour a chaque sync mobile reussie
 });
 
-// Soft delete automatique après 48h si le code n'a pas été utilisé (job cron)
-// Une fois utilisé (used_at NOT NULL), le code est valide pour toujours
+// Soft delete automatique apres 48h si le code n'a pas ete utilise (job cron)
+// Une fois utilise (used_at NOT NULL), le code est valide pour toujours
 export const patientCode = pgTable(
   'patient_code',
   {
@@ -45,23 +46,23 @@ export const patientCode = pgTable(
     uuid_patient: uuid('uuid_patient')
       .notNull()
       .references(() => patient.uuid_patient),
-    // varchar(6) garantit la longueur max uniquement — pas le format numérique.
+    // varchar(6) garantit la longueur max uniquement - pas le format numerique.
     // La validation "6 chiffres stricts" est intentionnellement dans le Value Object
     // PatientCodeValue (packages/shared/src/domain/) et non en contrainte CHECK SQL.
-    // Raison : les règles métier vivent dans le domaine (DDD), pas dans la base de données.
-    // PatientCodeValue doit être créé et utilisé dans auth/domain/ avant toute insertion.
+    // Raison : les regles metier vivent dans le domaine (DDD), pas dans la base de donnees.
+    // PatientCodeValue doit etre cree et utilise dans auth/domain/ avant toute insertion.
     code: varchar('code', { length: 6 }).notNull(),
     created_at: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
-    used_at: timestamp('used_at', { withTimezone: true }), // null = jamais utilisé
-    deleted_at: timestamp('deleted_at', { withTimezone: true }), // soft delete si used_at IS NULL après 48h
-    is_active: boolean('is_active').notNull().default(true), // false = désactivé (révoqué ou supprimé)
-    revoked_at: timestamp('revoked_at', { withTimezone: true }), // null = non révoqué, renseigné par le médecin pour couper l'accès
+    used_at: timestamp('used_at', { withTimezone: true }), // null = jamais utilise
+    deleted_at: timestamp('deleted_at', { withTimezone: true }), // soft delete si used_at IS NULL apres 48h
+    is_active: boolean('is_active').notNull().default(true), // false = desactive (revoque ou supprime)
+    revoked_at: timestamp('revoked_at', { withTimezone: true }), // null = non revoque, renseigne par le medecin pour couper l'acces
   },
   (t) => [
-    // Unicité globale du code (actif ou consommé) — empêche la réattribution d'un code déjà utilisé.
-    // is_active et used_at intentionnellement absents : un code peut sortir de ces états sans que
-    // deleted_at ou revoked_at soit renseigné, ce qui le rendrait réattribuable à tort.
-    // Seuls deleted_at et revoked_at garantissent qu'un code ne sera jamais réutilisé.
+    // Unicite globale du code (actif ou consomme) - empeche la reattribution d'un code deja utilise.
+    // is_active et used_at intentionnellement absents : un code peut sortir de ces etats sans que
+    // deleted_at ou revoked_at soit renseigne, ce qui le rendrait reattribuable a tort.
+    // Seuls deleted_at et revoked_at garantissent qu'un code ne sera jamais reutilise.
     uniqueIndex('patient_code_code_active_unique')
       .on(t.code)
       .where(sql`deleted_at IS NULL AND revoked_at IS NULL`),
@@ -71,21 +72,21 @@ export const patientCode = pgTable(
       .where(
         sql`is_active = true AND used_at IS NULL AND deleted_at IS NULL AND revoked_at IS NULL`,
       ),
-    // Accélère la recherche de tous les codes d'un patient (actifs + historique)
+    // Accelere la recherche de tous les codes d'un patient (actifs + historique)
     index('patient_code_uuid_patient_idx').on(t.uuid_patient),
-    // Optimise le cron de soft delete après 48h (WHERE created_at < now() - 48h AND used_at IS NULL AND deleted_at IS NULL)
-    // Index partiel : couvre uniquement les codes non consommés et non supprimés — seuls candidats du cron
+    // Optimise le cron de soft delete apres 48h (WHERE created_at < now() - 48h AND used_at IS NULL AND deleted_at IS NULL)
+    // Index partiel : couvre uniquement les codes non consommes et non supprimes - seuls candidats du cron
     index('patient_code_created_at_idx')
       .on(t.created_at)
       .where(sql`used_at IS NULL AND deleted_at IS NULL`),
   ],
 );
 
-// FK intentionnellement sans ON DELETE CASCADE sur toutes les tables liées à patient.
-// Raison : la suppression d'un patient n'est jamais un DELETE SQL — c'est une anonymisation
-// applicative (first_name/last_name/birthdate → NULL, anonymized_at renseigné).
-// Les données médicales sont conservées 20 ans (obligation HDS / Code de la santé publique,
-// art. L1110-4). Un CASCADE les détruirait et constituerait une violation légale.
+// FK intentionnellement sans ON DELETE CASCADE sur toutes les tables liees a patient.
+// Raison : la suppression d'un patient n'est jamais un DELETE SQL - c'est une anonymisation
+// applicative (first_name/last_name/birthdate -> NULL, anonymized_at renseigne).
+// Les donnees medicales sont conservees 20 ans (obligation HDS / Code de la sante publique,
+// art. L1110-4). Un CASCADE les detruirait et constituerait une violation legale.
 export const medicalProcedure = pgTable(
   'medical_procedure',
   {
@@ -112,7 +113,7 @@ export const medicalEvent = pgTable(
     event_title: varchar('event_title', { length: 200 }),
     description: text('description'),
     created_at: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
-    // severity remplacé par pictogrammes de symptômes (voir table symptom + medical_event_symptom)
+    // severity remplace par pictogrammes de symptomes (voir table symptom + medical_event_symptom)
   },
   (t) => [
     index('medical_event_uuid_medical_procedure_idx').on(t.uuid_medical_procedure),
@@ -120,22 +121,22 @@ export const medicalEvent = pgTable(
   ],
 );
 
-// Liste des pictogrammes de symptômes disponibles
-// La liste définitive est à valider avec les chirurgiens toulousains (MED-01)
+// Liste des pictogrammes de symptomes disponibles
+// La liste definitive est a valider avec les chirurgiens toulousains (MED-01)
 export const symptom = pgTable(
   'symptom',
   {
     uuid_symptom: uuid('uuid_symptom').primaryKey().defaultRandom(),
-    // Index unique fonctionnel sur lower(code) — cohérent avec physician.mail
+    // Index unique fonctionnel sur lower(code) - coherent avec physician.mail
     code: varchar('code', { length: 50 }).notNull(), // ex: 'pain_severe', 'bleeding'
     label_fr: varchar('label_fr', { length: 100 }).notNull(),
     label_km: varchar('label_km', { length: 100 }).notNull(), // khmer
-    triggers_alert: boolean('triggers_alert').notNull().default(false), // true = alerte automatique si sélectionné
+    triggers_alert: boolean('triggers_alert').notNull().default(false), // true = alerte automatique si selectionne
   },
   (t) => [uniqueIndex('symptom_code_unique').on(sql`lower(${t.code})`)],
 );
 
-// Relation N-N entre un événement médical et les symptômes sélectionnés par le patient
+// Relation N-N entre un evenement medical et les symptomes selectionnes par le patient
 export const medicalEventSymptom = pgTable(
   'medical_event_symptom',
   {
@@ -148,8 +149,8 @@ export const medicalEventSymptom = pgTable(
   },
   (t) => [
     primaryKey({ columns: [t.uuid_event, t.uuid_symptom] }),
-    // PK composite couvre les recherches par uuid_event (préfixe gauche)
-    // Index dédié nécessaire pour les recherches "tous les événements avec ce symptôme"
+    // PK composite couvre les recherches par uuid_event (prefixe gauche)
+    // Index dedie necessaire pour les recherches "tous les evenements avec ce symptome"
     index('medical_event_symptom_uuid_symptom_idx').on(t.uuid_symptom),
   ],
 );
@@ -181,12 +182,12 @@ export const instructions = pgTable(
       .references(() => medicalProcedure.uuid_medical_procedure),
     content: text('content').notNull(),
     created_at: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
-    acknowledged_at: timestamp('acknowledged_at', { withTimezone: true }), // null = non lu, renseigné à la lecture par le patient
+    acknowledged_at: timestamp('acknowledged_at', { withTimezone: true }), // null = non lu, renseigne a la lecture par le patient
   },
   (t) => [
     index('instructions_uuid_physician_idx').on(t.uuid_physician),
     index('instructions_uuid_medical_procedure_idx').on(t.uuid_medical_procedure),
-    // Optimise la requête "toutes les instructions non lues" (polling alertes)
+    // Optimise la requete "toutes les instructions non lues" (polling alertes)
     index('instructions_unread_idx')
       .on(t.uuid_medical_procedure)
       .where(sql`acknowledged_at IS NULL`),

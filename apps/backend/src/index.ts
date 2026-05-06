@@ -2,6 +2,12 @@ import { createDb } from '@shared/db';
 import { logger } from '@shared/logger';
 import { Hono } from 'hono';
 
+import { PatientUsecase } from './features/patients/application/patientUsecase';
+import {
+  InMemoryPatientsRepository,
+  PgPatientsRepository,
+} from './features/patients/infrastructure/patientRepository';
+import { createPatientRouter } from './features/patients/presentation/patientRouter';
 import { SyncUsecase } from './features/sync/application/syncUsecase';
 import {
   InMemorySyncRepository,
@@ -11,20 +17,23 @@ import { createSyncRouter } from './features/sync/presentation/syncRouter';
 
 export function createApp(): Hono {
   const app = new Hono();
-  const syncRepository = process.env.DATABASE_URL
-    ? new PgSyncRepository(createDb(process.env.DATABASE_URL))
-    : new InMemorySyncRepository();
+  const databaseUrl = process.env.DATABASE_URL;
+  const db = databaseUrl ? createDb(databaseUrl) : null;
+  const syncRepository = db ? new PgSyncRepository(db) : new InMemorySyncRepository();
+  const patientRepository = db ? new PgPatientsRepository(db) : new InMemoryPatientsRepository();
   const syncUsecase = new SyncUsecase(syncRepository, logger, 1);
+  const patientUsecase = new PatientUsecase(patientRepository, logger);
 
-  if (!process.env.DATABASE_URL) {
+  if (!databaseUrl) {
     logger.warn(
       {
-        feature: 'sync',
+        features: ['sync', 'patients'],
       },
-      'DATABASE_URL is not set, falling back to in-memory sync repository',
+      'DATABASE_URL is not set, falling back to in-memory repositories',
     );
   }
 
+  app.route('/', createPatientRouter(patientUsecase));
   app.route('/', createSyncRouter(syncUsecase));
 
   app.onError((error, context) => {
