@@ -125,7 +125,7 @@ Mobile (SQLite) → Hono sync.usecase.ts → compare avec PostgreSQL
 
 - Réception de la photo uploadée par le mobile
 - Validation checksum SHA-256 (comparé à celui envoyé par le mobile)
-- Stockage dans MinIO HDS
+- Stockage S3 (MinIO en dev, OVH Object Storage certifié HDS en prod)
 - Rejet `PHOTO_INTEGRITY_ERROR` si mismatch checksum
 - Retry côté mobile : backoff 2s, 4s, abandon à la 4e tentative
 

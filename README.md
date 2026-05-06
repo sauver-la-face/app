@@ -63,9 +63,9 @@ docker compose --profile dev up
 Cela démarre :
 
 - **PostgreSQL** sur le port défini dans `.env.local` (`POSTGRES_PORT`)
-- **MinIO** sur le port `9000` (console : `9001`)
 - **Caddy** (reverse proxy) sur les ports `80` / `443`
-- **pgAdmin** sur `http://localhost:8080` (uniquement avec `--profile dev`)
+- **MinIO** sur le port `9000` (console : `9001`) — uniquement avec `--profile dev`
+- **pgAdmin** sur `http://localhost:8080` — uniquement avec `--profile dev`
 
 Vérifie que les services sont bien lancés :
 

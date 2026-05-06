@@ -44,8 +44,8 @@ Bibliothèque d'authentification qui gère les sessions, tokens JWT, et MFA (dou
 Base de données relationnelle principale. Stocke toutes les données persistantes du projet (patients, médecins, événements médicaux, etc.).
 
 ### MinIO
-Serveur de stockage de fichiers compatible avec l'API Amazon S3. Stocke les photos de cicatrices envoyées par les patients.
-- Utilisé pour : upload et récupération des photos dans `apps/backend/src/features/photos/`
+Serveur de stockage local S3-compatible utilisé **uniquement en développement** (`docker compose --profile dev up`). En production, OVH Object Storage (certifié HDS) le remplace sans changement de code — seules les variables d'environnement changent.
+- Utilisé pour : simuler S3 en local (photos, logs d'audit)
 
 ---
 
