@@ -8,6 +8,7 @@ import {
   medicalEvent,
   medicalEventSymptom,
   medicalProcedure,
+  patient,
 } from '../../../infrastructure/schema';
 import type { SyncChanges, SyncRepository } from '../domain/syncRepository';
 
@@ -96,10 +97,6 @@ export class PgSyncRepository implements SyncRepository {
   async applyPatientChanges(patientId: string, changes: SyncChanges): Promise<void> {
     const procedureIds = await this.getPatientProcedureIds(patientId);
 
-    if (procedureIds.length === 0) {
-      return;
-    }
-
     const eventIds = await this.getPatientEventIds(procedureIds);
     const allowedEventIds = new Set(eventIds);
     const allowedProcedureIds = new Set(procedureIds);
@@ -161,6 +158,13 @@ export class PgSyncRepository implements SyncRepository {
         })
         .where(eq(instructions.uuid_instructions, entry.uuidInstructions));
     }
+
+    await this.db
+      .update(patient)
+      .set({
+        last_synced_at: new Date(),
+      })
+      .where(eq(patient.uuid_patient, patientId));
   }
 
   private async getPatientProcedureIds(patientId: string): Promise<string[]> {
