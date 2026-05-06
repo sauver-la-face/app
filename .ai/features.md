@@ -212,7 +212,7 @@ Mobile (SQLite) → Hono sync.usecase.ts → compare avec PostgreSQL
 
 ### PATIENT-01 — CRUD patients et gestion utilisateurs
 
-`[~]` 🟡 Majeur · `apps/backend/src/features/patients/`
+`[x]` 🟡 Majeur · `apps/backend/src/features/patients/`
 
 **Comportement attendu :**
 
