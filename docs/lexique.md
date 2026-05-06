@@ -44,7 +44,7 @@ Bibliothèque d'authentification qui gère les sessions, tokens JWT, et MFA (dou
 Base de données relationnelle principale. Stocke toutes les données persistantes du projet (patients, médecins, événements médicaux, etc.).
 
 ### MinIO
-Serveur de stockage local S3-compatible utilisé **uniquement en développement** (`docker compose --profile dev up`). En production, OVH Object Storage (certifié HDS) le remplace sans changement de code — seules les variables d'environnement changent.
+Serveur de stockage local S3-compatible utilisé **uniquement en développement** (`bun run docker:up:dev`). En production, OVH Object Storage (certifié HDS) le remplace sans changement de code — seules les variables d'environnement changent.
 - Utilisé pour : simuler S3 en local (photos, logs d'audit)
 
 ---
@@ -85,7 +85,7 @@ Framework CSS utilitaire. Les styles sont écrits directement dans le JSX avec d
 ## Infrastructure
 
 ### Docker + Docker Compose
-Outils pour lancer l'environnement de développement complet en une seule commande. 4 services en production : PostgreSQL, MinIO, backend Hono, Caddy. pgAdmin disponible uniquement en dev via `docker compose --profile dev up`.
+Outils pour lancer l'environnement de développement complet en une seule commande. 3 services en production : PostgreSQL, backend Hono, Caddy. En développement, `bun run docker:up:dev` ajoute MinIO et pgAdmin.
 
 ### Caddy
 Reverse proxy qui se place devant le backend. Termine le TLS 1.3, génère les certificats Let's Encrypt automatiquement, et redirige le trafic vers Hono. Hono ne reçoit jamais directement les connexions internet.

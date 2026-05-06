@@ -7,7 +7,7 @@ Ce guide permet de valider `SYNC-01` avec une vraie base PostgreSQL et l'endpoin
 ## 1. Préparer l'environnement
 
 ```bash
-bun run docker:up
+bun run docker:up:dev
 bun run --cwd apps/backend db:migrate
 bun run --cwd apps/backend db:seed:sync01
 ```

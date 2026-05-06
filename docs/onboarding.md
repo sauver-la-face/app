@@ -30,7 +30,7 @@ Voir le README.md pour les étapes complètes. En résumé :
 bun install
 cp .env.example .env.local
 cp apps/backend/.env.example apps/backend/.env.local
-bun run docker:up
+bun run docker:up:dev
 bun run --cwd apps/backend db:migrate
 ```
 
@@ -94,7 +94,7 @@ Stratégie **server-wins** : en cas de conflit entre une donnée mobile et une d
 
 ## Docker — développement vs production
 
-Docker Compose orchestre **3 services en production** : backend Hono, Caddy (reverse proxy), PostgreSQL. En développement, `docker compose --profile dev up` ajoute MinIO (S3 local) et pgAdmin.
+Docker Compose orchestre **3 services en production** : backend Hono, Caddy (reverse proxy), PostgreSQL. En développement, `bun run docker:up:dev` ajoute MinIO (S3 local) et pgAdmin.
 
 Le `Dockerfile` du backend utilise un **multi-stage build** avec trois étapes :
 
