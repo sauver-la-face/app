@@ -10,7 +10,7 @@ const app = new Hono<{ Variables: SessionVariables }>();
 app.use(
   '/api/auth/*',
   cors({
-    origin: process.env.WEB_URL ?? 'http://localhost:3000',
+    origin: process.env.WEB_URL ?? 'http://localhost:3001',
     allowHeaders: ['Content-Type', 'Authorization'],
     allowMethods: ['POST', 'GET', 'OPTIONS'],
     exposeHeaders: ['Content-Length'],
