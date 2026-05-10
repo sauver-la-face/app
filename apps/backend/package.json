@@ -12,6 +12,7 @@
     "db:seed:sync01": "dotenv -e .env.local -- bun run scripts/seedSync01.ts"
   },
   "dependencies": {
+    "@better-auth/drizzle-adapter": "^1.6.9",
     "@hono/zod-openapi": "^0.16.0",
     "@sauver-la-face/shared": "workspace:*",
     "better-auth": "^1.0.0",
@@ -23,7 +24,7 @@
     "zod": "^3.0.0"
   },
   "devDependencies": {
-    "@types/pg": "^8.15.6",
+    "@types/pg": "^8.20.0",
     "dotenv-cli": "^11.0.0",
     "drizzle-kit": "^0.31.10"
   }
