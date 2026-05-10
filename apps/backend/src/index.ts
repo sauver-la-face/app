@@ -36,18 +36,17 @@ export function createApp(): Hono {
     );
   }
 
-app.use(
-  '/api/auth/*',
-  cors({
-    origin: process.env.WEB_URL ?? 'http://localhost:3001',
-    allowHeaders: ['Content-Type', 'Authorization'],
-    allowMethods: ['POST', 'GET', 'OPTIONS'],
-    exposeHeaders: ['Content-Length'],
-    maxAge: 600,
-    credentials: true,
-  }),
-);
-
+  app.use(
+    '/api/auth/*',
+    cors({
+      origin: process.env.WEB_URL ?? 'http://localhost:3001',
+      allowHeaders: ['Content-Type', 'Authorization'],
+      allowMethods: ['POST', 'GET', 'OPTIONS'],
+      exposeHeaders: ['Content-Length'],
+      maxAge: 600,
+      credentials: true,
+    }),
+  );
 
   app.route('/', authRouter);
   app.route('/', createPatientRouter(patientUsecase));
@@ -63,13 +62,13 @@ app.use(
 
 const app = createApp();
 
-import { basicAuth } from 'hono/basic-auth'
-import { etag } from 'hono/etag'
-import { poweredBy } from 'hono/powered-by'
-import { prettyJSON } from 'hono/pretty-json'
+import { basicAuth } from 'hono/basic-auth';
+import { etag } from 'hono/etag';
+import { poweredBy } from 'hono/powered-by';
+import { prettyJSON } from 'hono/pretty-json';
 
 // Mount Builtin Middleware
-app.use('*', poweredBy())
+app.use('*', poweredBy());
 // app.use('*', logger())
 // import { Hono } from 'hono';
 // import { logger } from '@shared/logger';
