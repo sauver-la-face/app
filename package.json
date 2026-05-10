@@ -17,7 +17,7 @@
     "lint": "bunx biome check .",
     "format": "bunx biome format --write .",
     "build:shared": "bun run --cwd packages/shared build",
-    "test": "bun test --recursive"
+    "test": "bun run --cwd apps/backend test"
   },
   "devDependencies": {
     "@biomejs/biome": "^2.4.11",
