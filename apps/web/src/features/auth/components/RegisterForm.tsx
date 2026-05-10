@@ -1,8 +1,8 @@
 'use client';
 
-import { authClient } from '@/lib/authClient';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
+import { authClient } from '@/lib/authClient';
 
 export function RegisterForm() {
   const router = useRouter();

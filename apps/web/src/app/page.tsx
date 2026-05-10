@@ -1,8 +1,8 @@
 'use client';
 
-import { signOut, useSession } from '@/lib/authClient';
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
+import { signOut, useSession } from '@/lib/authClient';
 
 export default function HomePage() {
   const { data: session, isPending } = useSession();
@@ -38,7 +38,12 @@ export default function HomePage() {
             <span className="font-semibold text-gray-800">Sauver la Face</span>
           </div>
           <button
-            onClick={() => signOut({ fetchOptions: { onSuccess: () => router.replace('/login') } })}
+            type="button"
+            onClick={() =>
+              signOut({
+                fetchOptions: { onSuccess: () => router.replace('/login') },
+              })
+            }
             className="rounded-lg border border-gray-200 px-4 py-2 text-sm text-gray-600 hover:bg-gray-50 hover:text-gray-900 transition-colors"
           >
             Se déconnecter
@@ -66,7 +71,11 @@ export default function HomePage() {
           <StatusCard
             label="MFA TOTP"
             value={(user as any).twoFactorEnabled ? 'Activé' : 'Non activé'}
-            sub={(user as any).twoFactorEnabled ? 'Double authentification active' : 'Recommandé pour la sécurité'}
+            sub={
+              (user as any).twoFactorEnabled
+                ? 'Double authentification active'
+                : 'Recommandé pour la sécurité'
+            }
             color={user.twoFactorEnabled ? 'green' : 'yellow'}
           />
           <StatusCard
@@ -83,7 +92,12 @@ export default function HomePage() {
           <dl className="space-y-2 text-sm">
             <Row label="ID utilisateur" value={user.id} mono />
             <Row label="Email vérifié" value={user.emailVerified ? 'Oui' : 'Non'} />
-            <Row label="Compte créé le" value={new Date(user.createdAt).toLocaleDateString('fr-FR', { dateStyle: 'long' })} />
+            <Row
+              label="Compte créé le"
+              value={new Date(user.createdAt).toLocaleDateString('fr-FR', {
+                dateStyle: 'long',
+              })}
+            />
           </dl>
         </div>
       </div>
