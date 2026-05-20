@@ -4,7 +4,7 @@ import { Patient } from '../src/features/patients/domain/patient';
 import {
   resolvePatientCodeStatus,
   resolvePatientSyncStatus,
-} from '../src/features/patients/domain/patient.domain';
+} from '../src/features/patients/domain/patientsDomain';
 
 const now = new Date('2026-05-06T12:00:00.000Z');
 

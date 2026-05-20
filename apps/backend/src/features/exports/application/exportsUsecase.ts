@@ -5,7 +5,7 @@ import {
   type PatientExportData,
   type PortabilityJsonV1,
   serializeCsv,
-} from '../domain/exports.domain';
+} from '../domain/exportsDomain';
 import type { ExportsRepository } from '../domain/exportsRepository';
 import type { PdfReportGenerator } from '../domain/pdfReportGenerator';
 

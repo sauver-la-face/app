@@ -1,7 +1,7 @@
 import { describe, expect, mock, test } from 'bun:test';
-import { runAuditExportCron } from '../src/shared/jobs/audit.export.cron';
+import { runAuditExportCron } from '../src/shared/jobs/auditExportCron';
 
-describe('audit.export.cron', () => {
+describe('auditExportCron', () => {
   test('log en info quand un export est effectue', async () => {
     const exportAuditLog = mock(async () => ({
       bucketName: 'logs-audit',

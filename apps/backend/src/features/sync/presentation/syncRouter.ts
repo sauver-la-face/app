@@ -2,7 +2,7 @@ import { createRoute, OpenAPIHono } from '@hono/zod-openapi';
 import { syncRequestSchema, syncResponseSchema } from '@sauver-la-face/shared';
 import { syncVersionErrorSchema, validationErrorSchema } from '../../../shared/openapi';
 import type { SyncUsecase } from '../application/syncUsecase';
-import { SyncVersionError } from '../domain/sync.domain';
+import { SyncVersionError } from '../domain/syncDomain';
 
 const syncRoute = createRoute({
   method: 'post',

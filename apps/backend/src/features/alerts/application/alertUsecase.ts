@@ -7,7 +7,7 @@ import {
   createAlertsEtag,
   matchesEtag,
   sortAlerts,
-} from '../domain/alerts.domain';
+} from '../domain/alertsDomain';
 
 interface AlertLogger {
   info(payload: Record<string, unknown>, message: string): void;

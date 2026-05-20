@@ -1,5 +1,5 @@
 import cron from 'node-cron';
-import type { AuthCron } from '../features/auth/application/auth.cron';
+import type { AuthCron } from '../features/auth/application/authCron';
 import { logger } from '../shared/logger';
 
 export const scheduleJobs = (authCron: AuthCron) => {

@@ -6,7 +6,7 @@ import {
   computeChecksum,
   PhotoIntegrityError,
   validateChecksum,
-} from '../src/features/photos/domain/photos.domain';
+} from '../src/features/photos/domain/photosDomain';
 
 const knownBuffer = Buffer.from('hello world');
 const knownChecksum = createHash('sha256').update(knownBuffer).digest('hex');
@@ -31,7 +31,7 @@ describe('ChecksumSHA256', () => {
   });
 });
 
-describe('photos.domain', () => {
+describe('photosDomain', () => {
   test('computeChecksum produit un resultat deterministe', () => {
     const result = computeChecksum(knownBuffer);
     expect(result).toBe(knownChecksum);

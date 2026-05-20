@@ -8,7 +8,7 @@ import {
   type PatientExportData,
   PORTABILITY_JSON_SCHEMA,
   serializeCsv,
-} from './exports.domain';
+} from './exportsDomain';
 
 function buildPatient(overrides: Partial<PatientExportData> = {}): PatientExportData {
   return {

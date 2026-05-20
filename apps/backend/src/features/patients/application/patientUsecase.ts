@@ -10,13 +10,13 @@ import type {
 import { logger } from '@shared/logger';
 
 import { Patient } from '../domain/patient';
+import type { PatientRepository, PatientRepositoryRecord } from '../domain/patientRepository';
 import {
   buildPatientCode,
   getPatientCodeExpiry,
   resolvePatientCodeStatus,
   resolvePatientSyncStatus,
-} from '../domain/patient.domain';
-import type { PatientRepository, PatientRepositoryRecord } from '../domain/patientRepository';
+} from '../domain/patientsDomain';
 
 interface PatientLogger {
   info(payload: Record<string, unknown>, message: string): void;

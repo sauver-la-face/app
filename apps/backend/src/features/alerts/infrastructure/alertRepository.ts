@@ -12,7 +12,7 @@ import type {
   SyncOverdueAlertSource,
   TriggeredSymptomAlertSource,
 } from '../domain/alertRepository';
-import { syncOverdueThresholdDays } from '../domain/alerts.domain';
+import { syncOverdueThresholdDays } from '../domain/alertsDomain';
 
 interface InMemorySeed {
   triggeredSymptomAlerts?: TriggeredSymptomAlertSource[];

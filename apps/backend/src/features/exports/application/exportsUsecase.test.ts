@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'bun:test';
 
-import { type PatientExportData, PORTABILITY_JSON_SCHEMA } from '../domain/exports.domain';
+import { type PatientExportData, PORTABILITY_JSON_SCHEMA } from '../domain/exportsDomain';
 import type { ExportsRepository } from '../domain/exportsRepository';
 import type { PdfReportGenerator } from '../domain/pdfReportGenerator';
 import { PdfLibReportGenerator } from '../infrastructure/pdfLibReportGenerator';

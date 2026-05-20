@@ -1,5 +1,5 @@
 import { logger } from '../../../shared/logger';
-import { PATIENT_CODE_TTL_HOURS } from '../domain/auth.domain';
+import { PATIENT_CODE_TTL_HOURS } from '../domain/authDomain';
 import type { PatientCodeRepository } from '../domain/patientCodeRepository';
 
 export class AuthCron {

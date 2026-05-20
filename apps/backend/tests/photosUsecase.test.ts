@@ -4,7 +4,7 @@ import { createHash } from 'node:crypto';
 import { PhotosUsecase } from '../src/features/photos/application/photosUsecase';
 import type { PhotoRepository } from '../src/features/photos/domain/photoRepository';
 import type { PhotoStorage } from '../src/features/photos/domain/photoStorage';
-import { PhotoIntegrityError } from '../src/features/photos/domain/photos.domain';
+import { PhotoIntegrityError } from '../src/features/photos/domain/photosDomain';
 
 const eventId = 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa';
 const mediaId = 'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb';

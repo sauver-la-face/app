@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'bun:test';
 import { PatientCodeValue } from '@sauver-la-face/shared';
-import { canBeUsed, isExpired } from './auth.domain';
+import { canBeUsed, isExpired } from './authDomain';
 import type { PatientCode } from './patientCodeRepository';
 
 const createMockPatientCode = (overrides: Partial<PatientCode> = {}): PatientCode => ({
@@ -15,7 +15,7 @@ const createMockPatientCode = (overrides: Partial<PatientCode> = {}): PatientCod
   ...overrides,
 });
 
-describe('auth.domain', () => {
+describe('authDomain', () => {
   describe('isExpired', () => {
     it('should be expired after 48h if not used', () => {
       const now = new Date('2026-04-30T10:00:00Z');

@@ -2,7 +2,7 @@ import type { SyncRequest, SyncResponse } from '@sauver-la-face/shared';
 
 import { logger } from '@shared/logger';
 
-import { ensureSupportedSchemaVersion, resolveSyncPayload } from '../domain/sync.domain';
+import { ensureSupportedSchemaVersion, resolveSyncPayload } from '../domain/syncDomain';
 import type { SyncRepository } from '../domain/syncRepository';
 
 interface SyncLogger {
