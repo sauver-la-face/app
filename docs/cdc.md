@@ -197,8 +197,8 @@ TypeScript-first, performances proches du SQL brut, migrations versionnées via 
 #### 5. Authentification — Better Auth
 MFA TOTP obligatoire pour les médecins web. Gestion des codes 6 chiffres patients : le code expire après 48h s'il n'est pas utilisé, mais une fois activé le JWT patient est valide 1 an (offline-first). Compatible expo-secure-store pour le stockage sécurisé des tokens mobiles. Sessions stockées en PostgreSQL.
 
-#### 6. Stockage photos — MinIO
-Stockage S3-compatible auto-hébergé sur OVH HDS. Versioning des photos cicatrices, chiffrement AES-256 at-rest. Réplication synchrone entre deux buckets OVH (Strasbourg ↔ Roubaix).
+#### 6. Stockage photos — S3 (MinIO dev / OVH Object Storage prod)
+Stockage S3-compatible. En développement, MinIO local simule S3. En production, OVH Object Storage (certifié HDS) — versioning des photos cicatrices, chiffrement AES-256 at-rest, réplication synchrone entre deux buckets OVH (Strasbourg ↔ Roubaix).
 
 #### 7. Logs — Pino
 Logger JSON structuré, performant, compatible outils de centralisation (Loki). Audit trail complet pour conformité HDS.

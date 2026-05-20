@@ -53,19 +53,19 @@ cp apps/backend/.env.example apps/backend/.env.local
 ### 4. Démarrer les services Docker
 
 ```bash
-# Sans pgAdmin (défaut)
-bun run docker:up
+# Développement local (MinIO + pgAdmin inclus)
+bun run docker:up:dev
 
-# Avec pgAdmin (interface admin PostgreSQL — dev uniquement)
-docker compose --profile dev up
+# Production (postgres + backend + caddy uniquement)
+bun run docker:up:prod
 ```
 
-Cela démarre :
+Cela démarre (en dev) :
 
 - **PostgreSQL** sur le port défini dans `.env.local` (`POSTGRES_PORT`)
-- **MinIO** sur le port `9000` (console : `9001`)
 - **Caddy** (reverse proxy) sur les ports `80` / `443`
-- **pgAdmin** sur `http://localhost:8080` (uniquement avec `--profile dev`)
+- **MinIO** sur le port `9000` (console : `9001`)
+- **pgAdmin** sur `http://localhost:8080`
 
 Vérifie que les services sont bien lancés :
 
@@ -165,7 +165,7 @@ bun add drizzle-orm
 bun run --cwd apps/backend db:generate
 
 # Arrêter Docker
-bun run docker:down
+bun run docker:down:dev
 ```
 
 ---

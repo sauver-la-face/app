@@ -78,9 +78,9 @@ Les workflows qui commitent automatiquement sur `dev` (mise à jour `features.md
 - `/openapi.json` permet de générer un client TypeScript pour le web et le mobile en une commande — les types sont toujours synchronisés avec le backend
 
 ### Pourquoi MinIO au lieu de S3 directement
-- Déployable en local pour le développement (pas besoin de credentials AWS)
-- Compatible avec l'API S3 — migration vers S3 ou OVH Object Storage sans changer le code
-- Hébergeable sur OVH Cloud HDS (certification requise pour données médicales)
+- Déployable en local pour le développement (pas besoin de credentials cloud)
+- Compatible avec l'API S3 — aucun changement de code entre dev et prod
+- En production : OVH Object Storage S3-compatible (certifié HDS) — MinIO ne tourne qu'en dev
 
 ### Pourquoi polling au lieu de WebSockets pour les alertes
 - 200 patients actifs max, 20 médecins max — le volume ne justifie pas la complexité des WebSockets

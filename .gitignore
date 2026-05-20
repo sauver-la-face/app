@@ -23,6 +23,9 @@ build/
 *.log
 pino.log
 
+# Claude Code — settings locaux (secrets MCP)
+.claude/settings.local.json
+
 # OS
 .DS_Store
 Thumbs.db
