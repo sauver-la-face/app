@@ -648,6 +648,45 @@ Une GitHub App n'appartient à aucune personne — elle est rattachée au repo. 
 
 ---
 
+### DEVOPS-04 — Réparation du système de migrations Drizzle
+
+`[ ]` 🔴 Critique · `apps/backend/drizzle/` · `apps/backend/src/shared/db.ts`
+
+**Contexte :**
+
+`drizzle-kit migrate` est actuellement cassé silencieusement. Toutes les migrations passées ont été appliquées manuellement via `drizzle-kit push`, ce qui n'a jamais créé la table `__drizzle_migrations` en base. Sans cette table, `drizzle-kit migrate` croit qu'il n'y a rien à faire et ne fait rien — sans erreur, sans message. Le workaround actuel (`drizzle-kit push`) est acceptable en dev solo mais inutilisable en équipe ou en CI/CD.
+
+**Comportement attendu :**
+
+- `bun run db:migrate` (via `docker exec`) applique les migrations manquantes et met à jour `__drizzle_migrations`
+- Un nouveau développeur qui clone le repo peut initialiser la BDD avec `db:migrate` sans intervention manuelle
+- Les migrations futures sont appliquées de manière incrémentale et traçable
+
+**Plan de correction :**
+
+1. Vérifier l'état réel de la BDD Docker : `SELECT * FROM __drizzle_migrations` (probablement absente)
+2. Créer la table `__drizzle_migrations` avec le schéma attendu par Drizzle Kit :
+   ```sql
+   CREATE TABLE IF NOT EXISTS __drizzle_migrations (
+     id SERIAL PRIMARY KEY,
+     hash TEXT NOT NULL,
+     created_at BIGINT
+   );
+   ```
+3. Backfiller les migrations déjà appliquées (0001, 0002, 0003/0004) avec leurs hash SHA-256 calculés depuis les fichiers `.sql`
+4. Vérifier que `drizzle-kit migrate` détecte la table, ne rejoue pas les migrations déjà présentes, et applique correctement une nouvelle migration de test
+5. Supprimer le script de backfill une fois validé
+6. Mettre à jour le README et l'onboarding pour remplacer `drizzle-kit push` par `db:migrate`
+
+**Règles de code :**
+
+- Ne jamais rejouer une migration déjà appliquée — le backfill doit être idempotent
+- Le script de backfill est dans `apps/backend/scripts/fixDrizzleMigrations.ts` — à supprimer après usage
+- Les migrations restent additives : aucune suppression ou renommage de colonne
+- Tester : `db:migrate` sur une BDD vierge, `db:migrate` sur une BDD à jour (idempotent), migration suivante appliquée correctement
+
+---
+
 ### DEVOPS-01 — Interface d'administration PostgreSQL (pgAdmin)
 
 `[x]` 🟢 Mineur · `docker-compose.yml`
