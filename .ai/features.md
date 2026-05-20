@@ -191,7 +191,7 @@ Mobile (SQLite) → Hono sync.usecase.ts → compare avec PostgreSQL
 
 ### API-01 — Documentation OpenAPI auto-générée (Swagger UI)
 
-`[ ]` 🟢 Mineur · `apps/backend/src/index.ts`
+`[~]` 🟢 Mineur · `apps/backend/src/index.ts`
 
 **Comportement attendu :**
 
