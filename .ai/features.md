@@ -158,7 +158,7 @@ Mobile (SQLite) → Hono sync.usecase.ts → compare avec PostgreSQL
 
 ### AUDIT-01 — Middleware d'audit logs
 
-`[~]` 🟡 Majeur · `apps/backend/src/shared/middleware/audit.middleware.ts`
+`[x]` 🟡 Majeur · `apps/backend/src/shared/middleware/audit.middleware.ts`
 
 **Comportement attendu :**
 
