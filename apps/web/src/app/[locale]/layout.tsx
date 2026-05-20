@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { LocaleSwitcher } from '@/features/i18n/components/LocaleSwitcher';
 import { isLocale, type Locale, locales } from '@/i18n/config';
+import { getDictionary } from '@/i18n/dictionaries';
 
 export function generateStaticParams() {
   return locales.map((locale) => ({ locale }));
