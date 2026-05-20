@@ -13,7 +13,7 @@
 
 ### AUTH-01 — Authentification patients (codes 6 chiffres)
 
-`[ ]` 🔴 Critique · `apps/backend/src/features/auth/`
+`[~]` 🔴 Critique · `apps/backend/src/features/auth/`
 
 **Comportement attendu :**
 
@@ -58,7 +58,7 @@
 
 ### SYNC-01 — Réception et résolution des conflits (server-wins)
 
-`[~]` 🔴 Critique · `apps/backend/src/features/sync/`
+`[x]` 🔴 Critique · `apps/backend/src/features/sync/`
 
 **Comportement attendu :**
 
@@ -100,7 +100,7 @@ Mobile (SQLite) → Hono sync.usecase.ts → compare avec PostgreSQL
 
 ### ALERT-01 — Système d'alertes automatiques
 
-`[ ]` 🟡 Majeur · `apps/backend/src/features/alerts/`
+`[~]` 🟡 Majeur · `apps/backend/src/features/alerts/`
 
 **Comportement attendu :**
 
@@ -125,7 +125,7 @@ Mobile (SQLite) → Hono sync.usecase.ts → compare avec PostgreSQL
 
 - Réception de la photo uploadée par le mobile
 - Validation checksum SHA-256 (comparé à celui envoyé par le mobile)
-- Stockage dans MinIO HDS
+- Stockage S3 (MinIO en dev, OVH Object Storage certifié HDS en prod)
 - Rejet `PHOTO_INTEGRITY_ERROR` si mismatch checksum
 - Retry côté mobile : backoff 2s, 4s, abandon à la 4e tentative
 
@@ -212,7 +212,7 @@ Mobile (SQLite) → Hono sync.usecase.ts → compare avec PostgreSQL
 
 ### PATIENT-01 — CRUD patients et gestion utilisateurs
 
-`[ ]` 🟡 Majeur · `apps/backend/src/features/patients/`
+`[x]` 🟡 Majeur · `apps/backend/src/features/patients/`
 
 **Comportement attendu :**
 
