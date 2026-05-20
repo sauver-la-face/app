@@ -15,6 +15,11 @@ const dictionaries = {
     languageSwitcher: {
       label: 'Langue',
     },
+    footer: {
+      legal: 'Mentions légales et CGU',
+      privacy: 'Données personnelles et confidentialité',
+      sitemap: 'Plan du site',
+    },
     login: {
       eyebrow: 'Portail medecin - connexion securisee',
       title: 'Connexion',
@@ -26,6 +31,7 @@ const dictionaries = {
       submitting: 'Connexion en cours...',
       registerPrompt: 'Pas encore de compte ?',
       registerLink: 'Creer un compte',
+      forgotPassword: 'Identifiants oublies ?',
     },
     register: {
       eyebrow: 'Portail medecin - creation de compte',
@@ -80,6 +86,11 @@ const dictionaries = {
     languageSwitcher: {
       label: 'Language',
     },
+    footer: {
+      legal: 'Legal notices and T&C',
+      privacy: 'Personal data and privacy',
+      sitemap: 'Site map',
+    },
     login: {
       eyebrow: 'Physician portal - secure sign in',
       title: 'Sign in',
@@ -91,6 +102,7 @@ const dictionaries = {
       submitting: 'Signing in...',
       registerPrompt: "Don't have an account yet?",
       registerLink: 'Create an account',
+      forgotPassword: 'Forgot your credentials?',
     },
     register: {
       eyebrow: 'Physician portal - account creation',
@@ -145,6 +157,11 @@ const dictionaries = {
     languageSwitcher: {
       label: 'ភាសា',
     },
+    footer: {
+      legal: 'ច្បាប់​និង​លក្ខខណ្ឌ',
+      privacy: 'ទិន្នន័យ​ផ្ទាល់ខ្លួន​និង​ភាព​ឯកជន',
+      sitemap: 'ផែនទី​គេហទំព័រ',
+    },
     login: {
       eyebrow: 'វិបផតថលវេជ្ជបណ្ឌិត - ការចូលប្រើប្រាស់ដោយសុវត្ថិភាព',
       title: 'ចូល',
@@ -156,6 +173,7 @@ const dictionaries = {
       submitting: 'កំពុងចូល...',
       registerPrompt: 'មិនទាន់មានគណនីទេ?',
       registerLink: 'បង្កើតគណនី',
+      forgotPassword: 'ភ្លេចព័ត៌មានចូល?',
     },
     register: {
       eyebrow: 'វិបផតថលវេជ្ជបណ្ឌិត - បង្កើតគណនី',

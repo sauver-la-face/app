@@ -1,5 +1,6 @@
 'use client';
 
+import Image from 'next/image';
 import Link from 'next/link';
 import { usePathname, useSearchParams } from 'next/navigation';
 import { useState } from 'react';
@@ -28,9 +29,13 @@ export function LocaleSwitcher({ currentLocale }: { currentLocale: Locale }) {
         aria-label={`Langue : ${current.label}`}
         aria-expanded={open}
       >
-        <span className="text-2xl leading-none" aria-hidden>
-          {current.flag}
-        </span>
+        <Image
+          src={current.flag}
+          alt={current.label}
+          width={28}
+          height={20}
+          className="rounded-sm object-cover"
+        />
         <svg
           className={`h-3 w-3 text-black/60 transition-transform ${open ? 'rotate-180' : ''}`}
           viewBox="0 0 12 12"
@@ -59,10 +64,13 @@ export function LocaleSwitcher({ currentLocale }: { currentLocale: Locale }) {
                       isActive ? 'bg-gray-50 font-medium' : ''
                     }`}
                   >
-                    <span className="text-2xl leading-none" aria-hidden>
-                      {localeConfig[locale].flag}
-                    </span>
-                    <span className="text-gray-700">{localeConfig[locale].label}</span>
+                    <Image
+                      src={localeConfig[locale].flag}
+                      alt={localeConfig[locale].label}
+                      width={28}
+                      height={20}
+                      className="rounded-sm object-cover"
+                    />
                   </Link>
                 </li>
               );

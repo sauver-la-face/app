@@ -1,4 +1,6 @@
 import type { Metadata } from 'next';
+import Image from 'next/image';
+import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { LocaleSwitcher } from '@/features/i18n/components/LocaleSwitcher';
 import { isLocale, type Locale, locales } from '@/i18n/config';
@@ -34,15 +36,49 @@ export default function LocaleLayout({
 
   const locale = params.locale as Locale;
 
+  const dictionary = getDictionary(locale);
+
   return (
-    <div className="relative min-h-screen">
-      <div className="pointer-events-none absolute inset-x-0 top-0 h-64 bg-[radial-gradient(circle_at_top,_rgba(37,99,235,0.16),_transparent_60%)]" />
-      <div className="relative">
-        <div className="mx-auto flex max-w-6xl justify-end px-4 py-4 sm:px-6">
+    <div className="flex h-screen flex-col overflow-hidden bg-white">
+      <header className="border-b border-black/10 bg-white shadow-[0px_4px_4px_rgba(0,0,0,0.25)]">
+        <div className="mx-auto flex max-w-6xl items-center justify-between px-8 py-5">
+          <div className="flex items-center gap-3">
+            <Image
+              src="/logo.jpg"
+              alt={dictionary.common.brand}
+              width={56}
+              height={56}
+              className="rounded-lg object-contain"
+              priority
+            />
+            <span className="text-lg font-semibold text-gray-900">{dictionary.common.brand}</span>
+          </div>
           <LocaleSwitcher currentLocale={locale} />
         </div>
-        {children}
-      </div>
+      </header>
+      <div className="flex flex-1 flex-col">{children}</div>
+      <footer className="bg-[#D9D9D9] px-8 py-6">
+        <div className="mx-auto flex max-w-6xl flex-wrap items-center gap-x-10 gap-y-2">
+          <Link
+            href={`/${locale}/mentions-legales`}
+            className="text-sm text-black underline hover:opacity-70"
+          >
+            {dictionary.footer.legal}
+          </Link>
+          <Link
+            href={`/${locale}/confidentialite`}
+            className="text-sm text-black underline hover:opacity-70"
+          >
+            {dictionary.footer.privacy}
+          </Link>
+          <Link
+            href={`/${locale}/plan-du-site`}
+            className="text-sm text-black underline hover:opacity-70"
+          >
+            {dictionary.footer.sitemap}
+          </Link>
+        </div>
+      </footer>
     </div>
   );
 }

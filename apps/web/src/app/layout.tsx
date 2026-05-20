@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import { headers } from 'next/headers';
-import Script from 'next/script';
 import { defaultLocale, isLocale } from '@/i18n/config';
+import './globals.css';
 
 export const metadata: Metadata = {
   title: 'Sauver la Face',
@@ -14,10 +14,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 
   return (
     <html lang={locale}>
-      <head>
-        <Script src="https://cdn.tailwindcss.com" strategy="beforeInteractive" />
-      </head>
-      <body className="min-h-screen bg-gray-50 text-gray-900 antialiased">{children}</body>
+      <body className="bg-white text-gray-900 antialiased">{children}</body>
     </html>
   );
 }
