@@ -16,4 +16,4 @@ await migrate(db, {
 });
 
 console.log('Migrations applied successfully');
-await pool.end();
+process.exit(0);
