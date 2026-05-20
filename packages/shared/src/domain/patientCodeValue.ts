@@ -8,7 +8,7 @@ export const patientCodeSchema = z
 export type PatientCodeValueType = z.infer<typeof patientCodeSchema>;
 
 export class PatientCodeValue {
-  // On garde le `readonly` de "dev" (sans le "private") pour s'assurer de ne pas casser
+  // On garde le `readonly` de "dev" (sans le "private") pour s'assurer de ne pas casser 
   // d'éventuels appels à `.value` ailleurs dans le code de la branche dev.
   private constructor(readonly value: string) {}
 
