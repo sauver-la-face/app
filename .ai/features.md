@@ -625,7 +625,7 @@ Une GitHub App n'appartient à aucune personne — elle est rattachée au repo. 
 
 ### DEVOPS-02 — Reverse proxy Caddy avec TLS 1.3
 
-`[ ]` 🟡 Majeur · `Caddyfile` · `docker-compose.yml`
+`[~]` 🟡 Majeur · `Caddyfile` · `docker-compose.yml`
 
 **Comportement attendu :**
 
