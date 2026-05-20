@@ -4,7 +4,7 @@ import type { PatientCodeRepository } from '../domain/patientCodeRepository';
 import { AuthCron } from './auth.cron';
 
 class MockPatientCodeRepository {
-  softDeleteExpiredUnused = mock(async (cutoff: Date) => 10);
+  softDeleteExpiredUnused = mock(async (_cutoff: Date) => 10);
 }
 
 describe('AuthCron', () => {

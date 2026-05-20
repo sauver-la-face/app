@@ -1,5 +1,5 @@
 import { PatientCodeValue } from '@sauver-la-face/shared';
-import { AuthDomain } from '../domain/auth.domain';
+import { generateCode, isExpired } from '../domain/auth.domain';
 import type { PatientCode, PatientCodeRepository } from '../domain/patientCodeRepository';
 import type { TokenProvider } from './tokenProvider';
 
@@ -24,7 +24,7 @@ export class AuthUsecase {
     let existing: PatientCode | null;
 
     do {
-      code = AuthDomain.generateCode(random);
+      code = generateCode(random);
       existing = await this.repository.findByCode(code);
     } while (existing !== null);
 
@@ -47,7 +47,7 @@ export class AuthUsecase {
     let codeValue: PatientCodeValue;
     try {
       codeValue = PatientCodeValue.create(codeRaw);
-    } catch (e) {
+    } catch {
       return { success: false, error: 'INVALID_CODE' };
     }
 
@@ -62,7 +62,7 @@ export class AuthUsecase {
     if (!patientCode.is_active) return { success: false, error: 'INACTIVE_CODE' };
     if (patientCode.deleted_at) return { success: false, error: 'DELETED_CODE' };
     if (patientCode.revoked_at) return { success: false, error: 'REVOKED_CODE' };
-    if (AuthDomain.isExpired(patientCode, now)) return { success: false, error: 'EXPIRED_CODE' };
+    if (isExpired(patientCode, now)) return { success: false, error: 'EXPIRED_CODE' };
 
     if (patientCode.used_at === null) {
       patientCode.used_at = now;
