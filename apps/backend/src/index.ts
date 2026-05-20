@@ -56,7 +56,6 @@ import { createAuditMiddleware } from './shared/middleware/auditMiddleware';
 import { createS3LogsStorageFromEnv } from './shared/storage/logsStorage';
 import { buildPhotoPublicBaseUrl, createPhotoS3Client } from './shared/storage/s3Client';
 
-
 export function createApp(): OpenAPIHono<{ Variables: SessionVariables }> {
   const app = new OpenAPIHono<{ Variables: SessionVariables }>();
 
@@ -104,9 +103,7 @@ export function createApp(): OpenAPIHono<{ Variables: SessionVariables }> {
   const alertUsecase = new AlertUsecase(alertRepository, logger);
   const syncUsecase = new SyncUsecase(syncRepository, logger, 1);
   const patientUsecase = new PatientUsecase(patientRepository, logger);
-  const photosUsecase = photoRepository
-    ? new PhotosUsecase(photoStorage, photoRepository)
-    : null;
+  const photosUsecase = photoRepository ? new PhotosUsecase(photoStorage, photoRepository) : null;
   const exportsUsecase = exportsRepository
     ? new ExportsUsecase(exportsRepository, new PdfLibReportGenerator())
     : null;
