@@ -25,5 +25,17 @@
     "formatter": {
       "quoteStyle": "single"
     }
-  }
+  },
+  "overrides": [
+    {
+      "includes": ["**/globals.css"],
+      "linter": {
+        "rules": {
+          "suspicious": {
+            "noUnknownAtRules": "off"
+          }
+        }
+      }
+    }
+  ]
 }

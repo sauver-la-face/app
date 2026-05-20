@@ -64,7 +64,7 @@ export function middleware(request: NextRequest) {
     },
   });
 
-  response.cookies.set(LOCALE_COOKIE, locale, { path: '/' });
+  response.cookies.set(LOCALE_COOKIE, locale, { path: '/', sameSite: 'lax', secure: true });
   return response;
 }
 
