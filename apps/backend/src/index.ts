@@ -114,7 +114,11 @@ export function createApp(): OpenAPIHono<{ Variables: SessionVariables }> {
   );
   const instructionsUsecase = new InstructionsUsecase(instructionRepository, logger);
 
-  const tokenProvider = new JwtTokenProvider(process.env.JWT_SECRET || 'dev-secret');
+  const jwtSecret = process.env.JWT_SECRET;
+  if (!jwtSecret && process.env.NODE_ENV === 'production') {
+    throw new Error('JWT_SECRET is required in production');
+  }
+  const tokenProvider = new JwtTokenProvider(jwtSecret ?? 'dev-secret');
   const patientAuthUsecase = new AuthUsecase(patientCodeRepository, tokenProvider);
   const authCron = new AuthCron(patientCodeRepository);
 
@@ -125,7 +129,7 @@ export function createApp(): OpenAPIHono<{ Variables: SessionVariables }> {
   app.use(
     '/api/auth/*',
     cors({
-      origin: process.env.WEB_URL ?? 'http://localhost:3001',
+      origin: process.env.WEB_URL ?? 'http://localhost:3000',
       allowHeaders: ['Content-Type', 'Authorization'],
       allowMethods: ['POST', 'GET', 'OPTIONS'],
       exposeHeaders: ['Content-Length'],

@@ -73,28 +73,34 @@ Vérifie que les services sont bien lancés :
 docker compose ps
 ```
 
-### 5. Appliquer les migrations de base de données
+### 5. Synchroniser le schéma base de données
 
 ```bash
-bun run --cwd apps/backend db:migrate
+docker exec sauverlaface-backend-1 sh -c "cd /app/apps/backend && bunx drizzle-kit push"
 ```
+
+> ⚠️ `drizzle-kit migrate` est actuellement cassé — utiliser `push` en dev uniquement.
 
 ---
 
 ## Lancer les applications
 
-Chaque application se lance dans un terminal séparé :
+Le backend tourne dans Docker (lancé via `docker:up:dev`). Seuls le web et le mobile se lancent en local :
 
 ```bash
-# Backend (Hono) — http://localhost:3001
-bun run dev:backend
-
 # Dashboard web (Next.js) — http://localhost:3000
 bun run dev:web
 
 # Application mobile (Expo)
 bun run dev:mobile
 ```
+
+| Service    | URL                        |
+|------------|----------------------------|
+| Web        | http://localhost:3000      |
+| Backend    | http://localhost:3001      |
+| pgAdmin    | http://localhost:8080      |
+| MinIO      | http://localhost:9001      |
 
 ---
 
