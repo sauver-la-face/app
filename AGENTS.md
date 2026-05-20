@@ -137,6 +137,41 @@ bun run dev:mobile
 bun run docker:down:dev
 ```
 
+### Hot reload backend
+
+Le backend tourne dans Docker. `bun --watch` ne détecte pas les changements de fichiers depuis Windows via volumes Docker (limitation WSL2). Après toute modification d'un fichier backend, relancer manuellement :
+
+```bash
+docker restart sauverlaface-backend-1
+```
+
+---
+
+## Workflow Git
+
+```bash
+# Démarrer une feature
+git checkout dev && git pull origin dev
+git checkout -b feature/XXX-00-nom-de-la-feature
+
+# Soumettre une PR quand la feature est terminée et testée
+gh pr create --base dev --title "feat: XXX-00 nom"
+```
+
+**Règles absolues :**
+- Jamais de push direct sur `dev` — toujours passer par une PR
+- Format de branche obligatoire : `feature/XXX-00-nom` (ex: `feature/AUTH-01-authentification-patient`)
+- La PR est créée uniquement quand la feature est terminée et que `bun run lint` + `bun test` passent
+- La branche de production est `master` — merges humains uniquement, jamais via agent
+
+---
+
+## Sécurité et RGPD
+
+- **Ne jamais logger de données patient** : `firstName`, `lastName`, `birthdate` sont des PII — les logs Pino ne doivent contenir que `{ patientId }` (UUID)
+- **Tokens JWT** : stocker uniquement dans `expo-secure-store` côté mobile — jamais dans `AsyncStorage` (non chiffré)
+- **Secrets** : `BETTER_AUTH_SECRET` et `JWT_SECRET` sont obligatoires en production — le backend lève une erreur au démarrage s'ils sont absents
+
 ---
 
 ## Autres commandes
