@@ -32,11 +32,9 @@ cp .env.example .env.local
 cp apps/backend/.env.example apps/backend/.env.local
 bun run docker:up:dev
 # attendre "Backend démarré", puis synchroniser le schéma (premier lancement uniquement)
-docker exec sauverlaface-backend-1 sh -c "cd /app/apps/backend && bunx drizzle-kit push"
+docker exec sauverlaface-backend-1 bun run --cwd /app/apps/backend db:migrate
 bun run dev:web
 ```
-
-> ⚠️ `drizzle-kit migrate` est actuellement cassé — utiliser `push` en dev uniquement.
 
 ### 3. Vérifier que tout fonctionne
 

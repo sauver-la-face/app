@@ -109,10 +109,8 @@ docker logs sauverlaface-backend-1 --follow
 
 ### 3. Synchroniser le schéma base de données (premier lancement uniquement)
 ```bash
-docker exec sauverlaface-backend-1 sh -c "cd /app/apps/backend && bunx drizzle-kit push"
+docker exec sauverlaface-backend-1 bun run --cwd /app/apps/backend db:migrate
 ```
-
-> ⚠️ `drizzle-kit migrate` est actuellement cassé — utiliser `push` en dev uniquement.
 
 ### 4. Lancer le dashboard web (local, hot reload)
 ```bash
