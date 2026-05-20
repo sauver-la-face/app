@@ -4,7 +4,6 @@ import { buildPhotoPublicBaseUrl, createPhotoS3Client } from '@shared/storage/s3
 import { Hono } from 'hono';
 import { cors } from 'hono/cors';
 import { logger as honoLogger } from 'hono/logger';
-<<<<<<< HEAD
 import { poweredBy } from 'hono/powered-by';
 import { AlertUsecase } from './features/alerts/application/alertUsecase';
 import {
@@ -13,10 +12,7 @@ import {
 } from './features/alerts/infrastructure/alertRepository';
 import { createAlertRouter } from './features/alerts/presentation/alertRouter';
 import { authRouter } from './features/auth/presentation/authRouter';
-=======
-import { authRouter } from './features/auth/presentation/authRouter';
 
->>>>>>> 4c88cce (feat: photo feature)
 import { PatientUsecase } from './features/patients/application/patientUsecase';
 import {
   InMemoryPatientsRepository,
@@ -57,11 +53,7 @@ export function createApp(): Hono {
   if (!databaseUrl) {
     logger.warn(
       {
-<<<<<<< HEAD
-        features: ['alerts', 'sync', 'patients'],
-=======
-        features: ['sync', 'patients', 'photos'],
->>>>>>> 4c88cce (feat: photo feature)
+        features: ['alerts', 'sync', 'patients', 'photos'],
       },
       'DATABASE_URL is not set, falling back to in-memory repositories',
     );
@@ -101,12 +93,7 @@ function throwNoDb(feature: string): never {
 const app = createApp();
 const auditLogsStorage = createS3LogsStorageFromEnv();
 
-<<<<<<< HEAD
-=======
-import { poweredBy } from 'hono/powered-by';
-
 // Mount Builtin Middleware
->>>>>>> 4c88cce (feat: photo feature)
 app.use('*', poweredBy());
 
 if (process.env.NODE_ENV !== 'production') {
