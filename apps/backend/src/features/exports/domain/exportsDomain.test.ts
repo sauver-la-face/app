@@ -33,7 +33,7 @@ describe('anonymizePatientsForCsv', () => {
     const rows = anonymizePatientsForCsv([buildPatient()]);
 
     expect(rows).toHaveLength(1);
-    const row = rows[0]!;
+    const row = rows[0];
     expect(row).not.toHaveProperty('firstName');
     expect(row).not.toHaveProperty('lastName');
     expect(row).not.toHaveProperty('birthdate');
@@ -81,7 +81,7 @@ describe('anonymizePatientsForCsv', () => {
       }),
     ]);
 
-    const row = rows[0]!;
+    const row = rows[0];
     expect(row.proceduresCount).toBe(1);
     expect(row.eventsCount).toBe(2);
     expect(row.alertEventsCount).toBe(1);
@@ -124,7 +124,7 @@ describe('serializeCsv', () => {
       },
     ]);
 
-    const dataLine = csv.split('\r\n')[1]!;
+    const dataLine = csv.split('\r\n')[1];
     expect(dataLine).toContain('"Region, ""Special"""');
   });
 
