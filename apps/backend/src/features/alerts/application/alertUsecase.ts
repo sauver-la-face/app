@@ -1,5 +1,6 @@
 import type { AlertListResponse } from '@sauver-la-face/shared';
 import { logger } from '@shared/logger';
+import type { AlertRepository } from '../domain/alertRepository';
 import {
   buildSyncOverdueAlerts,
   buildTriggeredSymptomAlerts,
@@ -7,7 +8,6 @@ import {
   matchesEtag,
   sortAlerts,
 } from '../domain/alerts.domain';
-import type { AlertRepository } from '../domain/alertRepository';
 
 interface AlertLogger {
   info(payload: Record<string, unknown>, message: string): void;

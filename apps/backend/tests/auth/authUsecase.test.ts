@@ -1,14 +1,26 @@
 import { afterAll, beforeAll, describe, expect, it } from 'bun:test';
 
-const hasAuthTestEnvironment = Boolean(
-  process.env.DATABASE_URL && process.env.BETTER_AUTH_SECRET,
-);
+const hasAuthTestEnvironment = Boolean(process.env.DATABASE_URL && process.env.BETTER_AUTH_SECRET);
 
 const TEST_EMAIL = `physician.test.${Date.now()}@sauver-la-face.test`;
 const TEST_PASSWORD = 'TestPassword123!';
 const TEST_NAME = 'Dr. Test Physician';
 
 let auth: typeof import('../../src/features/auth/infrastructure/authConfig').auth;
+
+type PluginLike = { id?: string };
+type AuthApiExtension = {
+  enableTwoFactor(args: {
+    body: { password: string };
+    headers: Headers;
+  }): Promise<{ totpURI?: string } | null>;
+  deleteUser(args: { headers: Headers; body: { password: string } }): Promise<unknown>;
+};
+type SignInWithSessionToken = {
+  session?: {
+    token?: string;
+  };
+};
 
 function mockHeaders(cookies?: string): Headers {
   const headers = new Headers({ 'content-type': 'application/json' });
@@ -26,10 +38,7 @@ async function signIn(email = TEST_EMAIL, password = TEST_PASSWORD) {
   });
 }
 
-async function signInWithCookie(
-  email = TEST_EMAIL,
-  password = TEST_PASSWORD,
-): Promise<string> {
+async function signInWithCookie(email = TEST_EMAIL, password = TEST_PASSWORD): Promise<string> {
   const { headers } = await auth.api.signInEmail({
     returnHeaders: true,
     body: { email, password },
@@ -96,20 +105,24 @@ if (!hasAuthTestEnvironment) {
 
     describe('MFA TOTP', () => {
       it("le plugin twoFactor est configure sur l'instance auth", () => {
-        const pluginIds = auth.options.plugins?.map((plugin: any) => plugin.id) ?? [];
+        const pluginIds =
+          auth.options.plugins
+            ?.map((plugin) => (plugin as PluginLike).id)
+            .filter((pluginId): pluginId is string => typeof pluginId === 'string') ?? [];
 
         expect(pluginIds).toContain('two-factor');
       });
 
       it("enableTwoFactor retourne un totpURI pour la configuration de l'app authenticator", async () => {
         const cookie = await signInWithCookie();
-        const twoFactorResult = await (auth.api as any).enableTwoFactor({
+        const authApi = auth.api as typeof auth.api & AuthApiExtension;
+        const twoFactorResult = await authApi.enableTwoFactor({
           body: { password: TEST_PASSWORD },
           headers: mockHeaders(cookie),
         });
 
         expect(twoFactorResult).toBeTruthy();
-        expect((twoFactorResult as any)?.totpURI).toBeTruthy();
+        expect(twoFactorResult?.totpURI).toBeTruthy();
       });
     });
 
@@ -157,11 +170,12 @@ if (!hasAuthTestEnvironment) {
 
     afterAll(async () => {
       try {
-        const signInResult = await signIn();
-        const sessionToken = (signInResult as any)?.session?.token;
+        const authApi = auth.api as typeof auth.api & AuthApiExtension;
+        const signInResult = (await signIn()) as SignInWithSessionToken;
+        const sessionToken = signInResult.session?.token;
         const cookie = `better-auth.session_token=${sessionToken}`;
 
-        await (auth.api as any).deleteUser({
+        await authApi.deleteUser({
           headers: mockHeaders(cookie),
           body: { password: TEST_PASSWORD },
         });

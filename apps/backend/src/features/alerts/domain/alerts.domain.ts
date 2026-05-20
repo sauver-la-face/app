@@ -1,19 +1,18 @@
-import type { Alert } from '@sauver-la-face/shared';
 import { createHash } from 'node:crypto';
-import type {
-  SyncOverdueAlertSource,
-  TriggeredSymptomAlertSource,
-} from './alertRepository';
+import type { Alert } from '@sauver-la-face/shared';
+import type { SyncOverdueAlertSource, TriggeredSymptomAlertSource } from './alertRepository';
 
 const DAY_IN_MS = 24 * 60 * 60 * 1000;
 export const syncOverdueThresholdDays = 7;
 
-export function buildTriggeredSymptomAlerts(
-  sources: TriggeredSymptomAlertSource[],
-): Alert[] {
+export function buildTriggeredSymptomAlerts(sources: TriggeredSymptomAlertSource[]): Alert[] {
   return sources.map((source) => ({
     patientId: source.patientId,
-    patientDisplayName: buildPatientDisplayName(source.firstName, source.lastName, source.patientId),
+    patientDisplayName: buildPatientDisplayName(
+      source.firstName,
+      source.lastName,
+      source.patientId,
+    ),
     type: 'symptom_triggered',
     severity: 'critical',
     message: `Symptome declencheur detecte : ${source.symptomLabelFr}`,

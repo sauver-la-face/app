@@ -3,14 +3,14 @@ import { logger } from '@shared/logger';
 import { Hono } from 'hono';
 import { cors } from 'hono/cors';
 import { logger as honoLogger } from 'hono/logger';
+import { poweredBy } from 'hono/powered-by';
 import { AlertUsecase } from './features/alerts/application/alertUsecase';
 import {
   InMemoryAlertRepository,
   PgAlertRepository,
 } from './features/alerts/infrastructure/alertRepository';
 import { createAlertRouter } from './features/alerts/presentation/alertRouter';
-import { authRouter, type SessionVariables } from './features/auth/presentation/authRouter';
-
+import { authRouter } from './features/auth/presentation/authRouter';
 import { PatientUsecase } from './features/patients/application/patientUsecase';
 import {
   InMemoryPatientsRepository,
@@ -71,37 +71,21 @@ export function createApp(): Hono {
 
 const app = createApp();
 
-import { basicAuth } from 'hono/basic-auth';
-import { etag } from 'hono/etag';
-import { poweredBy } from 'hono/powered-by';
-import { prettyJSON } from 'hono/pretty-json';
-
-// Mount Builtin Middleware
 app.use('*', poweredBy());
-// app.use('*', logger())
-// import { Hono } from 'hono';
-// import { logger } from '@shared/logger';
 
-// const app = new Hono<{ Variables: SessionVariables }>();
-
-// CORS — Better Auth nécessite credentials: true
-
-// Logging HTTP (dev uniquement)
 if (process.env.NODE_ENV !== 'production') {
   app.use('*', honoLogger());
 }
 
-// Feature routers
+app.notFound((context) => context.json({ error: 'NOT_FOUND' }, 404));
 
-app.notFound((c) => c.json({ error: 'NOT_FOUND' }, 404));
-
-app.onError((err, c) => {
-  logger.error({ err }, 'Unhandled error');
-  return c.json({ error: 'INTERNAL_SERVER_ERROR' }, 500);
+app.onError((error, context) => {
+  logger.error({ error }, 'Unhandled error');
+  return context.json({ error: 'INTERNAL_SERVER_ERROR' }, 500);
 });
 
 const port = Number(process.env.PORT ?? 3001);
-logger.info({ port }, 'Backend démarré');
+logger.info({ port }, 'Backend demarre');
 
 export default {
   port,
