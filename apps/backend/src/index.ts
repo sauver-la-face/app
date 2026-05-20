@@ -26,6 +26,12 @@ import { ExportsUsecase } from './features/exports/application/exportsUsecase';
 import { PgExportsRepository } from './features/exports/infrastructure/exportsRepository';
 import { PdfLibReportGenerator } from './features/exports/infrastructure/pdfLibReportGenerator';
 import { createExportsRouter } from './features/exports/presentation/exportsRouter';
+import { InstructionsUsecase } from './features/instructions/application/instructionsUsecase';
+import {
+  InMemoryInstructionRepository,
+  PgInstructionRepository,
+} from './features/instructions/infrastructure/instructionRepository';
+import { createInstructionsRouter } from './features/instructions/presentation/instructionsRouter';
 import { PatientUsecase } from './features/patients/application/patientUsecase';
 import {
   InMemoryPatientsRepository,
@@ -70,7 +76,7 @@ export function createApp(): OpenAPIHono<{ Variables: SessionVariables }> {
 
   if (!databaseUrl) {
     logger.warn(
-      { features: ['alerts', 'sync', 'patients', 'photos', 'exports'] },
+      { features: ['alerts', 'sync', 'patients', 'photos', 'exports', 'instructions'] },
       'DATABASE_URL is not set, falling back to in-memory repositories where supported',
     );
   }
@@ -87,6 +93,9 @@ export function createApp(): OpenAPIHono<{ Variables: SessionVariables }> {
     : new InMemoryPatientsRepository();
   const photoRepository = dynamicDb ? new PgPhotoRepository(dynamicDb) : null;
   const exportsRepository = dynamicDb ? new PgExportsRepository(dynamicDb) : null;
+  const instructionRepository = dynamicDb
+    ? new PgInstructionRepository(dynamicDb)
+    : new InMemoryInstructionRepository();
   const patientCodeRepository = new DrizzlePatientCodeRepository(db);
 
   // 2. Storage
@@ -103,6 +112,7 @@ export function createApp(): OpenAPIHono<{ Variables: SessionVariables }> {
     exportsRepository ?? throwNoDb('exports'),
     new PdfLibReportGenerator(),
   );
+  const instructionsUsecase = new InstructionsUsecase(instructionRepository, logger);
 
   const tokenProvider = new JwtTokenProvider(process.env.JWT_SECRET || 'dev-secret');
   const patientAuthUsecase = new AuthUsecase(patientCodeRepository, tokenProvider);
@@ -147,6 +157,7 @@ export function createApp(): OpenAPIHono<{ Variables: SessionVariables }> {
   app.route('/', createSyncRouter(syncUsecase));
   app.route('/', createPhotosRouter(photosUsecase));
   app.route('/', createExportsRouter(exportsUsecase));
+  app.route('/', createInstructionsRouter(instructionsUsecase));
 
   if (process.env.NODE_ENV !== 'production') {
     app.get('/docs', swaggerUI({ url: '/openapi.json' }));
