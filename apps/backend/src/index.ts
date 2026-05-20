@@ -1,7 +1,7 @@
+import { OpenAPIHono } from '@hono/zod-openapi';
 import { createDb } from '@shared/db';
 import { logger } from '@shared/logger';
 import { buildPhotoPublicBaseUrl, createPhotoS3Client } from '@shared/storage/s3Client';
-import { Hono } from 'hono';
 import { cors } from 'hono/cors';
 import { logger as honoLogger } from 'hono/logger';
 import { poweredBy } from 'hono/powered-by';
@@ -33,8 +33,8 @@ import { startAuditExportScheduler } from './shared/jobs/audit.export.cron';
 import { createAuditMiddleware } from './shared/middleware/audit.middleware';
 import { createS3LogsStorageFromEnv } from './shared/storage/logs.storage';
 
-export function createApp(): Hono {
-  const app = new Hono();
+export function createApp(): OpenAPIHono {
+  const app = new OpenAPIHono();
   const databaseUrl = process.env.DATABASE_URL;
   const db = databaseUrl ? createDb(databaseUrl) : null;
   const alertRepository = db ? new PgAlertRepository(db) : new InMemoryAlertRepository();
@@ -72,11 +72,46 @@ export function createApp(): Hono {
   );
   app.use('*', createAuditMiddleware(logger));
 
+  app.doc('/openapi.json', {
+    info: {
+      title: 'Sauver la Face API',
+      version: '1.0.0',
+      description: 'Documentation OpenAPI du backend Sauver la Face',
+    },
+    openapi: '3.0.0',
+  });
+
   app.route('/', authRouter);
   app.route('/', createAlertRouter(alertUsecase));
   app.route('/', createPatientRouter(patientUsecase));
   app.route('/', createSyncRouter(syncUsecase));
   app.route('/', createPhotosRouter(photosUsecase));
+
+  if (process.env.NODE_ENV !== 'production') {
+    app.get('/docs', (context) =>
+      context.html(`<!DOCTYPE html>
+<html lang="fr">
+  <head>
+    <meta charset="utf-8" />
+    <title>Sauver la Face API Docs</title>
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/swagger-ui-dist@5/swagger-ui.css"
+    />
+  </head>
+  <body>
+    <div id="swagger-ui"></div>
+    <script src="https://unpkg.com/swagger-ui-dist@5/swagger-ui-bundle.js"></script>
+    <script>
+      window.ui = SwaggerUIBundle({
+        url: '/openapi.json',
+        dom_id: '#swagger-ui',
+      });
+    </script>
+  </body>
+</html>`),
+    );
+  }
 
   app.onError((error, context) => {
     logger.error({ error }, 'Unhandled backend error');
