@@ -22,18 +22,20 @@ export default function HomePage() {
     );
   }
 
-  if (!session) return null;
+  if (!session) {
+    return null;
+  }
 
   const { user } = session;
+  const twoFactorEnabled = user.twoFactorEnabled;
 
   return (
     <main className="min-h-screen bg-gray-50">
-      {/* Navbar */}
       <nav className="border-b border-gray-200 bg-white px-6 py-4 shadow-sm">
         <div className="mx-auto flex max-w-5xl items-center justify-between">
           <div className="flex items-center gap-3">
-            <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-blue-600 text-white text-lg">
-              ✚
+            <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-blue-600 text-lg text-white">
+              +
             </span>
             <span className="font-semibold text-gray-800">Sauver la Face</span>
           </div>
@@ -44,39 +46,34 @@ export default function HomePage() {
                 fetchOptions: { onSuccess: () => router.replace('/login') },
               })
             }
-            className="rounded-lg border border-gray-200 px-4 py-2 text-sm text-gray-600 hover:bg-gray-50 hover:text-gray-900 transition-colors"
+            className="rounded-lg border border-gray-200 px-4 py-2 text-sm text-gray-600 transition-colors hover:bg-gray-50 hover:text-gray-900"
           >
-            Se déconnecter
+            Se deconnecter
           </button>
         </div>
       </nav>
 
-      {/* Content */}
       <div className="mx-auto max-w-5xl px-6 py-10">
-        {/* Welcome */}
-        <div className="mb-8 rounded-2xl bg-white p-6 shadow-sm border border-gray-100">
-          <p className="text-sm text-gray-500 mb-1">Connecté en tant que</p>
-          <h1 className="text-xl font-bold text-gray-900">{user.name ?? 'Médecin'}</h1>
-          <p className="text-sm text-blue-600 mt-0.5">{user.email}</p>
+        <div className="mb-8 rounded-2xl border border-gray-100 bg-white p-6 shadow-sm">
+          <p className="mb-1 text-sm text-gray-500">Connecte en tant que</p>
+          <h1 className="text-xl font-bold text-gray-900">{user.name ?? 'Medecin'}</h1>
+          <p className="mt-0.5 text-sm text-blue-600">{user.email}</p>
         </div>
 
-        {/* Auth info */}
         <div className="grid gap-4 sm:grid-cols-3">
           <StatusCard
             label="Session"
             value="Active"
-            sub="Expire dans 2h d'inactivité"
+            sub="Expire dans 2h d'inactivite"
             color="green"
           />
           <StatusCard
             label="MFA TOTP"
-            value={(user as any).twoFactorEnabled ? 'Activé' : 'Non activé'}
+            value={twoFactorEnabled ? 'Active' : 'Non active'}
             sub={
-              (user as any).twoFactorEnabled
-                ? 'Double authentification active'
-                : 'Recommandé pour la sécurité'
+              twoFactorEnabled ? 'Double authentification active' : 'Recommande pour la securite'
             }
-            color={user.twoFactorEnabled ? 'green' : 'yellow'}
+            color={twoFactorEnabled ? 'green' : 'yellow'}
           />
           <StatusCard
             label="Backend"
@@ -86,14 +83,13 @@ export default function HomePage() {
           />
         </div>
 
-        {/* Session details */}
-        <div className="mt-6 rounded-2xl bg-white p-6 shadow-sm border border-gray-100">
-          <h2 className="text-sm font-semibold text-gray-700 mb-4">Détails de session</h2>
+        <div className="mt-6 rounded-2xl border border-gray-100 bg-white p-6 shadow-sm">
+          <h2 className="mb-4 text-sm font-semibold text-gray-700">Details de session</h2>
           <dl className="space-y-2 text-sm">
             <Row label="ID utilisateur" value={user.id} mono />
-            <Row label="Email vérifié" value={user.emailVerified ? 'Oui' : 'Non'} />
+            <Row label="Email verifie" value={user.emailVerified ? 'Oui' : 'Non'} />
             <Row
-              label="Compte créé le"
+              label="Compte cree le"
               value={new Date(user.createdAt).toLocaleDateString('fr-FR', {
                 dateStyle: 'long',
               })}
@@ -117,9 +113,9 @@ function StatusCard({
   color: 'green' | 'yellow' | 'blue';
 }) {
   const colors = {
-    green: 'bg-green-50 text-green-700 border-green-100',
-    yellow: 'bg-yellow-50 text-yellow-700 border-yellow-100',
-    blue: 'bg-blue-50 text-blue-700 border-blue-100',
+    green: 'border-green-100 bg-green-50 text-green-700',
+    yellow: 'border-yellow-100 bg-yellow-50 text-yellow-700',
+    blue: 'border-blue-100 bg-blue-50 text-blue-700',
   };
 
   return (
@@ -135,7 +131,7 @@ function Row({ label, value, mono }: { label: string; value: string; mono?: bool
   return (
     <div className="flex items-start gap-4">
       <dt className="w-36 shrink-0 text-gray-500">{label}</dt>
-      <dd className={`text-gray-800 ${mono ? 'font-mono text-xs break-all' : ''}`}>{value}</dd>
+      <dd className={`text-gray-800 ${mono ? 'break-all font-mono text-xs' : ''}`}>{value}</dd>
     </div>
   );
 }
