@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, mock } from 'bun:test';
 import { PatientCodeValue } from '@sauver-la-face/shared';
 import type { PatientCode, PatientCodeRepository } from '../domain/patientCodeRepository';
-import { AuthUsecase } from './auth.usecase';
+import { AuthUsecase } from './authUsecase';
 import type { TokenPayload, TokenProvider } from './tokenProvider';
 
 class MockPatientCodeRepository implements PatientCodeRepository {

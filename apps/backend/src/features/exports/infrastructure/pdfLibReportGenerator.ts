@@ -1,6 +1,6 @@
 import { PDFDocument, type PDFFont, type PDFPage, rgb, StandardFonts } from 'pdf-lib';
 
-import { displayPii, type PatientExportData } from '../domain/exports.domain';
+import { displayPii, type PatientExportData } from '../domain/exportsDomain';
 import type { PdfReportGenerator } from '../domain/pdfReportGenerator';
 
 // Adapter pdf-lib pour la génération d'un rapport patient PDF/A4.

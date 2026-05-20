@@ -12,8 +12,8 @@ import {
   PgAlertRepository,
 } from './features/alerts/infrastructure/alertRepository';
 import { createAlertRouter } from './features/alerts/presentation/alertRouter';
-import { AuthCron } from './features/auth/application/auth.cron';
-import { AuthUsecase } from './features/auth/application/auth.usecase';
+import { AuthCron } from './features/auth/application/authCron';
+import { AuthUsecase } from './features/auth/application/authUsecase';
 import { JwtTokenProvider } from './features/auth/infrastructure/jwtTokenProvider';
 import { DrizzlePatientCodeRepository } from './features/auth/infrastructure/patientCodeRepository';
 // Imports unifiés pour l'Auth (Patients + Better Auth)
@@ -51,9 +51,9 @@ import { createSyncRouter } from './features/sync/presentation/syncRouter';
 // Jobs & Infrastructure
 import { scheduleJobs } from './infrastructure/jobs';
 import { db } from './shared/db'; // Maintenu pour la compatibilité avec DrizzlePatientCodeRepository
-import { startAuditExportScheduler } from './shared/jobs/audit.export.cron';
-import { createAuditMiddleware } from './shared/middleware/audit.middleware';
-import { createS3LogsStorageFromEnv } from './shared/storage/logs.storage';
+import { startAuditExportScheduler } from './shared/jobs/auditExportCron';
+import { createAuditMiddleware } from './shared/middleware/auditMiddleware';
+import { createS3LogsStorageFromEnv } from './shared/storage/logsStorage';
 import { buildPhotoPublicBaseUrl, createPhotoS3Client } from './shared/storage/s3Client';
 
 function throwNoDb(feature: string): never {

@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, mock } from 'bun:test';
-import { PATIENT_CODE_TTL_HOURS } from '../domain/auth.domain';
+import { PATIENT_CODE_TTL_HOURS } from '../domain/authDomain';
 import type { PatientCodeRepository } from '../domain/patientCodeRepository';
-import { AuthCron } from './auth.cron';
+import { AuthCron } from './authCron';
 
 class MockPatientCodeRepository {
   softDeleteExpiredUnused = mock(async (_cutoff: Date) => 10);

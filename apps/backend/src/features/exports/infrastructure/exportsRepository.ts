@@ -17,7 +17,7 @@ import type {
   PatientExportData,
   ProcedureExportData,
   SymptomExportData,
-} from '../domain/exports.domain';
+} from '../domain/exportsDomain';
 import type { ExportsRepository } from '../domain/exportsRepository';
 
 // Adapter Drizzle pour la lecture des données d'export.

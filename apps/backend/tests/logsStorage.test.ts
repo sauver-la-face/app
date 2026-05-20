@@ -4,9 +4,9 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { gunzipSync } from 'node:zlib';
 import type { PutObjectCommand } from '@aws-sdk/client-s3';
-import { S3LogsStorage } from '../src/shared/storage/logs.storage';
+import { S3LogsStorage } from '../src/shared/storage/logsStorage';
 
-describe('logs.storage', () => {
+describe('logsStorage', () => {
   let temporaryDirectory: string | null = null;
 
   afterEach(() => {

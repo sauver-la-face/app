@@ -1,4 +1,4 @@
-import type { PatientExportData } from './exports.domain';
+import type { PatientExportData } from './exportsDomain';
 
 // Port (interface) de lecture des données pour les exports.
 // L'implémentation Drizzle vit dans `infrastructure/exportsRepository.ts`.

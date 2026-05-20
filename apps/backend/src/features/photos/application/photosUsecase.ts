@@ -3,9 +3,9 @@ import { randomUUID } from 'node:crypto';
 import { Photo } from '../domain/photo';
 import type { PhotoRepository } from '../domain/photoRepository';
 import type { PhotoStorage } from '../domain/photoStorage';
-import { validateChecksum } from '../domain/photos.domain';
+import { validateChecksum } from '../domain/photosDomain';
 
-export { PhotoIntegrityError } from '../domain/photos.domain';
+export { PhotoIntegrityError } from '../domain/photosDomain';
 
 interface UploadPhotoCommand {
   eventId: string;

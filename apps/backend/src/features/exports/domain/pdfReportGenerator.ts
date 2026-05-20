@@ -1,4 +1,4 @@
-import type { PatientExportData } from './exports.domain';
+import type { PatientExportData } from './exportsDomain';
 
 // Port (interface) de génération du PDF rapport patient.
 // L'implémentation concrète (pdf-lib) vit dans

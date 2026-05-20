@@ -6,13 +6,13 @@ import {
   createAlertsEtag,
   matchesEtag,
   sortAlerts,
-} from '../src/features/alerts/domain/alerts.domain';
+} from '../src/features/alerts/domain/alertsDomain';
 
 const patientId = '11111111-1111-4111-8111-111111111111';
 const eventId = '22222222-2222-4222-8222-222222222222';
 const now = new Date('2026-05-20T12:00:00.000Z');
 
-describe('alerts.domain', () => {
+describe('alertsDomain', () => {
   test('cree une alerte critique pour chaque symptome declencheur', () => {
     const alerts = buildTriggeredSymptomAlerts([
       {

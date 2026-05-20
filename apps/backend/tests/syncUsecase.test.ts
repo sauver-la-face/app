@@ -2,7 +2,7 @@ import { describe, expect, mock, test } from 'bun:test';
 
 import type { SyncRequest, SyncServerState } from '@sauver-la-face/shared';
 import { SyncUsecase } from '../src/features/sync/application/syncUsecase';
-import { SyncVersionError } from '../src/features/sync/domain/sync.domain';
+import { SyncVersionError } from '../src/features/sync/domain/syncDomain';
 import { InMemorySyncRepository } from '../src/features/sync/infrastructure/syncRepository';
 
 const patientId = '11111111-1111-4111-8111-111111111111';

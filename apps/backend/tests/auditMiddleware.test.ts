@@ -1,12 +1,12 @@
 import { afterEach, describe, expect, mock, test } from 'bun:test';
 import { Hono } from 'hono';
-import { createAuditMiddleware } from '../src/shared/middleware/audit.middleware';
+import { createAuditMiddleware } from '../src/shared/middleware/auditMiddleware';
 
 afterEach(() => {
   delete process.env.NODE_ENV;
 });
 
-describe('audit.middleware', () => {
+describe('auditMiddleware', () => {
   test('log une requete reussie avec les metadonnees attendues', async () => {
     const logger = createLoggerMock();
     const app = new Hono();

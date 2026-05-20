@@ -1,5 +1,5 @@
 import { logger } from '../logger';
-import type { AuditLogExportResult, S3LogsStorage } from '../storage/logs.storage';
+import type { AuditLogExportResult, S3LogsStorage } from '../storage/logsStorage';
 
 interface CronLogger {
   error(payload: Record<string, unknown>, message: string): void;
