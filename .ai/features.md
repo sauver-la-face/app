@@ -100,7 +100,7 @@ Mobile (SQLite) → Hono sync.usecase.ts → compare avec PostgreSQL
 
 ### ALERT-01 — Système d'alertes automatiques
 
-`[ ]` 🟡 Majeur · `apps/backend/src/features/alerts/`
+`[~]` 🟡 Majeur · `apps/backend/src/features/alerts/`
 
 **Comportement attendu :**
 
