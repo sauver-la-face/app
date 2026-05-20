@@ -9,7 +9,7 @@ export function isLocale(value: string | null | undefined): value is Locale {
 }
 
 export const localeConfig: Record<Locale, { label: string; flag: string }> = {
-  fr: { label: 'Français', flag: '🇫🇷' },
-  en: { label: 'English', flag: '🇬🇧' },
-  km: { label: 'ភាសាខ្មែរ', flag: '🇰🇭' },
+  fr: { label: 'Français', flag: '/flags/fr.svg' },
+  en: { label: 'English', flag: '/flags/gb.svg' },
+  km: { label: 'ភាសាខ្មែរ', flag: '/flags/kh.svg' },
 };
