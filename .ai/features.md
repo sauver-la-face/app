@@ -246,6 +246,27 @@ Mobile (SQLite) → Hono sync.usecase.ts → compare avec PostgreSQL
 
 ## DASHBOARD WEB
 
+### WEB-00 — Page de connexion médecin
+
+`[ ]` 🔴 Critique · `apps/web/src/app/[locale]/login/`
+
+**Comportement attendu :**
+
+- Formulaire de connexion médecin (email + mot de passe) fidèle aux maquettes Figma
+- Sélecteur de langue (fr/en/km) visible en haut à droite — dépend de WEB-I18N
+- Bouton "Se connecter" avec état de chargement
+- Lien "Identifiants oubliés ?"
+- Footer : Mentions légales · Données personnelles · Plan du site
+- Redirection vers le dashboard après connexion réussie
+
+**Règles de code :**
+
+- Utiliser Better Auth côté client — jamais de `BETTER_AUTH_SECRET` dans le web
+- Toutes les strings via le dictionnaire i18n — jamais en dur
+- Dépend de : WEB-I18N
+
+---
+
 ### WEB-I18N — Internationalisation du dashboard web (français / anglais / khmer)
 
 `[ ]` 🔴 Critique · `apps/web/src/i18n/`
