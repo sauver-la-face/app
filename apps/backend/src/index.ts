@@ -1,5 +1,6 @@
 import { createDb } from '@shared/db';
 import { logger } from '@shared/logger';
+import { buildPhotoPublicBaseUrl, createPhotoS3Client } from '@shared/storage/s3Client';
 import { Hono } from 'hono';
 import { cors } from 'hono/cors';
 import { logger as honoLogger } from 'hono/logger';
@@ -11,12 +12,17 @@ import {
 } from './features/alerts/infrastructure/alertRepository';
 import { createAlertRouter } from './features/alerts/presentation/alertRouter';
 import { authRouter } from './features/auth/presentation/authRouter';
+
 import { PatientUsecase } from './features/patients/application/patientUsecase';
 import {
   InMemoryPatientsRepository,
   PgPatientsRepository,
 } from './features/patients/infrastructure/patientRepository';
 import { createPatientRouter } from './features/patients/presentation/patientRouter';
+import { PhotosUsecase } from './features/photos/application/photosUsecase';
+import { PgPhotoRepository } from './features/photos/infrastructure/pgPhotoRepository';
+import { S3PhotoStorage } from './features/photos/infrastructure/s3PhotoStorage';
+import { createPhotosRouter } from './features/photos/presentation/photosRouter';
 import { SyncUsecase } from './features/sync/application/syncUsecase';
 import {
   InMemorySyncRepository,
@@ -38,10 +44,16 @@ export function createApp(): Hono {
   const syncUsecase = new SyncUsecase(syncRepository, logger, 1);
   const patientUsecase = new PatientUsecase(patientRepository, logger);
 
+  const s3Client = createPhotoS3Client();
+  const bucket = process.env.MINIO_BUCKET_PHOTOS ?? 'photos';
+  const photoStorage = new S3PhotoStorage(s3Client, bucket, buildPhotoPublicBaseUrl());
+  const photoRepository = db ? new PgPhotoRepository(db) : null;
+  const photosUsecase = new PhotosUsecase(photoStorage, photoRepository ?? throwNoDb('photos'));
+
   if (!databaseUrl) {
     logger.warn(
       {
-        features: ['alerts', 'sync', 'patients'],
+        features: ['alerts', 'sync', 'patients', 'photos'],
       },
       'DATABASE_URL is not set, falling back to in-memory repositories',
     );
@@ -64,6 +76,7 @@ export function createApp(): Hono {
   app.route('/', createAlertRouter(alertUsecase));
   app.route('/', createPatientRouter(patientUsecase));
   app.route('/', createSyncRouter(syncUsecase));
+  app.route('/', createPhotosRouter(photosUsecase));
 
   app.onError((error, context) => {
     logger.error({ error }, 'Unhandled backend error');
@@ -73,9 +86,14 @@ export function createApp(): Hono {
   return app;
 }
 
+function throwNoDb(feature: string): never {
+  throw new Error(`DATABASE_URL is required for feature: ${feature}`);
+}
+
 const app = createApp();
 const auditLogsStorage = createS3LogsStorageFromEnv();
 
+// Mount Builtin Middleware
 app.use('*', poweredBy());
 
 if (process.env.NODE_ENV !== 'production') {
