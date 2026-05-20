@@ -139,7 +139,7 @@ Mobile (SQLite) → Hono sync.usecase.ts → compare avec PostgreSQL
 
 ### EXPORT-01 — Export PDF / CSV RGPD
 
-`[ ]` 🟢 Mineur · `apps/backend/src/features/exports/`
+`[~]` 🟢 Mineur · `apps/backend/src/features/exports/`
 
 **Comportement attendu :**
 
