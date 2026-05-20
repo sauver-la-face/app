@@ -3,6 +3,12 @@ import { logger } from '@shared/logger';
 import { Hono } from 'hono';
 import { cors } from 'hono/cors';
 import { logger as honoLogger } from 'hono/logger';
+import { AlertUsecase } from './features/alerts/application/alertUsecase';
+import {
+  InMemoryAlertRepository,
+  PgAlertRepository,
+} from './features/alerts/infrastructure/alertRepository';
+import { createAlertRouter } from './features/alerts/presentation/alertRouter';
 import { authRouter, type SessionVariables } from './features/auth/presentation/authRouter';
 
 import { PatientUsecase } from './features/patients/application/patientUsecase';
@@ -22,15 +28,17 @@ export function createApp(): Hono {
   const app = new Hono();
   const databaseUrl = process.env.DATABASE_URL;
   const db = databaseUrl ? createDb(databaseUrl) : null;
+  const alertRepository = db ? new PgAlertRepository(db) : new InMemoryAlertRepository();
   const syncRepository = db ? new PgSyncRepository(db) : new InMemorySyncRepository();
   const patientRepository = db ? new PgPatientsRepository(db) : new InMemoryPatientsRepository();
+  const alertUsecase = new AlertUsecase(alertRepository, logger);
   const syncUsecase = new SyncUsecase(syncRepository, logger, 1);
   const patientUsecase = new PatientUsecase(patientRepository, logger);
 
   if (!databaseUrl) {
     logger.warn(
       {
-        features: ['sync', 'patients'],
+        features: ['alerts', 'sync', 'patients'],
       },
       'DATABASE_URL is not set, falling back to in-memory repositories',
     );
@@ -49,6 +57,7 @@ export function createApp(): Hono {
   );
 
   app.route('/', authRouter);
+  app.route('/', createAlertRouter(alertUsecase));
   app.route('/', createPatientRouter(patientUsecase));
   app.route('/', createSyncRouter(syncUsecase));
 
