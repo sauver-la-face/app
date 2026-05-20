@@ -1,20 +1,62 @@
-import { syncRequestSchema } from '@sauver-la-face/shared';
-import { Hono } from 'hono';
-
+import { createRoute, OpenAPIHono } from '@hono/zod-openapi';
+import { syncRequestSchema, syncResponseSchema } from '@sauver-la-face/shared';
+import { syncVersionErrorSchema, validationErrorSchema } from '../../../shared/openapi';
 import type { SyncUsecase } from '../application/syncUsecase';
 import { SyncVersionError } from '../domain/sync.domain';
 
-export function createSyncRouter(syncUsecase: SyncUsecase): Hono {
-  const router = new Hono();
+const syncRoute = createRoute({
+  method: 'post',
+  path: '/sync',
+  request: {
+    body: {
+      content: {
+        'application/json': {
+          schema: syncRequestSchema,
+        },
+      },
+      required: true,
+    },
+  },
+  responses: {
+    200: {
+      content: {
+        'application/json': {
+          schema: syncResponseSchema,
+        },
+      },
+      description: 'Synchronisation reussie',
+    },
+    400: {
+      content: {
+        'application/json': {
+          schema: validationErrorSchema,
+        },
+      },
+      description: 'Erreur de validation',
+    },
+    409: {
+      content: {
+        'application/json': {
+          schema: syncVersionErrorSchema,
+        },
+      },
+      description: 'Version de schema incompatible',
+    },
+  },
+  tags: ['Sync'],
+});
 
-  router.post('/sync', async (context) => {
+export function createSyncRouter(syncUsecase: SyncUsecase): OpenAPIHono {
+  const router = new OpenAPIHono();
+
+  router.openapi(syncRoute, async (context) => {
     const body = await context.req.json().catch(() => undefined);
     const parsedBody = syncRequestSchema.safeParse(body);
 
     if (!parsedBody.success) {
       return context.json(
         {
-          code: 'VALIDATION_ERROR',
+          code: 'VALIDATION_ERROR' as const,
           details: parsedBody.error.flatten(),
         },
         400,
@@ -28,7 +70,7 @@ export function createSyncRouter(syncUsecase: SyncUsecase): Hono {
       if (error instanceof SyncVersionError) {
         return context.json(
           {
-            code: error.code,
+            code: error.code as 'APP_UPDATE_REQUIRED',
             message: error.message,
             serverSchemaVersion: error.serverSchemaVersion,
           },

@@ -5,6 +5,7 @@
   "scripts": {
     "start": "expo start",
     "android": "expo run:android",
+    "generate:api-types": "bunx openapi-typescript http://localhost:3001/openapi.json -o src/api.types.ts",
     "ios": "expo run:ios",
     "test": "bun test"
   },
