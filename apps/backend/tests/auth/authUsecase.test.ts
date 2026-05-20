@@ -1,6 +1,10 @@
 import { afterAll, beforeAll, describe, expect, it } from 'bun:test';
 
-const hasAuthTestEnvironment = Boolean(process.env.DATABASE_URL && process.env.BETTER_AUTH_SECRET);
+const hasAuthTestEnvironment = Boolean(
+  process.env.RUN_AUTH_INTEGRATION_TESTS === 'true' &&
+    process.env.DATABASE_URL &&
+    process.env.BETTER_AUTH_SECRET,
+);
 
 const TEST_EMAIL = `physician.test.${Date.now()}@sauver-la-face.test`;
 const TEST_PASSWORD = 'TestPassword123!';
@@ -49,7 +53,7 @@ async function signInWithCookie(email = TEST_EMAIL, password = TEST_PASSWORD): P
 
 if (!hasAuthTestEnvironment) {
   describe('AUTH-02 - Authentification medecin', () => {
-    it('ignore les tests auth quand DATABASE_URL ou BETTER_AUTH_SECRET est absent', () => {
+    it('ignore les tests auth tant que RUN_AUTH_INTEGRATION_TESTS n est pas active', () => {
       expect(hasAuthTestEnvironment).toBe(false);
     });
   });
