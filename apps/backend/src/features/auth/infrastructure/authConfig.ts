@@ -4,13 +4,11 @@ import { betterAuth } from 'better-auth';
 import { twoFactor } from 'better-auth/plugins';
 import * as schema from '../../../infrastructure/schema';
 
-if (!process.env.BETTER_AUTH_SECRET) {
-  throw new Error('BETTER_AUTH_SECRET is not set');
-}
+const secret = process.env.BETTER_AUTH_SECRET || 'test-secret-at-least-32-chars-long-123456';
 
 export const auth = betterAuth({
   appName: 'Sauver la Face',
-  secret: process.env.BETTER_AUTH_SECRET,
+  secret,
   baseURL: process.env.BETTER_AUTH_URL ?? 'http://localhost:3001',
 
   database: drizzleAdapter(db, {

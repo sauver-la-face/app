@@ -12,7 +12,9 @@
     "db:seed:sync01": "dotenv -e .env.local -- bun run scripts/seedSync01.ts"
   },
   "dependencies": {
+    "@aws-sdk/client-s3": "^3.1050.0",
     "@better-auth/drizzle-adapter": "^1.6.9",
+    "@hono/swagger-ui": "^0.6.1",
     "@hono/zod-openapi": "^0.16.0",
     "@sauver-la-face/shared": "workspace:*",
     "better-auth": "^1.0.0",

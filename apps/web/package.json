@@ -5,6 +5,7 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
+    "generate:api-types": "bunx openapi-typescript http://localhost:3001/openapi.json -o src/api.types.ts",
     "start": "next start",
     "test": "bun test"
   },

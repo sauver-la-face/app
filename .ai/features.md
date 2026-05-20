@@ -39,7 +39,7 @@
 
 ### AUTH-02 — Authentification médecins (MFA TOTP)
 
-`[ ]` 🔴 Critique · `apps/backend/src/features/auth/`
+`[x]` 🔴 Critique · `apps/backend/src/features/auth/`
 
 **Comportement attendu :**
 
@@ -100,7 +100,7 @@ Mobile (SQLite) → Hono sync.usecase.ts → compare avec PostgreSQL
 
 ### ALERT-01 — Système d'alertes automatiques
 
-`[~]` 🟡 Majeur · `apps/backend/src/features/alerts/`
+`[x]` 🟡 Majeur · `apps/backend/src/features/alerts/`
 
 **Comportement attendu :**
 
@@ -119,7 +119,7 @@ Mobile (SQLite) → Hono sync.usecase.ts → compare avec PostgreSQL
 
 ### PHOTO-01 — Stockage et validation des photos
 
-`[ ]` 🟡 Majeur · `apps/backend/src/features/photos/`
+`[x]` 🟡 Majeur · `apps/backend/src/features/photos/`
 
 **Comportement attendu :**
 
@@ -158,7 +158,7 @@ Mobile (SQLite) → Hono sync.usecase.ts → compare avec PostgreSQL
 
 ### AUDIT-01 — Middleware d'audit logs
 
-`[ ]` 🟡 Majeur · `apps/backend/src/shared/middleware/audit.middleware.ts`
+`[x]` 🟡 Majeur · `apps/backend/src/shared/middleware/audit.middleware.ts`
 
 **Comportement attendu :**
 
@@ -191,7 +191,7 @@ Mobile (SQLite) → Hono sync.usecase.ts → compare avec PostgreSQL
 
 ### API-01 — Documentation OpenAPI auto-générée (Swagger UI)
 
-`[ ]` 🟢 Mineur · `apps/backend/src/index.ts`
+`[x]` 🟢 Mineur · `apps/backend/src/index.ts`
 
 **Comportement attendu :**
 

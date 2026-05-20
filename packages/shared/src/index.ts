@@ -1,5 +1,5 @@
-// Exports du domaine partagé (Value Objects utilisés par le backend et le mobile)
-// Les exports seront ajoutés ici au fur et à mesure de l'implémentation des features
+export * from './alerts';
+export * from './domain/checksumSHA256';
 export * from './domain/patientCodeValue';
 export * from './patients';
 export * from './sync';
