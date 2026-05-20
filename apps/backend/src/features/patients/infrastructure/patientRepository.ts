@@ -494,4 +494,4 @@ function isUniqueViolation(error: unknown): error is { code: string } {
   );
 }
 
-export type { PatientPersistenceRecord };
+export type { PatientHistoryRecord, PatientPersistenceRecord };
