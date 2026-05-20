@@ -1,24 +1,10 @@
-import { OpenAPIHono } from '@hono/zod-openapi';
 import { swaggerUI } from '@hono/swagger-ui';
+import { OpenAPIHono } from '@hono/zod-openapi';
+import { createDb } from '@shared/db';
+import { logger } from '@shared/logger';
 import { cors } from 'hono/cors';
 import { logger as honoLogger } from 'hono/logger';
 import { poweredBy } from 'hono/powered-by';
-
-import { createDb } from '@shared/db';
-import { db } from './shared/db'; // Maintenu pour la compatibilité avec DrizzlePatientCodeRepository
-import { logger } from '@shared/logger';
-
-// Imports unifiés pour l'Auth (Patients + Better Auth)
-import { 
-  authRouter, 
-  createAuthRouter, 
-  type SessionVariables 
-} from './features/auth/presentation/authRouter';
-import { DrizzlePatientCodeRepository } from './features/auth/infrastructure/patientCodeRepository';
-import { AuthUsecase } from './features/auth/application/auth.usecase';
-import { JwtTokenProvider } from './features/auth/infrastructure/jwtTokenProvider';
-import { AuthCron } from './features/auth/application/auth.cron';
-
 // Features métier
 import { AlertUsecase } from './features/alerts/application/alertUsecase';
 import {
@@ -26,6 +12,16 @@ import {
   PgAlertRepository,
 } from './features/alerts/infrastructure/alertRepository';
 import { createAlertRouter } from './features/alerts/presentation/alertRouter';
+import { AuthCron } from './features/auth/application/auth.cron';
+import { AuthUsecase } from './features/auth/application/auth.usecase';
+import { JwtTokenProvider } from './features/auth/infrastructure/jwtTokenProvider';
+import { DrizzlePatientCodeRepository } from './features/auth/infrastructure/patientCodeRepository';
+// Imports unifiés pour l'Auth (Patients + Better Auth)
+import {
+  authRouter,
+  createAuthRouter,
+  type SessionVariables,
+} from './features/auth/presentation/authRouter';
 import { PatientUsecase } from './features/patients/application/patientUsecase';
 import {
   InMemoryPatientsRepository,
@@ -42,9 +38,9 @@ import {
   PgSyncRepository,
 } from './features/sync/infrastructure/syncRepository';
 import { createSyncRouter } from './features/sync/presentation/syncRouter';
-
 // Jobs & Infrastructure
 import { scheduleJobs } from './infrastructure/jobs';
+import { db } from './shared/db'; // Maintenu pour la compatibilité avec DrizzlePatientCodeRepository
 import { startAuditExportScheduler } from './shared/jobs/audit.export.cron';
 import { createAuditMiddleware } from './shared/middleware/audit.middleware';
 import { createS3LogsStorageFromEnv } from './shared/storage/logs.storage';
@@ -78,9 +74,13 @@ export function createApp(): OpenAPIHono<{ Variables: SessionVariables }> {
   // --- Injection des Dépendances (DI) ---
 
   // 1. Repositories
-  const alertRepository = dynamicDb ? new PgAlertRepository(dynamicDb) : new InMemoryAlertRepository();
+  const alertRepository = dynamicDb
+    ? new PgAlertRepository(dynamicDb)
+    : new InMemoryAlertRepository();
   const syncRepository = dynamicDb ? new PgSyncRepository(dynamicDb) : new InMemorySyncRepository();
-  const patientRepository = dynamicDb ? new PgPatientsRepository(dynamicDb) : new InMemoryPatientsRepository();
+  const patientRepository = dynamicDb
+    ? new PgPatientsRepository(dynamicDb)
+    : new InMemoryPatientsRepository();
   const photoRepository = dynamicDb ? new PgPhotoRepository(dynamicDb) : null;
   const patientCodeRepository = new DrizzlePatientCodeRepository(db);
 
@@ -94,7 +94,7 @@ export function createApp(): OpenAPIHono<{ Variables: SessionVariables }> {
   const syncUsecase = new SyncUsecase(syncRepository, logger, 1);
   const patientUsecase = new PatientUsecase(patientRepository, logger);
   const photosUsecase = new PhotosUsecase(photoStorage, photoRepository ?? throwNoDb('photos'));
-  
+
   const tokenProvider = new JwtTokenProvider(process.env.JWT_SECRET || 'dev-secret');
   const patientAuthUsecase = new AuthUsecase(patientCodeRepository, tokenProvider);
   const authCron = new AuthCron(patientCodeRepository);
@@ -127,11 +127,11 @@ export function createApp(): OpenAPIHono<{ Variables: SessionVariables }> {
 
   // --- Enregistrement des Routes ---
   app.get('/health', (c) => c.json({ status: 'ok' }));
-  
+
   // Routes Auth (classiques + patients)
   app.route('/', authRouter);
   app.route('/auth', createAuthRouter(patientAuthUsecase));
-  
+
   // Routes métier
   app.route('/', createAlertRouter(alertUsecase));
   app.route('/', createPatientRouter(patientUsecase));
