@@ -1,9 +1,16 @@
+import { createRoute, OpenAPIHono, z } from '@hono/zod-openapi';
+import { patientCodeSchema } from '@sauver-la-face/shared';
 import { logger } from '@shared/logger';
 import { Hono } from 'hono';
+import { rateLimiter } from '../../../shared/middleware/rateLimiter';
+import type { AuthUsecase } from '../application/auth.usecase';
 import { auth } from '../infrastructure/authConfig';
 
+// ============================================================================
+// PARTIE 1 : AUTHENTIFICATION BETTER AUTH (Depuis `dev`)
+// ============================================================================
+
 // État en mémoire des tentatives échouées par IP.
-// Suffisant pour 20 utilisateurs web simultanés — pas besoin de Redis en v1.
 type IpState = { failures: number; blockedUntil: number | null };
 const ipFailures = new Map<string, IpState>();
 
@@ -44,9 +51,9 @@ function resetFailures(ip: string): void {
   ipFailures.delete(ip);
 }
 
+// Export du routeur pour l'authentification classique
 export const authRouter = new Hono();
 
-// Middleware de rate limiting sur les tentatives de connexion échouées
 authRouter.use('/api/auth/sign-in/email', async (c, next) => {
   const ip = getClientIp(c.req.raw);
 
@@ -63,7 +70,6 @@ authRouter.use('/api/auth/sign-in/email', async (c, next) => {
 
   await next();
 
-  // Après la réponse de Better Auth : comptabiliser les échecs
   const status = c.res.status;
   if (status === 401 || status === 422 || status === 403) {
     recordFailure(ip);
@@ -72,10 +78,8 @@ authRouter.use('/api/auth/sign-in/email', async (c, next) => {
   }
 });
 
-// Handler principal Better Auth — couvre toutes les routes /api/auth/*
 authRouter.on(['POST', 'GET'], '/api/auth/*', (c) => auth.handler(c.req.raw));
 
-// Middleware d'injection de session pour les routes protégées
 export type SessionVariables = {
   user: typeof auth.$Infer.Session.user | null;
   session: typeof auth.$Infer.Session.session | null;
@@ -89,4 +93,149 @@ export const sessionMiddleware = async (
   c.set('user', session?.user ?? null);
   c.set('session', session?.session ?? null);
   await next();
+};
+
+// ============================================================================
+// PARTIE 2 : AUTHENTIFICATION PATIENTS branche `feature`
+// ============================================================================
+
+const validateSchema = z.object({
+  code: patientCodeSchema,
+});
+
+const generateSchema = z.object({
+  uuid_patient: z.string().uuid(),
+});
+
+const renewSchema = z.object({
+  uuid_patient: z.string().uuid(),
+});
+
+// Export de la factory du routeur patient (qui nécessite l'injection du usecase)
+export const createAuthRouter = (authUsecase: AuthUsecase) => {
+  const app = new OpenAPIHono();
+
+  app.post(
+    '/patient/validate',
+    rateLimiter({
+      maxAttempts: 3,
+      windowMs: 15 * 60 * 1000,
+      blockDurationMs: 15 * 60 * 1000,
+    }),
+  );
+
+  app.openapi(
+    createRoute({
+      method: 'post',
+      path: '/patient/validate',
+      request: {
+        body: {
+          content: {
+            'application/json': {
+              schema: validateSchema,
+            },
+          },
+        },
+      },
+      responses: {
+        200: {
+          description: 'Code valide',
+          content: {
+            'application/json': {
+              schema: z.object({
+                success: z.literal(true),
+                patientCode: z.any(), // On pourra affiner le schéma plus tard
+                token: z.string().optional(),
+              }),
+            },
+          },
+        },
+        401: {
+          description: 'Code invalide ou expiré',
+          content: {
+            'application/json': {
+              schema: z.object({
+                success: z.literal(false),
+                error: z.string(),
+              }),
+            },
+          },
+        },
+      },
+    }),
+    async (c) => {
+      const { code } = c.req.valid('json');
+      const result = await authUsecase.validatePatientCode(code);
+
+      if (!result.success) {
+        return c.json(result, 401);
+      }
+
+      return c.json(result, 200);
+    },
+  );
+
+  app.openapi(
+    createRoute({
+      method: 'post',
+      path: '/patient/generate',
+      request: {
+        body: {
+          content: {
+            'application/json': {
+              schema: generateSchema,
+            },
+          },
+        },
+      },
+      responses: {
+        201: {
+          description: 'Code généré',
+          content: {
+            'application/json': {
+              schema: z.any(),
+            },
+          },
+        },
+      },
+    }),
+    async (c) => {
+      const { uuid_patient } = c.req.valid('json');
+      const patientCode = await authUsecase.generatePatientCode(uuid_patient);
+      return c.json(patientCode, 201);
+    },
+  );
+
+  app.openapi(
+    createRoute({
+      method: 'post',
+      path: '/patient/renew',
+      request: {
+        body: {
+          content: {
+            'application/json': {
+              schema: renewSchema,
+            },
+          },
+        },
+      },
+      responses: {
+        201: {
+          description: 'Code renouvelé',
+          content: {
+            'application/json': {
+              schema: z.any(),
+            },
+          },
+        },
+      },
+    }),
+    async (c) => {
+      const { uuid_patient } = c.req.valid('json');
+      const patientCode = await authUsecase.renewPatientCode(uuid_patient);
+      return c.json(patientCode, 201);
+    },
+  );
+
+  return app;
 };
