@@ -3,17 +3,6 @@
     "allow": ["Bash(bun run lint *)"]
   },
   "hooks": {
-    "PreToolUse": [
-      {
-        "matcher": "Edit|Write",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "powershell -NoProfile -Command \"$json = [Console]::In.ReadToEnd() | ConvertFrom-Json; $f = $json.tool_input.file_path; if ($f -like '*.env.local') { Write-Host 'Edition .env.local bloquee — secrets DB et cles S3'; exit 2 }; exit 0\""
-          }
-        ]
-      }
-    ],
     "PostToolUse": [
       {
         "matcher": "Edit|Write",

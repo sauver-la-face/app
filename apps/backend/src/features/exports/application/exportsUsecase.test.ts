@@ -54,7 +54,7 @@ describe('ExportsUsecase.exportPatientPdf', () => {
     const bytes = await usecase.exportPatientPdf(patient.patientId);
 
     expect(generator.calls).toHaveLength(1);
-    expect(generator.calls[0]!.patientId).toBe(patient.patientId);
+    expect(generator.calls[0]?.patientId).toBe(patient.patientId);
     expect(bytes.length).toBeGreaterThan(0);
   });
 

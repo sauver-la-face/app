@@ -15,7 +15,8 @@ Une fois l'info obtenue, exécute dans l'ordre :
 1. `git checkout dev`
 2. `git pull origin dev`
 3. `git checkout -b feature/[ID]-[nom]`
+4. `git push -u origin HEAD`
 
-Confirme la branche créée et rappelle que :
+Confirme la branche créée et publiée, et rappelle que :
+- Le push est obligatoire pour déclencher le workflow GitHub Actions qui met `features.md` à `[~]`
 - La PR sera créée vers `dev` uniquement quand la feature est **terminée et testée**
-- Le statut dans `features.md` passera automatiquement de `[ ]` à `[~]` via GitHub Actions dès la création de la branche

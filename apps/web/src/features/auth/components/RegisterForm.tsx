@@ -34,7 +34,7 @@ export function RegisterForm({ locale, dictionary }: { locale: Locale; dictionar
         password,
       },
       {
-        onSuccess: () => router.push(`/${locale}`),
+        onSuccess: () => router.push(`/${locale}/dashboard`),
         onError: (ctx) => setError(ctx.error.message),
       },
     );
@@ -42,10 +42,13 @@ export function RegisterForm({ locale, dictionary }: { locale: Locale; dictionar
     setLoading(false);
   }
 
+  const inputClass =
+    'h-9 w-full rounded-[5px] border border-black/30 px-3 text-sm shadow-[0px_4px_4px_rgba(0,0,0,0.25)] focus:border-[#2EAC8E] focus:outline-none focus:ring-1 focus:ring-[#2EAC8E]';
+
   return (
-    <form onSubmit={handleSubmit} className="space-y-5">
+    <form onSubmit={handleSubmit} className="space-y-2">
       <div>
-        <label htmlFor="name" className="mb-1 block text-sm font-medium text-gray-700">
+        <label htmlFor="name" className="mb-1 block text-xs font-medium text-gray-700">
           {register.nameLabel}
         </label>
         <input
@@ -54,13 +57,13 @@ export function RegisterForm({ locale, dictionary }: { locale: Locale; dictionar
           type="text"
           required
           autoComplete="name"
-          className="w-full rounded-lg border border-gray-300 px-4 py-2.5 text-sm shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+          className={inputClass}
           placeholder={register.namePlaceholder}
         />
       </div>
 
       <div>
-        <label htmlFor="email" className="mb-1 block text-sm font-medium text-gray-700">
+        <label htmlFor="email" className="mb-1 block text-xs font-medium text-gray-700">
           {register.emailLabel}
         </label>
         <input
@@ -69,13 +72,13 @@ export function RegisterForm({ locale, dictionary }: { locale: Locale; dictionar
           type="email"
           required
           autoComplete="email"
-          className="w-full rounded-lg border border-gray-300 px-4 py-2.5 text-sm shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+          className={inputClass}
           placeholder={register.emailPlaceholder}
         />
       </div>
 
       <div>
-        <label htmlFor="password" className="mb-1 block text-sm font-medium text-gray-700">
+        <label htmlFor="password" className="mb-1 block text-xs font-medium text-gray-700">
           {register.passwordLabel}
         </label>
         <input
@@ -85,13 +88,13 @@ export function RegisterForm({ locale, dictionary }: { locale: Locale; dictionar
           required
           autoComplete="new-password"
           minLength={8}
-          className="w-full rounded-lg border border-gray-300 px-4 py-2.5 text-sm shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+          className={inputClass}
           placeholder={register.passwordPlaceholder}
         />
       </div>
 
       <div>
-        <label htmlFor="confirm" className="mb-1 block text-sm font-medium text-gray-700">
+        <label htmlFor="confirm" className="mb-1 block text-xs font-medium text-gray-700">
           {register.confirmLabel}
         </label>
         <input
@@ -101,7 +104,7 @@ export function RegisterForm({ locale, dictionary }: { locale: Locale; dictionar
           required
           autoComplete="new-password"
           minLength={8}
-          className="w-full rounded-lg border border-gray-300 px-4 py-2.5 text-sm shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+          className={inputClass}
           placeholder={register.confirmPlaceholder}
         />
       </div>
@@ -112,13 +115,15 @@ export function RegisterForm({ locale, dictionary }: { locale: Locale; dictionar
         </p>
       )}
 
-      <button
-        type="submit"
-        disabled={loading}
-        className="w-full rounded-lg bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white shadow transition-colors hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60"
-      >
-        {loading ? register.submitting : register.submit}
-      </button>
+      <div className="pt-1">
+        <button
+          type="submit"
+          disabled={loading}
+          className="h-9 w-full rounded-[10px] bg-[#2EAC8E] text-sm font-medium text-white shadow-sm transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
+        >
+          {loading ? register.submitting : register.submit}
+        </button>
+      </div>
     </form>
   );
 }

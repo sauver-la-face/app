@@ -31,8 +31,12 @@ bun install
 cp .env.example .env.local
 cp apps/backend/.env.example apps/backend/.env.local
 bun run docker:up:dev
-bun run --cwd apps/backend db:migrate
+# attendre "Backend démarré", puis synchroniser le schéma (premier lancement uniquement)
+docker exec sauverlaface-backend-1 sh -c "cd /app/apps/backend && bunx drizzle-kit push"
+bun run dev:web
 ```
+
+> ⚠️ `drizzle-kit migrate` est actuellement cassé — utiliser `push` en dev uniquement.
 
 ### 3. Vérifier que tout fonctionne
 
@@ -112,12 +116,12 @@ build:
   target: dev  ← hot reload activé
 ```
 
-En production, on cible `prod` :
+Le fichier `docker-compose.override.yml` est chargé automatiquement en dev (pas en prod). Il expose le port `3001` du backend sur `127.0.0.1` pour le développement local. En production, le backend n'est accessible que via Caddy sur le réseau Docker interne.
 
-```yaml
-# docker-compose.prod.yml (à créer au moment du déploiement)
-build:
-  target: prod  ← pas de watch mode, démarrage optimisé
+En production, on cible `prod` via `-f docker-compose.yml` explicitement (sans override) :
+
+```bash
+bun run docker:up:prod  # équivalent à docker compose -f docker-compose.yml up
 ```
 
 > Ne jamais déployer avec `target: dev` en production — le watch mode surveille les fichiers en permanence et consomme des ressources inutilement.

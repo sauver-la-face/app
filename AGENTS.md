@@ -86,21 +86,62 @@ apps/web/src/
 
 - Tous les blocs de code doivent avoir un langage déclaré (MD040) : ` ```bash `, ` ```ts `, ` ```yaml `, ` ```text ` pour le texte brut — jamais de ` ``` ` nu.
 
-## Commandes
+## Démarrage de l'environnement de dev
+
+### Prérequis
+- Docker Desktop en cours d'exécution
+- `bun` installé
+
+### 1. Installer les dépendances
+```bash
+bun install
+```
+
+### 2. Lancer les services Docker (postgres, minio, pgadmin, backend)
+```bash
+bun run docker:up:dev
+```
+
+Attendre que le backend log `Backend démarré` avant de continuer :
+```bash
+docker logs sauverlaface-backend-1 --follow
+```
+
+### 3. Synchroniser le schéma base de données (premier lancement uniquement)
+```bash
+docker exec sauverlaface-backend-1 sh -c "cd /app/apps/backend && bunx drizzle-kit push"
+```
+
+> ⚠️ `drizzle-kit migrate` est actuellement cassé — utiliser `push` en dev uniquement.
+
+### 4. Lancer le dashboard web (local, hot reload)
+```bash
+bun run dev:web
+```
+
+### 5. Lancer l'app mobile (optionnel)
+```bash
+bun run dev:mobile
+```
+
+### URLs
+| Service    | URL                        |
+|------------|----------------------------|
+| Web        | http://localhost:3000      |
+| Backend    | http://localhost:3001      |
+| pgAdmin    | http://localhost:8080      |
+| MinIO      | http://localhost:9001      |
+
+### Arrêter les services
+```bash
+bun run docker:down:dev
+```
+
+---
+
+## Autres commandes
 
 ```bash
-# Installer les dépendances
-bun install
-
-# Lancer le backend
-bun run dev:backend
-
-# Lancer le dashboard web
-bun run dev:web
-
-# Lancer l'app mobile
-bun run dev:mobile
-
 # Tests
 bun test --recursive
 
@@ -111,7 +152,6 @@ bun run format
 # Compiler le package shared (obligatoire avant typecheck)
 bun run build:shared
 
-# Migrations Drizzle
+# Générer une migration Drizzle après changement de schéma
 bun run --cwd apps/backend db:generate
-bun run --cwd apps/backend db:migrate
 ```

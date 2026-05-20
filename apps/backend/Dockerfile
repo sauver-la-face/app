@@ -15,6 +15,8 @@ WORKDIR /app/apps/backend
 
 EXPOSE 3001
 
+RUN mkdir -p .logs && chown -R bun:bun .logs
+
 USER bun
 
 # ── ÉTAPE 2 : développement (hot reload) ────────────────────────────────────────

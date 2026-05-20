@@ -4,12 +4,16 @@ import { betterAuth } from 'better-auth';
 import { twoFactor } from 'better-auth/plugins';
 import * as schema from '../../../infrastructure/schema';
 
-const secret = process.env.BETTER_AUTH_SECRET || 'test-secret-at-least-32-chars-long-123456';
+const secret = process.env.BETTER_AUTH_SECRET;
+if (!secret && process.env.NODE_ENV === 'production') {
+  throw new Error('BETTER_AUTH_SECRET is required in production');
+}
 
 export const auth = betterAuth({
   appName: 'Sauver la Face',
-  secret,
+  secret: secret ?? 'test-secret-at-least-32-chars-long-123456',
   baseURL: process.env.BETTER_AUTH_URL ?? 'http://localhost:3001',
+  trustedOrigins: (process.env.WEB_URL ?? 'http://localhost:3000').split(','),
 
   database: drizzleAdapter(db, {
     provider: 'pg',

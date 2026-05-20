@@ -39,9 +39,9 @@ export default function LocaleLayout({
   const dictionary = getDictionary(locale);
 
   return (
-    <div className="flex h-screen flex-col overflow-hidden bg-white">
-      <header className="border-b border-black/10 bg-white shadow-[0px_4px_4px_rgba(0,0,0,0.25)]">
-        <div className="mx-auto flex max-w-6xl items-center justify-between px-8 py-5">
+    <div className="flex min-h-screen flex-col bg-white">
+      <header className="sticky top-0 z-10 border-b border-black/10 bg-white shadow-[0px_4px_4px_rgba(0,0,0,0.25)]">
+        <div className="mx-auto flex max-w-6xl items-center justify-between px-8 py-3">
           <div className="flex items-center gap-3">
             <Image
               src="/logo.jpg"

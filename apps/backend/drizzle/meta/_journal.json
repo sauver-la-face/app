@@ -26,13 +26,15 @@
     {
       "idx": 3,
       "version": "7",
-<<<<<<< HEAD
-      "when": 1778109000000,
-      "tag": "0003_patient_sync_timestamp",
-=======
       "when": 1777468865974,
       "tag": "0003_chilly_kitty_pryde",
->>>>>>> 853e815 (feat(physician-auth): fix bug)
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1778109000000,
+      "tag": "0004_patient_sync_timestamp",
       "breakpoints": true
     }
   ]

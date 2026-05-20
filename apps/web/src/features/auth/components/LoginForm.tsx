@@ -109,7 +109,7 @@ export function LoginForm({ locale, dictionary }: { locale: Locale; dictionary: 
         password: data.get('password') as string,
       },
       {
-        onSuccess: () => router.push(`/${locale}`),
+        onSuccess: () => router.push(`/${locale}/dashboard`),
         onError: (ctx) => setError(ctx.error.message),
       },
     );
