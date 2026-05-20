@@ -57,6 +57,57 @@ export const patientAccessCodeSchema = z.object({
   expiresAt: isoDateTimeSchema,
 });
 
+export const patientHistoryProcedureSchema = z.object({
+  procedureId: uuidSchema,
+  procedureType: z.string(),
+  date: isoDateSchema,
+  hospitalName: z.string().nullable(),
+});
+
+export const patientHistorySymptomSchema = z.object({
+  code: z.string(),
+  labelFr: z.string(),
+  labelKm: z.string(),
+  triggersAlert: z.boolean(),
+});
+
+export const patientHistoryEventSchema = z.object({
+  eventId: uuidSchema,
+  procedureId: uuidSchema,
+  physicianId: uuidSchema.nullable(),
+  eventType: z.string(),
+  eventTitle: z.string().nullable(),
+  description: z.string().nullable(),
+  createdAt: isoDateTimeSchema,
+  symptoms: z.array(patientHistorySymptomSchema),
+});
+
+export const patientHistoryMediaSchema = z.object({
+  mediaId: uuidSchema,
+  eventId: uuidSchema,
+  fileUrl: z.string().url(),
+  fileType: z.string(),
+  takenAt: isoDateTimeSchema,
+  description: z.string().nullable(),
+});
+
+export const patientHistoryInstructionSchema = z.object({
+  instructionId: uuidSchema,
+  procedureId: uuidSchema,
+  physicianId: uuidSchema,
+  content: z.string(),
+  createdAt: isoDateTimeSchema,
+  acknowledgedAt: isoDateTimeSchema.nullable(),
+});
+
+export const patientHistoryResponseSchema = z.object({
+  patient: patientDetailsSchema,
+  procedures: z.array(patientHistoryProcedureSchema),
+  events: z.array(patientHistoryEventSchema),
+  media: z.array(patientHistoryMediaSchema),
+  instructions: z.array(patientHistoryInstructionSchema),
+});
+
 export type PatientCodeStatus = z.infer<typeof patientCodeStatusSchema>;
 export type PatientSyncStatus = z.infer<typeof patientSyncStatusSchema>;
 export type CreatePatientInput = z.infer<typeof createPatientSchema>;
@@ -65,3 +116,9 @@ export type PatientSummary = z.infer<typeof patientSummarySchema>;
 export type PatientListResponse = z.infer<typeof patientListResponseSchema>;
 export type PatientDetails = z.infer<typeof patientDetailsSchema>;
 export type PatientAccessCode = z.infer<typeof patientAccessCodeSchema>;
+export type PatientHistoryProcedure = z.infer<typeof patientHistoryProcedureSchema>;
+export type PatientHistorySymptom = z.infer<typeof patientHistorySymptomSchema>;
+export type PatientHistoryEvent = z.infer<typeof patientHistoryEventSchema>;
+export type PatientHistoryMedia = z.infer<typeof patientHistoryMediaSchema>;
+export type PatientHistoryInstruction = z.infer<typeof patientHistoryInstructionSchema>;
+export type PatientHistoryResponse = z.infer<typeof patientHistoryResponseSchema>;

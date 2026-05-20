@@ -1,8 +1,21 @@
 import type { DbClient } from '@shared/db';
 import { and, desc, eq, inArray, isNull } from 'drizzle-orm';
 
-import { patient, patientCode } from '../../../infrastructure/schema';
+import {
+  instructions,
+  media,
+  medicalEvent,
+  medicalEventSymptom,
+  medicalProcedure,
+  patient,
+  patientCode,
+  symptom,
+} from '../../../infrastructure/schema';
 import type {
+  PatientHistoryInstructionRecord,
+  PatientHistoryMediaRecord,
+  PatientHistoryRecord,
+  PatientHistorySymptomRecord,
   PatientCodeRecord,
   PatientPersistenceRecord,
   PatientRepository,
@@ -12,11 +25,13 @@ import type {
 interface InMemorySeed {
   patients?: Array<PatientPersistenceRecord>;
   codes?: Array<PatientCodeRecord>;
+  histories?: Array<PatientHistoryRecord>;
 }
 
 export class InMemoryPatientsRepository implements PatientRepository {
   private readonly patients = new Map<string, PatientPersistenceRecord>();
   private readonly codes: Array<PatientCodeRecord> = [];
+  private readonly histories = new Map<string, PatientHistoryRecord>();
 
   constructor(seed: InMemorySeed = {}) {
     for (const patientRecord of seed.patients ?? []) {
@@ -29,6 +44,10 @@ export class InMemoryPatientsRepository implements PatientRepository {
       this.codes.push({
         ...codeRecord,
       });
+    }
+
+    for (const historyRecord of seed.histories ?? []) {
+      this.histories.set(historyRecord.patient.patientId, cloneHistory(historyRecord));
     }
   }
 
@@ -51,6 +70,27 @@ export class InMemoryPatientsRepository implements PatientRepository {
     return {
       ...patientRecord,
       latestCode: this.getLatestCode(patientId),
+    };
+  }
+
+  async findHistoryById(patientId: string): Promise<PatientHistoryRecord | null> {
+    const history = this.histories.get(patientId);
+
+    if (history) {
+      return cloneHistory(history);
+    }
+
+    const patientRecord = await this.findById(patientId);
+    if (!patientRecord) {
+      return null;
+    }
+
+    return {
+      patient: patientRecord,
+      procedures: [],
+      events: [],
+      media: [],
+      instructions: [],
     };
   }
 
@@ -161,6 +201,109 @@ export class PgPatientsRepository implements PatientRepository {
     return {
       ...mapPatientRow(patientRow),
       latestCode: latestCode.get(patientId),
+    };
+  }
+
+  async findHistoryById(patientId: string): Promise<PatientHistoryRecord | null> {
+    const patientRecord = await this.findById(patientId);
+
+    if (!patientRecord) {
+      return null;
+    }
+
+    const procedureRows = await this.db
+      .select()
+      .from(medicalProcedure)
+      .where(eq(medicalProcedure.uuid_patient, patientId));
+
+    const procedures = procedureRows.map((procedureRow) => ({
+      procedureId: procedureRow.uuid_medical_procedure,
+      procedureType: procedureRow.procedure_type,
+      date: procedureRow.date,
+      hospitalName: procedureRow.hospital_name,
+    }));
+
+    const procedureIds = procedureRows.map((procedureRow) => procedureRow.uuid_medical_procedure);
+
+    if (procedureIds.length === 0) {
+      return {
+        patient: patientRecord,
+        procedures,
+        events: [],
+        media: [],
+        instructions: [],
+      };
+    }
+
+    const [eventRows, instructionRows] = await Promise.all([
+      this.db
+        .select()
+        .from(medicalEvent)
+        .where(inArray(medicalEvent.uuid_medical_procedure, procedureIds)),
+      this.db
+        .select()
+        .from(instructions)
+        .where(inArray(instructions.uuid_medical_procedure, procedureIds)),
+    ]);
+
+    const eventIds = eventRows.map((eventRow) => eventRow.uuid_event);
+    const [symptomRows, mediaRows] =
+      eventIds.length === 0
+        ? [[], []]
+        : await Promise.all([
+            this.db
+              .select({
+                eventId: medicalEventSymptom.uuid_event,
+                code: symptom.code,
+                labelFr: symptom.label_fr,
+                labelKm: symptom.label_km,
+                triggersAlert: symptom.triggers_alert,
+              })
+              .from(medicalEventSymptom)
+              .innerJoin(symptom, eq(symptom.uuid_symptom, medicalEventSymptom.uuid_symptom))
+              .where(inArray(medicalEventSymptom.uuid_event, eventIds)),
+            this.db.select().from(media).where(inArray(media.uuid_event, eventIds)),
+          ]);
+
+    const symptomsByEvent = groupBy(symptomRows, (row) => row.eventId);
+
+    const events = eventRows.map((eventRow) => ({
+      eventId: eventRow.uuid_event,
+      procedureId: eventRow.uuid_medical_procedure,
+      physicianId: eventRow.uuid_physician,
+      eventType: eventRow.event_type,
+      eventTitle: eventRow.event_title,
+      description: eventRow.description,
+      createdAt: eventRow.created_at.toISOString(),
+      symptoms: (symptomsByEvent.get(eventRow.uuid_event) ?? []).map(mapSymptomRow),
+    }));
+
+    const medias: PatientHistoryMediaRecord[] = mediaRows.map((mediaRow) => ({
+      mediaId: mediaRow.uuid_media,
+      eventId: mediaRow.uuid_event,
+      fileUrl: mediaRow.file_url,
+      fileType: mediaRow.file_type,
+      takenAt: mediaRow.taken_at.toISOString(),
+      description: mediaRow.description,
+    }));
+
+    const instructionList: PatientHistoryInstructionRecord[] = instructionRows.map(
+      (instructionRow) => ({
+        instructionId: instructionRow.uuid_instructions,
+        procedureId: instructionRow.uuid_medical_procedure,
+        physicianId: instructionRow.uuid_physician,
+        content: instructionRow.content,
+        createdAt: instructionRow.created_at.toISOString(),
+        acknowledgedAt: instructionRow.acknowledged_at?.toISOString() ?? null,
+      }),
+    );
+
+    return {
+      patient: patientRecord,
+      procedures,
+      events,
+      media: medias,
+      instructions: instructionList,
     };
   }
 
@@ -292,6 +435,53 @@ function mapPatientRow(row: typeof patient.$inferSelect): PatientPersistenceReco
     region: row.region,
     anonymizedAt: row.anonymized_at,
     lastSyncedAt: row.last_synced_at,
+  };
+}
+
+function mapSymptomRow(row: {
+  code: string;
+  labelFr: string;
+  labelKm: string;
+  triggersAlert: boolean;
+}): PatientHistorySymptomRecord {
+  return {
+    code: row.code,
+    labelFr: row.labelFr,
+    labelKm: row.labelKm,
+    triggersAlert: row.triggersAlert,
+  };
+}
+
+function groupBy<T, K>(items: readonly T[], keyFn: (item: T) => K): Map<K, T[]> {
+  const groups = new Map<K, T[]>();
+
+  for (const item of items) {
+    const key = keyFn(item);
+    const bucket = groups.get(key);
+
+    if (bucket) {
+      bucket.push(item);
+    } else {
+      groups.set(key, [item]);
+    }
+  }
+
+  return groups;
+}
+
+function cloneHistory(history: PatientHistoryRecord): PatientHistoryRecord {
+  return {
+    patient: {
+      ...history.patient,
+      latestCode: history.patient.latestCode ? { ...history.patient.latestCode } : undefined,
+    },
+    procedures: history.procedures.map((procedure) => ({ ...procedure })),
+    events: history.events.map((event) => ({
+      ...event,
+      symptoms: event.symptoms.map((symptomRecord) => ({ ...symptomRecord })),
+    })),
+    media: history.media.map((mediaRecord) => ({ ...mediaRecord })),
+    instructions: history.instructions.map((instruction) => ({ ...instruction })),
   };
 }
 

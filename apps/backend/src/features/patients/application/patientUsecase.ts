@@ -2,6 +2,7 @@ import type {
   CreatePatientInput,
   PatientAccessCode,
   PatientDetails,
+  PatientHistoryResponse,
   PatientListResponse,
   PatientSummary,
   UpdatePatientInput,
@@ -81,6 +82,22 @@ export class PatientUsecase {
     }
 
     return toPatientDetails(patient, this.nowFactory());
+  }
+
+  async getPatientHistory(patientId: string): Promise<PatientHistoryResponse> {
+    const history = await this.patientRepository.findHistoryById(patientId);
+
+    if (!history) {
+      throw new PatientNotFoundError(patientId);
+    }
+
+    return {
+      patient: toPatientDetails(history.patient, this.nowFactory()),
+      procedures: history.procedures,
+      events: history.events,
+      media: history.media,
+      instructions: history.instructions,
+    };
   }
 
   async updatePatient(patientId: string, command: UpdatePatientInput): Promise<PatientDetails> {
