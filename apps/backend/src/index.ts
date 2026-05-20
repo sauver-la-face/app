@@ -23,6 +23,9 @@ import {
   PgSyncRepository,
 } from './features/sync/infrastructure/syncRepository';
 import { createSyncRouter } from './features/sync/presentation/syncRouter';
+import { startAuditExportScheduler } from './shared/jobs/audit.export.cron';
+import { createAuditMiddleware } from './shared/middleware/audit.middleware';
+import { createS3LogsStorageFromEnv } from './shared/storage/logs.storage';
 
 export function createApp(): Hono {
   const app = new Hono();
@@ -55,6 +58,7 @@ export function createApp(): Hono {
       credentials: true,
     }),
   );
+  app.use('*', createAuditMiddleware(logger));
 
   app.route('/', authRouter);
   app.route('/', createAlertRouter(alertUsecase));
@@ -70,11 +74,16 @@ export function createApp(): Hono {
 }
 
 const app = createApp();
+const auditLogsStorage = createS3LogsStorageFromEnv();
 
 app.use('*', poweredBy());
 
 if (process.env.NODE_ENV !== 'production') {
   app.use('*', honoLogger());
+}
+
+if (auditLogsStorage && process.env.NODE_ENV !== 'test') {
+  startAuditExportScheduler(auditLogsStorage, logger);
 }
 
 app.notFound((context) => context.json({ error: 'NOT_FOUND' }, 404));
