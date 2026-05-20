@@ -253,7 +253,7 @@ Mobile (SQLite) → Hono sync.usecase.ts → compare avec PostgreSQL
 **Comportement attendu :**
 
 - Formulaire de connexion médecin (email + mot de passe) fidèle aux maquettes Figma
-- Sélecteur de langue (fr/en/km) visible en haut à droite — dépend de WEB-I18N
+- Sélecteur de langue (fr/en/km) visible en haut à droite — dépend de WEB-I18N-01
 - Bouton "Se connecter" avec état de chargement
 - Lien "Identifiants oubliés ?"
 - Footer : Mentions légales · Données personnelles · Plan du site
@@ -263,13 +263,13 @@ Mobile (SQLite) → Hono sync.usecase.ts → compare avec PostgreSQL
 
 - Utiliser Better Auth côté client — jamais de `BETTER_AUTH_SECRET` dans le web
 - Toutes les strings via le dictionnaire i18n — jamais en dur
-- Dépend de : WEB-I18N
+- Dépend de : WEB-I18N-01
 
 ---
 
-### WEB-I18N — Internationalisation du dashboard web (français / anglais / khmer)
+### WEB-I18N-01 — Internationalisation du dashboard web (français / anglais / khmer)
 
-`[ ]` 🔴 Critique · `apps/web/src/i18n/`
+`[x]` 🔴 Critique · `apps/web/src/i18n/`
 
 **Comportement attendu :**
 
@@ -650,7 +650,7 @@ Une GitHub App n'appartient à aucune personne — elle est rattachée au repo. 
 
 ### DEVOPS-01 — Interface d'administration PostgreSQL (pgAdmin)
 
-`[ ]` 🟢 Mineur · `docker-compose.yml`
+`[x]` 🟢 Mineur · `docker-compose.yml`
 
 **Comportement attendu :**
 
