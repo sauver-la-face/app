@@ -37,15 +37,16 @@ async function main() {
     .delete(medicalProcedure)
     .where(eq(medicalProcedure.uuid_medical_procedure, ids.procedureId));
   await db.delete(patient).where(eq(patient.uuid_patient, ids.patientId));
-  await db.delete(physician).where(eq(physician.uuid_physician, ids.physicianId));
+  await db.delete(physician).where(eq(physician.id, ids.physicianId));
 
   await db.insert(physician).values({
-    uuid_physician: ids.physicianId,
-    first_name: 'Jean',
-    last_name: 'Dupont',
-    phone_number: '+33123456789',
-    mail: 'jean.dupont@example.com',
-    password_hash: 'not-used-for-sync',
+    id: ids.physicianId,
+    name: 'Jean Dupont',
+    email: 'jean.dupont@example.com',
+    firstName: 'Jean',
+    lastName: 'Dupont',
+    phoneNumber: '+33123456789',
+    passwordHash: 'not-used-for-sync',
   });
 
   await db.insert(patient).values({
