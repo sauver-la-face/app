@@ -2,12 +2,15 @@
 
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
+import type { Locale } from '@/i18n/config';
+import type { Dictionary } from '@/i18n/dictionaries';
 import { authClient } from '@/lib/authClient';
 
-export function RegisterForm() {
+export function RegisterForm({ locale, dictionary }: { locale: Locale; dictionary: Dictionary }) {
   const router = useRouter();
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const { register } = dictionary;
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -18,7 +21,7 @@ export function RegisterForm() {
     const confirm = data.get('confirm') as string;
 
     if (password !== confirm) {
-      setError('Les mots de passe ne correspondent pas.');
+      setError(register.passwordMismatch);
       return;
     }
 
@@ -31,7 +34,7 @@ export function RegisterForm() {
         password,
       },
       {
-        onSuccess: () => router.push('/'),
+        onSuccess: () => router.push(`/${locale}`),
         onError: (ctx) => setError(ctx.error.message),
       },
     );
@@ -42,8 +45,8 @@ export function RegisterForm() {
   return (
     <form onSubmit={handleSubmit} className="space-y-5">
       <div>
-        <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
-          Nom complet
+        <label htmlFor="name" className="mb-1 block text-sm font-medium text-gray-700">
+          {register.nameLabel}
         </label>
         <input
           id="name"
@@ -52,13 +55,13 @@ export function RegisterForm() {
           required
           autoComplete="name"
           className="w-full rounded-lg border border-gray-300 px-4 py-2.5 text-sm shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
-          placeholder="Dr. Jean Dupont"
+          placeholder={register.namePlaceholder}
         />
       </div>
 
       <div>
-        <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
-          Adresse e-mail
+        <label htmlFor="email" className="mb-1 block text-sm font-medium text-gray-700">
+          {register.emailLabel}
         </label>
         <input
           id="email"
@@ -67,13 +70,13 @@ export function RegisterForm() {
           required
           autoComplete="email"
           className="w-full rounded-lg border border-gray-300 px-4 py-2.5 text-sm shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
-          placeholder="medecin@hopital.fr"
+          placeholder={register.emailPlaceholder}
         />
       </div>
 
       <div>
-        <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
-          Mot de passe
+        <label htmlFor="password" className="mb-1 block text-sm font-medium text-gray-700">
+          {register.passwordLabel}
         </label>
         <input
           id="password"
@@ -83,13 +86,13 @@ export function RegisterForm() {
           autoComplete="new-password"
           minLength={8}
           className="w-full rounded-lg border border-gray-300 px-4 py-2.5 text-sm shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
-          placeholder="••••••••"
+          placeholder={register.passwordPlaceholder}
         />
       </div>
 
       <div>
-        <label htmlFor="confirm" className="block text-sm font-medium text-gray-700 mb-1">
-          Confirmer le mot de passe
+        <label htmlFor="confirm" className="mb-1 block text-sm font-medium text-gray-700">
+          {register.confirmLabel}
         </label>
         <input
           id="confirm"
@@ -99,12 +102,12 @@ export function RegisterForm() {
           autoComplete="new-password"
           minLength={8}
           className="w-full rounded-lg border border-gray-300 px-4 py-2.5 text-sm shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
-          placeholder="••••••••"
+          placeholder={register.confirmPlaceholder}
         />
       </div>
 
       {error && (
-        <p className="rounded-lg bg-red-50 px-4 py-2.5 text-sm text-red-700 border border-red-200">
+        <p className="rounded-lg border border-red-200 bg-red-50 px-4 py-2.5 text-sm text-red-700">
           {error}
         </p>
       )}
@@ -112,9 +115,9 @@ export function RegisterForm() {
       <button
         type="submit"
         disabled={loading}
-        className="w-full rounded-lg bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white shadow hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-60 disabled:cursor-not-allowed transition-colors"
+        className="w-full rounded-lg bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white shadow transition-colors hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60"
       >
-        {loading ? 'Création du compte…' : 'Créer mon compte'}
+        {loading ? register.submitting : register.submit}
       </button>
     </form>
   );
