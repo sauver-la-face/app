@@ -301,7 +301,7 @@ Mobile (SQLite) → Hono sync.usecase.ts → compare avec PostgreSQL
 
 ### WEB-01 — Tableau de bord médecin
 
-`[ ]` 🟡 Majeur · `apps/web/src/app/dashboard/`
+`[~]` 🟡 Majeur · `apps/web/src/app/dashboard/`
 
 **Comportement attendu :**
 
