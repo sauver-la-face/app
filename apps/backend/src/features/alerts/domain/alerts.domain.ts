@@ -34,29 +34,32 @@ export function buildSyncOverdueAlerts(
 
   return sources
     .filter((source) => source.lastSyncedAt !== null)
-    .filter((source) => {
-      if (source.lastSyncedAt === null) {
-        return false;
+    .flatMap((source) => {
+      const { lastSyncedAt } = source;
+
+      if (lastSyncedAt === null || lastSyncedAt.getTime() > thresholdTime) {
+        return [];
       }
 
-      return source.lastSyncedAt.getTime() <= thresholdTime;
-    })
-    .map((source) => ({
-      patientId: source.patientId,
-      patientDisplayName: buildPatientDisplayName(
-        source.firstName,
-        source.lastName,
-        source.patientId,
-      ),
-      type: 'sync_overdue',
-      severity: 'warning',
-      message: `Aucune synchronisation depuis ${thresholdDays} jours`,
-      occurredAt: source.lastSyncedAt!.toISOString(),
-      medicalEventId: null,
-      symptomCode: null,
-      symptomLabelFr: null,
-      lastSyncedAt: source.lastSyncedAt!.toISOString(),
-    }));
+      return [
+        {
+          patientId: source.patientId,
+          patientDisplayName: buildPatientDisplayName(
+            source.firstName,
+            source.lastName,
+            source.patientId,
+          ),
+          type: 'sync_overdue' as const,
+          severity: 'warning' as const,
+          message: `Aucune synchronisation depuis ${thresholdDays} jours`,
+          occurredAt: lastSyncedAt.toISOString(),
+          medicalEventId: null,
+          symptomCode: null,
+          symptomLabelFr: null,
+          lastSyncedAt: lastSyncedAt.toISOString(),
+        },
+      ];
+    });
 }
 
 export function sortAlerts(alerts: Alert[]): Alert[] {
