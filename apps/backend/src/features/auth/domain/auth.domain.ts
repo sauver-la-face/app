@@ -20,7 +20,7 @@ export class AuthDomain {
     if (!patientCode.is_active) return false;
     if (patientCode.deleted_at) return false;
     if (patientCode.revoked_at) return false;
-    if (this.isExpired(patientCode, now)) return false;
+    if (AuthDomain.isExpired(patientCode, now)) return false;
     return true;
   }
 }

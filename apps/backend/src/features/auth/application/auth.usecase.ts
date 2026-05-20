@@ -1,21 +1,24 @@
 import { PatientCodeValue } from '@sauver-la-face/shared';
-import type { PatientCode, PatientCodeRepository } from '../domain/patientCodeRepository';
 import { AuthDomain } from '../domain/auth.domain';
+import type { PatientCode, PatientCodeRepository } from '../domain/patientCodeRepository';
 import type { TokenProvider } from './tokenProvider';
 
-export type ValidateResult = 
+export type ValidateResult =
   | { success: true; patientCode: PatientCode; token: string }
-  | { success: false; error: 'INVALID_CODE' | 'EXPIRED_CODE' | 'DELETED_CODE' | 'REVOKED_CODE' | 'INACTIVE_CODE' };
+  | {
+      success: false;
+      error: 'INVALID_CODE' | 'EXPIRED_CODE' | 'DELETED_CODE' | 'REVOKED_CODE' | 'INACTIVE_CODE';
+    };
 
 export class AuthUsecase {
   constructor(
     private readonly repository: PatientCodeRepository,
-    private readonly tokenProvider: TokenProvider
+    private readonly tokenProvider: TokenProvider,
   ) {}
 
   async generatePatientCode(
     uuid_patient: string,
-    random: () => string = () => Math.floor(100000 + Math.random() * 900000).toString()
+    random: () => string = () => Math.floor(100000 + Math.random() * 900000).toString(),
   ): Promise<PatientCode> {
     let code: PatientCodeValue;
     let existing: PatientCode | null;
@@ -71,7 +74,7 @@ export class AuthUsecase {
       uuid_patient_code: patientCode.uuid_patient_code,
       role: 'patient',
     });
-    
+
     return { success: true, patientCode, token };
   }
 

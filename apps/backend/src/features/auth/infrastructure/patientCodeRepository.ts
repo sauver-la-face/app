@@ -1,6 +1,6 @@
-import { eq, and, isNull, lt } from 'drizzle-orm';
-import type { NodePgDatabase } from 'drizzle-orm/node-postgres';
 import { PatientCodeValue } from '@sauver-la-face/shared';
+import { and, eq, isNull, lt } from 'drizzle-orm';
+import type { NodePgDatabase } from 'drizzle-orm/node-postgres';
 import * as schema from '../../../infrastructure/schema';
 import type { PatientCode, PatientCodeRepository } from '../domain/patientCodeRepository';
 
@@ -66,9 +66,9 @@ export class DrizzlePatientCodeRepository implements PatientCodeRepository {
   async softDeleteExpiredUnused(cutoff: Date): Promise<number> {
     const result = await this.db
       .update(schema.patientCode)
-      .set({ 
+      .set({
         deleted_at: new Date(),
-        is_active: false 
+        is_active: false,
       })
       .where(
         and(
@@ -77,7 +77,7 @@ export class DrizzlePatientCodeRepository implements PatientCodeRepository {
           lt(schema.patientCode.created_at, cutoff),
         ),
       );
-    
+
     return result.rowCount ?? 0;
   }
 }

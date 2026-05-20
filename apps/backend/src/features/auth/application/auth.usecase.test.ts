@@ -1,8 +1,8 @@
-import { describe, expect, it, mock, beforeEach } from 'bun:test';
-import { AuthUsecase } from './auth.usecase';
-import type { PatientCodeRepository, PatientCode } from '../domain/patientCodeRepository';
+import { beforeEach, describe, expect, it, mock } from 'bun:test';
 import { PatientCodeValue } from '@sauver-la-face/shared';
-import type { TokenProvider, TokenPayload } from './tokenProvider';
+import type { PatientCode, PatientCodeRepository } from '../domain/patientCodeRepository';
+import { AuthUsecase } from './auth.usecase';
+import type { TokenPayload, TokenProvider } from './tokenProvider';
 
 class MockPatientCodeRepository implements PatientCodeRepository {
   save = mock(async (patientCode: PatientCode) => {});
@@ -39,9 +39,9 @@ describe('AuthUsecase', () => {
     it('should retry if the generated code already exists', async () => {
       const uuid_patient = 'patient-1';
       const existingCode = PatientCodeValue.create('123456');
-      
+
       repository.findByCode
-        .mockImplementationOnce(async () => ({ code: existingCode } as PatientCode))
+        .mockImplementationOnce(async () => ({ code: existingCode }) as PatientCode)
         .mockImplementationOnce(async () => null);
 
       let callCount = 0;

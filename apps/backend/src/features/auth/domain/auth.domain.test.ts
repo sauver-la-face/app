@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'bun:test';
-import { AuthDomain } from './auth.domain';
 import { PatientCodeValue } from '@sauver-la-face/shared';
+import { AuthDomain } from './auth.domain';
 import type { PatientCode } from './patientCodeRepository';
 
 const createMockPatientCode = (overrides: Partial<PatientCode> = {}): PatientCode => ({
@@ -21,7 +21,7 @@ describe('AuthDomain', () => {
       const now = new Date('2026-04-30T10:00:00Z');
       const createdAt = new Date('2026-04-28T09:59:59Z');
       const patientCode = createMockPatientCode({ created_at: createdAt });
-      
+
       expect(AuthDomain.isExpired(patientCode, now)).toBe(true);
     });
 
@@ -29,18 +29,18 @@ describe('AuthDomain', () => {
       const now = new Date('2026-04-30T10:00:00Z');
       const createdAt = new Date('2026-04-28T10:00:01Z');
       const patientCode = createMockPatientCode({ created_at: createdAt });
-      
+
       expect(AuthDomain.isExpired(patientCode, now)).toBe(false);
     });
 
     it('should never be expired if already used', () => {
       const now = new Date('2026-05-30T10:00:00Z');
       const createdAt = new Date('2026-04-28T10:00:00Z');
-      const patientCode = createMockPatientCode({ 
+      const patientCode = createMockPatientCode({
         created_at: createdAt,
-        used_at: new Date('2026-04-29T10:00:00Z')
+        used_at: new Date('2026-04-29T10:00:00Z'),
       });
-      
+
       expect(AuthDomain.isExpired(patientCode, now)).toBe(false);
     });
   });
@@ -49,7 +49,7 @@ describe('AuthDomain', () => {
     it('should be usable if active, not deleted, not revoked and not expired', () => {
       const now = new Date('2026-04-29T10:00:00Z');
       const patientCode = createMockPatientCode({
-        created_at: new Date('2026-04-28T10:00:00Z')
+        created_at: new Date('2026-04-28T10:00:00Z'),
       });
       expect(AuthDomain.canBeUsed(patientCode, now)).toBe(true);
     });

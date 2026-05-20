@@ -1,4 +1,4 @@
-import { describe, expect, it, beforeEach } from 'bun:test';
+import { beforeEach, describe, expect, it } from 'bun:test';
 import { Hono } from 'hono';
 import { rateLimiter, rateLimitStores } from './rateLimiter';
 
@@ -19,7 +19,7 @@ describe('rateLimiter middleware', () => {
         const fail = c.req.query('fail');
         if (fail) return c.json({ error: 'fail' }, 401);
         return c.json({ ok: true }, 200);
-      }
+      },
     );
   });
 

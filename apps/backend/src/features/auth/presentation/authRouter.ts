@@ -1,7 +1,7 @@
 import { createRoute, OpenAPIHono, z } from '@hono/zod-openapi';
-import type { AuthUsecase } from '../application/auth.usecase';
 import { patientCodeSchema } from '@sauver-la-face/shared';
 import { rateLimiter } from '../../../shared/middleware/rateLimiter';
+import type { AuthUsecase } from '../application/auth.usecase';
 
 const validateSchema = z.object({
   code: patientCodeSchema,
