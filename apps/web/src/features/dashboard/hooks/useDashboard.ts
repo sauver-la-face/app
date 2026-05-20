@@ -33,7 +33,6 @@ export function usePatients() {
   return useQuery({
     queryKey: ['patients'],
     queryFn: fetchPatients,
-    refetchInterval: 30_000,
   });
 }
 
