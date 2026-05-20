@@ -1,11 +1,13 @@
 'use client';
 
+import type { ImageLoaderProps } from 'next/image';
+import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
-import { useSession } from '@/lib/authClient';
 import type { Locale } from '@/i18n/config';
 import type { Dictionary } from '@/i18n/dictionaries';
+import { useSession } from '@/lib/authClient';
 import { usePatientHistory } from '../hooks/usePatientHistory';
 
 export function PatientHistoryPage({
@@ -65,12 +67,18 @@ export function PatientHistoryPage({
   const history = historyQuery.data;
   const patient = history.patient;
   const fullName = [patient.firstName, patient.lastName].filter(Boolean).join(' ') || 'Patient';
-  const events = [...history.events].sort((left, right) => right.createdAt.localeCompare(left.createdAt));
-  const photos = [...history.media].sort((left, right) => right.takenAt.localeCompare(left.takenAt));
+  const events = [...history.events].sort((left, right) =>
+    right.createdAt.localeCompare(left.createdAt),
+  );
+  const photos = [...history.media].sort((left, right) =>
+    right.takenAt.localeCompare(left.takenAt),
+  );
   const instructions = [...history.instructions].sort((left, right) =>
     right.createdAt.localeCompare(left.createdAt),
   );
-  const procedures = [...history.procedures].sort((left, right) => right.date.localeCompare(left.date));
+  const procedures = [...history.procedures].sort((left, right) =>
+    right.date.localeCompare(left.date),
+  );
   const symptomPoints = [...history.events]
     .sort((left, right) => left.createdAt.localeCompare(right.createdAt))
     .map((event) => ({
@@ -124,10 +132,14 @@ export function PatientHistoryPage({
                   key={photo.mediaId}
                   className="overflow-hidden rounded-[24px] border border-black/10 bg-[#FBFAF6]"
                 >
-                  <img
+                  <Image
+                    loader={passthroughImageLoader}
                     src={photo.fileUrl}
                     alt={photo.description ?? `Photo ${photo.mediaId}`}
                     className="h-56 w-full object-cover"
+                    width={640}
+                    height={448}
+                    unoptimized
                   />
                   <div className="space-y-2 p-4">
                     <div className="flex items-center justify-between gap-3">
@@ -138,7 +150,9 @@ export function PatientHistoryPage({
                         {formatDate(photo.takenAt, locale)}
                       </span>
                     </div>
-                    <p className="text-xs uppercase tracking-[0.2em] text-gray-400">{photo.fileType}</p>
+                    <p className="text-xs uppercase tracking-[0.2em] text-gray-400">
+                      {photo.fileType}
+                    </p>
                   </div>
                 </article>
               ))}
@@ -148,7 +162,10 @@ export function PatientHistoryPage({
 
         <Panel title={labels.summaryTitle}>
           <dl className="space-y-4 text-sm">
-            <InfoRow label={labels.syncLabel} value={formatNullableDate(patient.lastSyncedAt, locale)} />
+            <InfoRow
+              label={labels.syncLabel}
+              value={formatNullableDate(patient.lastSyncedAt, locale)}
+            />
             <InfoRow label={labels.regionLabel} value={patient.region ?? '-'} />
             <InfoRow label={labels.sexLabel} value={patient.sex ?? '-'} />
             <InfoRow label={labels.birthdateLabel} value={patient.birthdate ?? '-'} />
@@ -203,7 +220,10 @@ export function PatientHistoryPage({
                     <div className="rounded-full bg-[#EAE6DD] p-1">
                       <div
                         className="h-3 rounded-full bg-[#2EAC8E]"
-                        style={{ width: totalWidth, minWidth: point.totalSymptoms > 0 ? '1rem' : 0 }}
+                        style={{
+                          width: totalWidth,
+                          minWidth: point.totalSymptoms > 0 ? '1rem' : 0,
+                        }}
                       />
                     </div>
                     {point.alertSymptoms > 0 ? (
@@ -246,9 +266,7 @@ export function PatientHistoryPage({
                       </div>
                       <span
                         className={`rounded-full px-3 py-1 text-xs font-medium ${
-                          hasAlert
-                            ? 'bg-[#FCE2E2] text-[#B24545]'
-                            : 'bg-[#E5F5F1] text-[#2E7F69]'
+                          hasAlert ? 'bg-[#FCE2E2] text-[#B24545]' : 'bg-[#E5F5F1] text-[#2E7F69]'
                         }`}
                       >
                         {hasAlert ? labels.alertBadge : labels.okBadge}
@@ -277,11 +295,15 @@ export function PatientHistoryPage({
                     {eventPhotos.length > 0 ? (
                       <div className="mt-4 flex gap-3 overflow-x-auto pb-1">
                         {eventPhotos.map((photo) => (
-                          <img
+                          <Image
                             key={photo.mediaId}
+                            loader={passthroughImageLoader}
                             src={photo.fileUrl}
                             alt={photo.description ?? photo.fileType}
                             className="h-24 w-24 rounded-2xl object-cover"
+                            width={96}
+                            height={96}
+                            unoptimized
                           />
                         ))}
                       </div>
@@ -316,7 +338,9 @@ export function PatientHistoryPage({
                           : 'bg-[#F1EFE8] text-[#6A645A]'
                       }`}
                     >
-                      {instruction.acknowledgedAt ? labels.instructionRead : labels.instructionUnread}
+                      {instruction.acknowledgedAt
+                        ? labels.instructionRead
+                        : labels.instructionUnread}
                     </span>
                   </div>
                   <p className="mt-3 text-sm leading-6 text-gray-700">{instruction.content}</p>
@@ -385,6 +409,10 @@ function CenteredState({ label }: { label: string }) {
       </div>
     </main>
   );
+}
+
+function passthroughImageLoader({ src }: ImageLoaderProps): string {
+  return src;
 }
 
 function formatDate(value: string, locale: Locale): string {

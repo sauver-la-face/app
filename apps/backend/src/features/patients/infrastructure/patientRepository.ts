@@ -12,11 +12,11 @@ import {
   symptom,
 } from '../../../infrastructure/schema';
 import type {
+  PatientCodeRecord,
   PatientHistoryInstructionRecord,
   PatientHistoryMediaRecord,
   PatientHistoryRecord,
   PatientHistorySymptomRecord,
-  PatientCodeRecord,
   PatientPersistenceRecord,
   PatientRepository,
   PatientRepositoryRecord,

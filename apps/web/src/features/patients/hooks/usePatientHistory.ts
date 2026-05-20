@@ -1,7 +1,7 @@
 'use client';
 
-import { useQuery } from '@tanstack/react-query';
 import type { PatientHistoryResponse } from '@sauver-la-face/shared';
+import { useQuery } from '@tanstack/react-query';
 
 const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001';
 

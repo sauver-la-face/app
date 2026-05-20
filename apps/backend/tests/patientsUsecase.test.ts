@@ -132,7 +132,12 @@ describe('patients.usecase', () => {
       histories: [createPatientHistorySeed(existingPatientId)],
     });
     const logger = { info: mock(() => undefined), warn: mock(() => undefined) };
-    const usecase = new PatientUsecase(repository, logger, () => now, () => '123456');
+    const usecase = new PatientUsecase(
+      repository,
+      logger,
+      () => now,
+      () => '123456',
+    );
 
     const history = await usecase.getPatientHistory(existingPatientId);
 
