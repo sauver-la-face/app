@@ -131,10 +131,75 @@ const dictionaries = {
       createdAt: 'Account created on',
     },
   },
+  km: {
+    metadata: {
+      title: 'Sauver la Face - ផ្ទាំងគ្រប់គ្រងវេជ្ជបណ្ឌិត',
+      description: 'វិបផតថលតាមដានក្រោយការវះកាត់',
+    },
+    common: {
+      brand: 'Sauver la Face',
+      protectedAccess: 'ការចូលប្រើប្រាស់សម្រាប់អ្នកជំនាញសុខភាពដែលមានការអនុញ្ញាតប៉ុណ្ណោះ',
+      loading: 'កំពុងផ្ទុក...',
+      logout: 'ចាកចេញ',
+    },
+    languageSwitcher: {
+      label: 'ភាសា',
+    },
+    login: {
+      eyebrow: 'វិបផតថលវេជ្ជបណ្ឌិត - ការចូលប្រើប្រាស់ដោយសុវត្ថិភាព',
+      title: 'ចូល',
+      emailLabel: 'អាស័យដ្ឋានអ៊ីម៉ែល',
+      emailPlaceholder: 'medecin@hopital.fr',
+      passwordLabel: 'ពាក្យសម្ងាត់',
+      passwordPlaceholder: '••••••••',
+      submit: 'ចូល',
+      submitting: 'កំពុងចូល...',
+      registerPrompt: 'មិនទាន់មានគណនីទេ?',
+      registerLink: 'បង្កើតគណនី',
+    },
+    register: {
+      eyebrow: 'វិបផតថលវេជ្ជបណ្ឌិត - បង្កើតគណនី',
+      title: 'បង្កើតគណនី',
+      nameLabel: 'ឈ្មោះពេញ',
+      namePlaceholder: 'Dr Jean Dupont',
+      emailLabel: 'អាស័យដ្ឋានអ៊ីម៉ែល',
+      emailPlaceholder: 'medecin@hopital.fr',
+      passwordLabel: 'ពាក្យសម្ងាត់',
+      passwordPlaceholder: '••••••••',
+      confirmLabel: 'បញ្ជាក់ពាក្យសម្ងាត់',
+      confirmPlaceholder: '••••••••',
+      passwordMismatch: 'ពាក្យសម្ងាត់មិនត្រូវគ្នា',
+      submit: 'បង្កើតគណនីរបស់ខ្ញុំ',
+      submitting: 'កំពុងបង្កើតគណនី...',
+      loginPrompt: 'មានគណនីហើយ?',
+      loginLink: 'ចូល',
+    },
+    dashboard: {
+      signedInAs: 'ចូលជា',
+      fallbackUserName: 'វេជ្ជបណ្ឌិត',
+      session: 'វគ្គ',
+      sessionValue: 'សកម្ម',
+      sessionHint: 'ផុតកំណត់ក្រោយ ២ ម៉ោងគ្មានសកម្មភាព',
+      mfa: 'MFA TOTP',
+      mfaEnabled: 'បានបើក',
+      mfaDisabled: 'មិនទាន់បើក',
+      mfaEnabledHint: 'ការផ្ទៀងផ្ទាត់ពីរជំហានសកម្ម',
+      mfaDisabledHint: 'ណែនាំសម្រាប់សុវត្ថិភាព',
+      backend: 'Backend',
+      backendValue: 'Better Auth v1',
+      backendHint: 'Drizzle · PostgreSQL',
+      detailsTitle: 'ព័ត៌មានវគ្គ',
+      userId: 'លេខសម្គាល់អ្នកប្រើ',
+      emailVerified: 'អ៊ីម៉ែលបានផ្ទៀងផ្ទាត់',
+      yes: 'បាទ/ចាស',
+      no: 'ទេ',
+      createdAt: 'គណនីបង្កើតនៅ',
+    },
+  },
 } as const;
 
-export type Dictionary = (typeof dictionaries)[Locale];
+export type Dictionary = (typeof dictionaries)['fr'];
 
 export function getDictionary(locale: Locale): Dictionary {
-  return dictionaries[locale] ?? dictionaries[defaultLocale];
+  return (dictionaries[locale] ?? dictionaries[defaultLocale]) as Dictionary;
 }

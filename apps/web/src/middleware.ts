@@ -47,7 +47,11 @@ export function middleware(request: NextRequest) {
     url.pathname = `/${redirectLocale}${pathname}`;
 
     const response = NextResponse.redirect(url);
-    response.cookies.set(LOCALE_COOKIE, redirectLocale, { path: '/' });
+    response.cookies.set(LOCALE_COOKIE, redirectLocale, {
+      path: '/',
+      sameSite: 'lax',
+      secure: true,
+    });
     return response;
   }
 
