@@ -39,7 +39,7 @@
 
 ### AUTH-02 — Authentification médecins (MFA TOTP)
 
-`[ ]` 🔴 Critique · `apps/backend/src/features/auth/`
+`[x]` 🔴 Critique · `apps/backend/src/features/auth/`
 
 **Comportement attendu :**
 
@@ -119,7 +119,7 @@ Mobile (SQLite) → Hono sync.usecase.ts → compare avec PostgreSQL
 
 ### PHOTO-01 — Stockage et validation des photos
 
-`[ ]` 🟡 Majeur · `apps/backend/src/features/photos/`
+`[x]` 🟡 Majeur · `apps/backend/src/features/photos/`
 
 **Comportement attendu :**
 
