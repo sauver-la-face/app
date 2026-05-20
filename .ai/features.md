@@ -229,7 +229,7 @@ Mobile (SQLite) → Hono sync.usecase.ts → compare avec PostgreSQL
 
 ### INSTRUCTION-01 — Envoi d'instructions médicales
 
-`[ ]` 🟡 Majeur · `apps/backend/src/features/instructions/`
+`[~]` 🟡 Majeur · `apps/backend/src/features/instructions/`
 
 **Comportement attendu :**
 
