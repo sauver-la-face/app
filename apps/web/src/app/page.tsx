@@ -1,6 +1,3 @@
-import { redirect } from 'next/navigation';
-import { defaultLocale } from '@/i18n/config';
-
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
 import { signOut, useSession } from '@/lib/authClient';
@@ -135,6 +132,4 @@ function Row({ label, value, mono }: { label: string; value: string; mono?: bool
       <dd className={`text-gray-800 ${mono ? 'break-all font-mono text-xs' : ''}`}>{value}</dd>
     </div>
   );
-export default function RootPage() {
-  redirect(`/${defaultLocale}`);
 }

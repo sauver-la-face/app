@@ -5,14 +5,14 @@ import { AuthUsecase } from './auth.usecase';
 import type { TokenPayload, TokenProvider } from './tokenProvider';
 
 class MockPatientCodeRepository implements PatientCodeRepository {
-  save = mock(async (patientCode: PatientCode) => {});
-  findByCode = mock(async (code: PatientCodeValue) => null as PatientCode | null);
-  findActiveByPatient = mock(async (uuid_patient: string) => null as PatientCode | null);
-  softDeleteExpiredUnused = mock(async (cutoff: Date) => 0);
+  save = mock(async (_patientCode: PatientCode) => {});
+  findByCode = mock(async (_code: PatientCodeValue) => null as PatientCode | null);
+  findActiveByPatient = mock(async (_uuid_patient: string) => null as PatientCode | null);
+  softDeleteExpiredUnused = mock(async (_cutoff: Date) => 0);
 }
 
 class MockTokenProvider implements TokenProvider {
-  sign = mock(async (payload: TokenPayload) => 'mock-token');
+  sign = mock(async (_payload: TokenPayload) => 'mock-token');
 }
 
 describe('AuthUsecase', () => {
