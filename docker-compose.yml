@@ -60,6 +60,7 @@ services:
       - ./apps/backend/.env.local
     volumes:
       - ./apps/backend/src:/app/apps/backend/src
+      - ./apps/backend/scripts:/app/apps/backend/scripts
       - ./packages:/app/packages
     depends_on:
       postgres:
