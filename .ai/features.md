@@ -248,7 +248,7 @@ Mobile (SQLite) → Hono sync.usecase.ts → compare avec PostgreSQL
 
 ### WEB-00 — Page de connexion médecin
 
-`[ ]` 🔴 Critique · `apps/web/src/app/[locale]/login/`
+`[x]` 🔴 Critique · `apps/web/src/app/[locale]/login/`
 
 **Comportement attendu :**
 
