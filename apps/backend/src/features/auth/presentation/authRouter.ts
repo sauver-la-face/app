@@ -1,10 +1,10 @@
 import { createRoute, OpenAPIHono, z } from '@hono/zod-openapi';
-import { Hono } from 'hono';
-import { logger } from '@shared/logger';
-import { auth } from '../infrastructure/authConfig';
-import type { AuthUsecase } from '../application/auth.usecase';
 import { patientCodeSchema } from '@sauver-la-face/shared';
+import { logger } from '@shared/logger';
+import { Hono } from 'hono';
 import { rateLimiter } from '../../../shared/middleware/rateLimiter';
+import type { AuthUsecase } from '../application/auth.usecase';
+import { auth } from '../infrastructure/authConfig';
 
 // ============================================================================
 // PARTIE 1 : AUTHENTIFICATION BETTER AUTH (Depuis `dev`)

@@ -22,7 +22,7 @@ export type DbClient = ReturnType<typeof createDb>;
 // PARTIE FEATURE : Instance globale par défaut
 // ============================================================================
 // On instancie un pool par défaut (nécessaire pour DrizzlePatientCodeRepository).
-// Si DATABASE_URL n'est pas défini, on ne throw pas d'erreur ici pour 
+// Si DATABASE_URL n'est pas défini, on ne throw pas d'erreur ici pour
 // permettre au fallback InMemory de l'application de s'exécuter.
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,

@@ -1,26 +1,20 @@
-import { OpenAPIHono } from '@hono/zod-openapi';
 import { swaggerUI } from '@hono/swagger-ui';
+import { OpenAPIHono } from '@hono/zod-openapi';
+import { createDb } from '@shared/db';
+import { logger } from '@shared/logger';
 import { cors } from 'hono/cors';
 import { logger as honoLogger } from 'hono/logger';
 import { poweredBy } from 'hono/powered-by';
-
-import { createDb } from '@shared/db';
-import { db } from './shared/db'; // Maintenu pour la compatibilité avec DrizzlePatientCodeRepository
-import { logger } from '@shared/logger';
-
-// Imports unifiés pour l'Auth (Patients + Better Auth)
-import { 
-  authRouter, 
-  createAuthRouter, 
-  type SessionVariables 
-} from './features/auth/presentation/authRouter';
-import { DrizzlePatientCodeRepository } from './features/auth/infrastructure/patientCodeRepository';
+import { AuthCron } from './features/auth/application/auth.cron';
 import { AuthUsecase } from './features/auth/application/auth.usecase';
 import { JwtTokenProvider } from './features/auth/infrastructure/jwtTokenProvider';
-import { AuthCron } from './features/auth/application/auth.cron';
-
-// Imports Dev (Features métiers et Jobs)
-import { scheduleJobs } from './infrastructure/jobs';
+import { DrizzlePatientCodeRepository } from './features/auth/infrastructure/patientCodeRepository';
+// Imports unifiés pour l'Auth (Patients + Better Auth)
+import {
+  authRouter,
+  createAuthRouter,
+  type SessionVariables,
+} from './features/auth/presentation/authRouter';
 import { PatientUsecase } from './features/patients/application/patientUsecase';
 import {
   InMemoryPatientsRepository,
@@ -33,6 +27,9 @@ import {
   PgSyncRepository,
 } from './features/sync/infrastructure/syncRepository';
 import { createSyncRouter } from './features/sync/presentation/syncRouter';
+// Imports Dev (Features métiers et Jobs)
+import { scheduleJobs } from './infrastructure/jobs';
+import { db } from './shared/db'; // Maintenu pour la compatibilité avec DrizzlePatientCodeRepository
 
 export function createApp(): OpenAPIHono<{ Variables: SessionVariables }> {
   // Remplacement de Hono classique par OpenAPIHono (qui l'étend)
@@ -58,7 +55,9 @@ export function createApp(): OpenAPIHono<{ Variables: SessionVariables }> {
   // --- Injection des Dépendances (DI) ---
   // 1. DI Issues de dev
   const syncRepository = dynamicDb ? new PgSyncRepository(dynamicDb) : new InMemorySyncRepository();
-  const patientRepository = dynamicDb ? new PgPatientsRepository(dynamicDb) : new InMemoryPatientsRepository();
+  const patientRepository = dynamicDb
+    ? new PgPatientsRepository(dynamicDb)
+    : new InMemoryPatientsRepository();
   const syncUsecase = new SyncUsecase(syncRepository, logger, 1);
   const patientUsecase = new PatientUsecase(patientRepository, logger);
 
@@ -86,11 +85,11 @@ export function createApp(): OpenAPIHono<{ Variables: SessionVariables }> {
 
   // --- Enregistrement des Routes ---
   app.get('/health', (c) => c.json({ status: 'ok' }));
-  
+
   // Routes Auth (classiques + patients)
   app.route('/', authRouter);
   app.route('/auth', createAuthRouter(patientAuthUsecase));
-  
+
   // Routes métier
   app.route('/', createPatientRouter(patientUsecase));
   app.route('/', createSyncRouter(syncUsecase));

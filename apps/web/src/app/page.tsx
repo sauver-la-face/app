@@ -70,6 +70,7 @@ export default function HomePage() {
           />
           <StatusCard
             label="MFA TOTP"
+            // biome-ignore lint/suspicious/noExplicitAny: Typage Better Auth en attente
             value={(user as any).twoFactorEnabled ? 'Activé' : 'Non activé'}
             sub={
               (user as any).twoFactorEnabled
