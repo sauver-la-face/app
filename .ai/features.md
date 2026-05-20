@@ -246,6 +246,38 @@ Mobile (SQLite) → Hono sync.usecase.ts → compare avec PostgreSQL
 
 ## DASHBOARD WEB
 
+### WEB-I18N — Internationalisation du dashboard web (français / anglais / khmer)
+
+`[ ]` 🔴 Critique · `apps/web/src/i18n/`
+
+**Comportement attendu :**
+
+- Interface disponible en 3 langues : français (`fr`), anglais (`en`), khmer (`km`)
+- Langue par défaut : français
+- Sélecteur de langue visible sur toutes les pages (header)
+- Routing i18n via Next.js : `/fr/dashboard`, `/en/dashboard`, `/km/dashboard`
+- Persistance de la langue choisie dans un cookie
+
+**Fichiers à créer :**
+
+- `apps/web/src/i18n/request.ts` — configuration next-intl
+- `apps/web/src/i18n/routing.ts` — définition des locales et locale par défaut
+- `apps/web/src/messages/fr.json` — traductions français
+- `apps/web/src/messages/en.json` — traductions anglais
+- `apps/web/src/messages/km.json` — traductions khmer
+- `apps/web/src/middleware.ts` — middleware next-intl pour le routing
+
+**Règles de code :**
+
+- Utiliser `next-intl` — conçu pour Next.js App Router, pas i18next
+- Toutes les pages sont dans `apps/web/src/app/[locale]/` — jamais de string en dur dans les composants
+- Utiliser le hook `useTranslations()` dans les composants client, `getTranslations()` dans les Server Components
+- Les clés suivent le format `feature.composant.element` (ex: `auth.login.title`)
+- Dépend de : toutes les features WEB — à implémenter avant WEB-01
+- Tester : changement de langue, persistance après refresh, fallback si clé manquante
+
+---
+
 ### WEB-01 — Tableau de bord médecin
 
 `[ ]` 🟡 Majeur · `apps/web/src/app/dashboard/`
