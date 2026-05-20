@@ -1,0 +1,86 @@
+{
+  "consent": {
+    "title": "Consentement",
+    "description": "Cette application collecte des photos de cicatrices et des questionnaires de symptômes pour assurer votre suivi post-opératoire.",
+    "dataCollected": "Données collectées",
+    "photos": "Photos de cicatrices",
+    "questionnaires": "Questionnaires de symptômes",
+    "accept": "J'accepte",
+    "decline": "Je refuse"
+  },
+  "auth": {
+    "login": {
+      "title": "Code patient",
+      "placeholder": "Entrez votre code",
+      "button": "Se connecter"
+    }
+  },
+  "home": {
+    "greeting": "Bonjour",
+    "upToDate": "Vous êtes à jour",
+    "normalRecovery": "Récupération normale",
+    "categories": "Catégories",
+    "appointments": "Prochains rendez-vous",
+    "articles": "Les derniers articles",
+    "medicalTracking": "Suivi médical",
+    "addSymptoms": "Ajouter symptômes",
+    "notifications": "Notifications",
+    "patientCard": "Ma carte patient",
+    "seeAll": "Voir tout"
+  },
+  "questionnaire": {
+    "title": "Sélectionnez vos symptômes",
+    "reportDate": "Date du signalement",
+    "addDocument": "Ajouter un document",
+    "addPhoto": "Ajouter des photos (optionnel)",
+    "photoButton": "Ajoutez une photo",
+    "save": "Enregistrer les symptômes",
+    "symptoms": {
+      "fatigue": "Fatigue",
+      "insomnia": "Insomnie",
+      "redness": "Rougeur",
+      "swelling": "Gonflement",
+      "bleeding": "Saignement",
+      "discharge": "Ecoulement",
+      "smell": "Odeur",
+      "appetite": "Mange moins",
+      "fever": "Fièvre",
+      "swallowing": "Difficulté à avaler",
+      "breathing": "Difficulté à respirer"
+    }
+  },
+  "tracking": {
+    "title": "Suivi médical",
+    "appointments": "Mes prochains rendez-vous",
+    "instructions": "Mes consignes"
+  },
+  "profile": {
+    "title": "Fiche d'identité",
+    "edit": "Modifier le profil",
+    "personalInfo": "Informations personelles",
+    "generalInfo": "Informations générales",
+    "medicalInfo": "Informations médicales",
+    "lastName": "Nom",
+    "firstName": "Prénom",
+    "gender": "Sexe",
+    "city": "Ville d'origine",
+    "id": "ID",
+    "birthDate": "Date de naissance",
+    "age": "Age",
+    "allergies": "Allergies"
+  },
+  "navigation": {
+    "home": "Accueil",
+    "tracking": "Suivi",
+    "articles": "Articles",
+    "profile": "Ma fiche"
+  },
+  "common": {
+    "loading": "Chargement...",
+    "error": "Une erreur est survenue",
+    "save": "Enregistrer",
+    "cancel": "Annuler",
+    "back": "Retour",
+    "confirm": "Confirmer"
+  }
+}
