@@ -650,7 +650,7 @@ Une GitHub App n'appartient à aucune personne — elle est rattachée au repo. 
 
 ### DEVOPS-04 — Réparation du système de migrations Drizzle
 
-`[ ]` 🔴 Critique · `apps/backend/drizzle/` · `apps/backend/src/shared/db.ts`
+`[~]` 🔴 Critique · `apps/backend/drizzle/` · `apps/backend/src/shared/db.ts`
 
 **Contexte :**
 
