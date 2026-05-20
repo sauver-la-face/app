@@ -3,6 +3,7 @@ import { createApp } from '../src/index';
 
 afterEach(() => {
   delete process.env.NODE_ENV;
+  delete process.env.JWT_SECRET;
 });
 
 describe('api.docs', () => {
@@ -29,6 +30,7 @@ describe('api.docs', () => {
     expect(await devResponse.text()).toContain('/openapi.json');
 
     process.env.NODE_ENV = 'production';
+    process.env.JWT_SECRET = 'test-secret-at-least-32-chars-long-123';
     const prodApp = createApp();
     const prodResponse = await prodApp.request('/docs');
 

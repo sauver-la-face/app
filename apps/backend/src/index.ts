@@ -56,9 +56,6 @@ import { createAuditMiddleware } from './shared/middleware/auditMiddleware';
 import { createS3LogsStorageFromEnv } from './shared/storage/logsStorage';
 import { buildPhotoPublicBaseUrl, createPhotoS3Client } from './shared/storage/s3Client';
 
-function throwNoDb(feature: string): never {
-  throw new Error(`DATABASE_URL is required for feature: ${feature}`);
-}
 
 export function createApp(): OpenAPIHono<{ Variables: SessionVariables }> {
   const app = new OpenAPIHono<{ Variables: SessionVariables }>();
@@ -107,11 +104,12 @@ export function createApp(): OpenAPIHono<{ Variables: SessionVariables }> {
   const alertUsecase = new AlertUsecase(alertRepository, logger);
   const syncUsecase = new SyncUsecase(syncRepository, logger, 1);
   const patientUsecase = new PatientUsecase(patientRepository, logger);
-  const photosUsecase = new PhotosUsecase(photoStorage, photoRepository ?? throwNoDb('photos'));
-  const exportsUsecase = new ExportsUsecase(
-    exportsRepository ?? throwNoDb('exports'),
-    new PdfLibReportGenerator(),
-  );
+  const photosUsecase = photoRepository
+    ? new PhotosUsecase(photoStorage, photoRepository)
+    : null;
+  const exportsUsecase = exportsRepository
+    ? new ExportsUsecase(exportsRepository, new PdfLibReportGenerator())
+    : null;
   const instructionsUsecase = new InstructionsUsecase(instructionRepository, logger);
 
   const jwtSecret = process.env.JWT_SECRET;
@@ -125,13 +123,13 @@ export function createApp(): OpenAPIHono<{ Variables: SessionVariables }> {
   // --- Lancement des tâches planifiées ---
   scheduleJobs(authCron);
 
-  // --- Configuration CORS (spécifique Better Auth) ---
+  // --- Configuration CORS globale ---
   app.use(
-    '/api/auth/*',
+    '*',
     cors({
       origin: process.env.WEB_URL ?? 'http://localhost:3000',
       allowHeaders: ['Content-Type', 'Authorization'],
-      allowMethods: ['POST', 'GET', 'OPTIONS'],
+      allowMethods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
       exposeHeaders: ['Content-Length'],
       maxAge: 600,
       credentials: true,
@@ -159,8 +157,8 @@ export function createApp(): OpenAPIHono<{ Variables: SessionVariables }> {
   app.route('/', createAlertRouter(alertUsecase));
   app.route('/', createPatientRouter(patientUsecase));
   app.route('/', createSyncRouter(syncUsecase));
-  app.route('/', createPhotosRouter(photosUsecase));
-  app.route('/', createExportsRouter(exportsUsecase));
+  if (photosUsecase) app.route('/', createPhotosRouter(photosUsecase));
+  if (exportsUsecase) app.route('/', createExportsRouter(exportsUsecase));
   app.route('/', createInstructionsRouter(instructionsUsecase));
 
   if (process.env.NODE_ENV !== 'production') {
