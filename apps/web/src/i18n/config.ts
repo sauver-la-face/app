@@ -1,4 +1,4 @@
-export const locales = ['fr', 'en'] as const;
+export const locales = ['fr', 'en', 'km'] as const;
 
 export type Locale = (typeof locales)[number];
 
@@ -8,6 +8,8 @@ export function isLocale(value: string | null | undefined): value is Locale {
   return locales.includes(value as Locale);
 }
 
-export function getLocaleLabel(locale: Locale): string {
-  return locale === 'fr' ? 'Francais' : 'English';
-}
+export const localeConfig: Record<Locale, { label: string; flag: string }> = {
+  fr: { label: 'Français', flag: '🇫🇷' },
+  en: { label: 'English', flag: '🇬🇧' },
+  km: { label: 'ភាសាខ្មែរ', flag: '🇰🇭' },
+};
