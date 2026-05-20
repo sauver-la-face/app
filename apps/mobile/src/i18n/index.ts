@@ -4,7 +4,10 @@ import { getLocales } from "expo-localization";
 
 import fr from "./locales/fr.json";
 import km from "./locales/km.json";
-import { detectLanguage } from "./detectLanguage";
+import { detectLanguage, type SupportedLanguage } from "./detectLanguage";
+
+export type { SupportedLanguage };
+export const SUPPORTED_LANGUAGES = ["fr", "km"] as const satisfies readonly SupportedLanguage[];
 
 i18n.use(initReactI18next).init({
   compatibilityJSON: "v3",

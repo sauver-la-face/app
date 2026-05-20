@@ -12,7 +12,9 @@
     "login": {
       "title": "Code patient",
       "placeholder": "Entrez votre code",
-      "button": "Se connecter"
+      "button": "Se connecter",
+      "error": "Code incorrect, veuillez réessayer",
+      "code_expired": "Ce code a expiré"
     }
   },
   "home": {
@@ -57,7 +59,7 @@
   "profile": {
     "title": "Fiche d'identité",
     "edit": "Modifier le profil",
-    "personalInfo": "Informations personelles",
+    "personalInfo": "Informations personnelles",
     "generalInfo": "Informations générales",
     "medicalInfo": "Informations médicales",
     "lastName": "Nom",

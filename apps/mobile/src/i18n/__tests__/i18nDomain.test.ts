@@ -9,6 +9,7 @@ import km from "../locales/km.json";
 // Initialisation i18n isolée — sans expo-localization ni react-native
 i18n.use(initReactI18next).init({
   compatibilityJSON: "v3",
+  initImmediate: false,
   resources: {
     fr: { translation: fr },
     km: { translation: km },
