@@ -17,11 +17,16 @@ export function NewPatientForm({ locale, dictionary }: NewPatientFormProps) {
   const labels = dictionary.newPatient;
   const { mutate, isPending, isError } = useCreatePatient();
 
+  const [civilite, setCivilite] = useState('');
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
   const [sex, setSex] = useState('');
   const [birthdate, setBirthdate] = useState('');
-  const [region, setRegion] = useState('');
+  const [phone, setPhone] = useState('');
+  const [social, setSocial] = useState('');
+  const [address, setAddress] = useState('');
+  const [postalCode, setPostalCode] = useState('');
+  const [city, setCity] = useState('');
 
   useEffect(() => {
     if (!sessionPending && !session) {
@@ -38,6 +43,7 @@ export function NewPatientForm({ locale, dictionary }: NewPatientFormProps) {
   }
 
   const age = birthdate ? calculateAge(birthdate) : null;
+  const hasContent = firstName || lastName;
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -47,7 +53,7 @@ export function NewPatientForm({ locale, dictionary }: NewPatientFormProps) {
         lastName,
         sex: sex || null,
         birthdate: birthdate || null,
-        region: region || null,
+        region: city || null,
       },
       {
         onSuccess: () => {
@@ -58,147 +64,302 @@ export function NewPatientForm({ locale, dictionary }: NewPatientFormProps) {
   }
 
   const inputClass =
-    'h-14 w-full rounded-[5px] border border-black/30 px-4 text-sm shadow-[0px_4px_4px_rgba(0,0,0,0.25)] focus:border-[#2EAC8E] focus:outline-none focus:ring-1 focus:ring-[#2EAC8E]';
-  const labelClass = 'mb-1.5 block text-sm font-medium text-gray-700';
+    'h-11 w-full rounded-[5px] border border-gray-300 bg-white px-3 text-sm placeholder:text-gray-400 focus:border-[#2EAC8E] focus:outline-none focus:ring-1 focus:ring-[#2EAC8E]';
+  const selectClass =
+    'h-11 w-full rounded-[5px] border border-gray-300 bg-white px-3 text-sm text-gray-700 focus:border-[#2EAC8E] focus:outline-none focus:ring-1 focus:ring-[#2EAC8E]';
+  const labelClass = 'mb-1 block text-sm font-medium text-gray-700';
 
   return (
-    <div className="flex gap-8">
-      <form onSubmit={handleSubmit} className="flex-1 space-y-6">
-        <h1 className="text-2xl font-semibold text-gray-900">{labels.title}</h1>
-
-        <div className="grid grid-cols-2 gap-4">
-          <div>
-            <label className={labelClass} htmlFor="firstName">
-              {labels.firstNameLabel} <span className="text-[#2EAC8E]">*</span>
-            </label>
-            <input
-              id="firstName"
-              type="text"
-              required
-              maxLength={100}
-              value={firstName}
-              onChange={(e) => setFirstName(e.target.value)}
-              className={inputClass}
-            />
-          </div>
-          <div>
-            <label className={labelClass} htmlFor="lastName">
-              {labels.lastNameLabel} <span className="text-[#2EAC8E]">*</span>
-            </label>
-            <input
-              id="lastName"
-              type="text"
-              required
-              maxLength={100}
-              value={lastName}
-              onChange={(e) => setLastName(e.target.value)}
-              className={inputClass}
-            />
-          </div>
-        </div>
-
-        <div className="grid grid-cols-3 gap-4">
-          <div>
-            <label className={labelClass} htmlFor="birthdate">
-              {labels.birthdateLabel}
-            </label>
-            <input
-              id="birthdate"
-              type="date"
-              value={birthdate}
-              onChange={(e) => setBirthdate(e.target.value)}
-              className={inputClass}
-            />
-          </div>
-          <div>
-            <label className={labelClass} htmlFor="age">
-              {labels.ageLabel}
-            </label>
-            <input
-              id="age"
-              type="text"
-              readOnly
-              value={age !== null && age >= 0 ? `${age} ${labels.ageUnit}` : ''}
-              className={`${inputClass} cursor-default bg-gray-50 text-gray-500`}
-            />
-          </div>
-          <div>
-            <label className={labelClass} htmlFor="sex">
-              {labels.sexLabel}
-            </label>
-            <select
-              id="sex"
-              value={sex}
-              onChange={(e) => setSex(e.target.value)}
-              className={inputClass}
-            >
-              <option value="">—</option>
-              <option value="M">{labels.sexMale}</option>
-              <option value="F">{labels.sexFemale}</option>
-              <option value="Autre">{labels.sexOther}</option>
-            </select>
-          </div>
-        </div>
-
+    <div>
+      {/* Header titre + boutons — au-dessus du flex row */}
+      <div className="mb-5 flex items-start justify-between">
         <div>
-          <label className={labelClass} htmlFor="region">
-            {labels.regionLabel}
-          </label>
-          <input
-            id="region"
-            type="text"
-            maxLength={100}
-            value={region}
-            onChange={(e) => setRegion(e.target.value)}
-            placeholder={labels.regionPlaceholder}
-            className={inputClass}
-          />
+          <h1 className="text-2xl font-bold text-gray-900">{labels.title}</h1>
+          <p className="mt-1 text-sm text-gray-500">{labels.subtitle}</p>
         </div>
-
-        {isError && (
-          <p className="rounded-[5px] border border-red-100 bg-red-50 px-4 py-3 text-sm text-red-700">
-            {labels.errorMessage}
-          </p>
-        )}
-
-        <div className="flex gap-4 pt-2">
+        <div className="flex gap-3">
           <button
             type="button"
             onClick={() => router.push(`/${locale}`)}
-            className="h-14 flex-1 rounded-[10px] border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50"
+            className="rounded-md border border-gray-300 bg-white px-5 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
           >
             {labels.cancelButton}
           </button>
           <button
             type="submit"
+            form="new-patient-form"
             disabled={isPending}
-            className="h-14 flex-1 rounded-[10px] bg-[#2EAC8E] text-sm font-medium text-white hover:bg-[#27967A] disabled:opacity-60"
+            className="rounded-md bg-[#2EAC8E] px-5 py-2 text-sm font-medium text-white hover:bg-[#27967A] disabled:opacity-60"
           >
             {isPending ? labels.submitting : labels.submitButton}
           </button>
         </div>
-      </form>
+      </div>
 
-      <aside className="w-72 shrink-0 space-y-5">
-        <div className="rounded-[14px] border border-[#2EAC8E]/20 bg-[#F0FAF7] p-5">
-          <h3 className="text-sm font-semibold text-[#2EAC8E]">{labels.asideTitle}</h3>
-          <p className="mt-2 text-sm leading-6 text-gray-600">{labels.asideText}</p>
+      {/* Flex row : formulaire + aside alignés */}
+      <div className="flex gap-6">
+      <div className="flex-1">
+        <form id="new-patient-form" onSubmit={handleSubmit} className="space-y-4">
+          {/* Informations personnelles */}
+          <div className="rounded-lg border border-gray-200 bg-white p-5">
+            <h2 className="mb-4 text-sm font-semibold text-gray-800">
+              {labels.personalInfoSection}
+            </h2>
+
+            {/* Row 1 : Civilité / Prénom / Nom */}
+            <div className="mb-4 grid grid-cols-3 gap-4">
+              <div>
+                <label className={labelClass} htmlFor="civilite">
+                  {labels.civiliteLabel}
+                </label>
+                <select
+                  id="civilite"
+                  value={civilite}
+                  onChange={(e) => setCivilite(e.target.value)}
+                  className={selectClass}
+                >
+                  <option value="">{labels.civiliteSelect}</option>
+                  <option value="M.">{labels.civiliteMr}</option>
+                  <option value="Mme">{labels.civiliteMme}</option>
+                  <option value="Dr">{labels.civiliteDr}</option>
+                  <option value="Pr">{labels.civilitePr}</option>
+                </select>
+              </div>
+              <div>
+                <label className={labelClass} htmlFor="firstName">
+                  {labels.firstNameLabel} <span className="text-red-500">*</span>
+                </label>
+                <input
+                  id="firstName"
+                  type="text"
+                  required
+                  maxLength={100}
+                  placeholder={labels.firstNamePlaceholder}
+                  value={firstName}
+                  onChange={(e) => setFirstName(e.target.value)}
+                  className={inputClass}
+                />
+              </div>
+              <div>
+                <label className={labelClass} htmlFor="lastName">
+                  {labels.lastNameLabel} <span className="text-red-500">*</span>
+                </label>
+                <input
+                  id="lastName"
+                  type="text"
+                  required
+                  maxLength={100}
+                  placeholder={labels.lastNamePlaceholder}
+                  value={lastName}
+                  onChange={(e) => setLastName(e.target.value)}
+                  className={inputClass}
+                />
+              </div>
+            </div>
+
+            {/* Row 2 : Date / Âge / Sexe */}
+            <div className="mb-4 grid grid-cols-3 gap-4">
+              <div>
+                <label className={labelClass} htmlFor="birthdate">
+                  {labels.birthdateLabel} <span className="text-red-500">*</span>
+                </label>
+                <input
+                  id="birthdate"
+                  type="date"
+                  value={birthdate}
+                  onChange={(e) => setBirthdate(e.target.value)}
+                  className={inputClass}
+                />
+              </div>
+              <div>
+                <label className={labelClass} htmlFor="age">
+                  {labels.ageLabel}
+                </label>
+                <input
+                  id="age"
+                  type="text"
+                  readOnly
+                  value={age !== null && age >= 0 ? `${age}` : '--'}
+                  className={`${inputClass} cursor-default bg-gray-50 text-gray-400`}
+                />
+              </div>
+              <div>
+                <label className={labelClass} htmlFor="sex">
+                  {labels.sexLabel} <span className="text-red-500">*</span>
+                </label>
+                <select
+                  id="sex"
+                  value={sex}
+                  onChange={(e) => setSex(e.target.value)}
+                  className={selectClass}
+                >
+                  <option value="">{labels.sexSelect}</option>
+                  <option value="M">{labels.sexMale}</option>
+                  <option value="F">{labels.sexFemale}</option>
+                  <option value="Autre">{labels.sexOther}</option>
+                </select>
+              </div>
+            </div>
+
+            {/* Row 3 : Téléphone / Réseaux sociaux */}
+            <div className="mb-4 grid grid-cols-2 gap-4">
+              <div>
+                <label className={labelClass} htmlFor="phone">
+                  {labels.phoneLabel}
+                </label>
+                <input
+                  id="phone"
+                  type="tel"
+                  maxLength={20}
+                  placeholder={labels.phonePlaceholder}
+                  value={phone}
+                  onChange={(e) => setPhone(e.target.value)}
+                  className={inputClass}
+                />
+              </div>
+              <div>
+                <label className={labelClass} htmlFor="social">
+                  {labels.socialLabel}
+                </label>
+                <input
+                  id="social"
+                  type="text"
+                  maxLength={500}
+                  placeholder={labels.socialPlaceholder}
+                  value={social}
+                  onChange={(e) => setSocial(e.target.value)}
+                  className={inputClass}
+                />
+              </div>
+            </div>
+
+            {/* Row 4 : Adresse */}
+            <div className="mb-4">
+              <label className={labelClass} htmlFor="address">
+                {labels.addressLabel}
+              </label>
+              <input
+                id="address"
+                type="text"
+                maxLength={255}
+                placeholder={labels.addressPlaceholder}
+                value={address}
+                onChange={(e) => setAddress(e.target.value)}
+                className={inputClass}
+              />
+            </div>
+
+            {/* Row 5 : Code Postal / Ville / Pays */}
+            <div className="grid grid-cols-3 gap-4">
+              <div>
+                <label className={labelClass} htmlFor="postalCode">
+                  {labels.postalCodeLabel}
+                </label>
+                <input
+                  id="postalCode"
+                  type="text"
+                  maxLength={20}
+                  placeholder={labels.postalCodePlaceholder}
+                  value={postalCode}
+                  onChange={(e) => setPostalCode(e.target.value)}
+                  className={inputClass}
+                />
+              </div>
+              <div>
+                <label className={labelClass} htmlFor="city">
+                  {labels.cityLabel}
+                </label>
+                <input
+                  id="city"
+                  type="text"
+                  maxLength={255}
+                  placeholder={labels.cityPlaceholder}
+                  value={city}
+                  onChange={(e) => setCity(e.target.value)}
+                  className={inputClass}
+                />
+              </div>
+              <div>
+                <label className={labelClass} htmlFor="country">
+                  {labels.countryLabel}
+                </label>
+                <select id="country" defaultValue="cambodge" className={selectClass}>
+                  <option value="cambodge">{labels.countryDefault}</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          {/* Pièces jointes */}
+          <div className="rounded-lg border border-gray-200 bg-white p-5">
+            <div className="flex items-center gap-3">
+              <svg
+                className="h-5 w-5 shrink-0 text-gray-400"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                strokeWidth={1.5}
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M18.375 12.739l-7.693 7.693a4.5 4.5 0 01-6.364-6.364l10.94-10.94A3 3 0 1119.5 7.372L8.552 18.32m.009-.01l-.01.01m5.699-9.941l-7.81 7.81a1.5 1.5 0 002.112 2.13"
+                />
+              </svg>
+              <div>
+                <span className="text-sm font-medium text-gray-800">{labels.attachmentsLabel}</span>
+                <span className="ml-2 text-xs text-gray-400">({labels.attachmentsOptional})</span>
+                <p className="mt-0.5 text-xs text-gray-500">{labels.attachmentsHint}</p>
+              </div>
+            </div>
+          </div>
+
+          {isError && (
+            <p className="rounded-md border border-red-100 bg-red-50 px-4 py-3 text-sm text-red-700">
+              {labels.errorMessage}
+            </p>
+          )}
+        </form>
+      </div>
+
+      {/* Panneau droit */}
+      <aside className="w-64 shrink-0 space-y-4">
+        {/* À savoir */}
+        <div className="rounded-lg border border-gray-200 bg-white p-4">
+          <div className="mb-2 flex items-center gap-2">
+            <svg className="h-4 w-4 text-gray-900" viewBox="0 0 20 20" fill="currentColor">
+              <path
+                fillRule="evenodd"
+                d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a.75.75 0 000 1.5h.253a.25.25 0 01.244.304l-.459 2.066A1.75 1.75 0 0010.747 15H11a.75.75 0 000-1.5h-.253a.25.25 0 01-.244-.304l.459-2.066A1.75 1.75 0 009.253 9H9z"
+                clipRule="evenodd"
+              />
+            </svg>
+            <h3 className="text-sm font-semibold text-gray-900">{labels.asideTitle}</h3>
+          </div>
+          <p className="text-xs leading-5 text-gray-900">{labels.asideText}</p>
         </div>
 
-        <div className="rounded-[14px] border border-black/10 bg-white p-5 shadow-sm">
-          <h3 className="text-sm font-semibold text-gray-700">{labels.summaryTitle}</h3>
-          {firstName || lastName ? (
-            <dl className="mt-4 space-y-3 text-sm">
+        {/* Résumé */}
+        <div className="rounded-lg border border-gray-200 bg-white p-4">
+          <div className="mb-3 flex items-center gap-2">
+            <svg className="h-4 w-4 text-gray-400" viewBox="0 0 20 20" fill="currentColor">
+              <path d="M10 8a3 3 0 100-6 3 3 0 000 6zM3.465 14.493a1.23 1.23 0 00.41 1.412A9.957 9.957 0 0010 18c2.31 0 4.438-.784 6.131-2.1.43-.333.604-.903.408-1.41a7.002 7.002 0 00-13.074.003z" />
+            </svg>
+            <h3 className="text-sm font-semibold text-gray-900">{labels.summaryTitle}</h3>
+          </div>
+
+          {hasContent ? (
+            <dl className="space-y-2 text-xs">
               <div>
-                <dt className="text-xs text-gray-400">{labels.identityLabel}</dt>
-                <dd className="mt-0.5 font-medium text-gray-900">
-                  {[firstName, lastName].filter(Boolean).join(' ')}
+                <dt className="text-gray-400">{labels.identityLabel}</dt>
+                <dd className="mt-0.5 font-medium text-gray-800">
+                  {[civilite, firstName, lastName].filter(Boolean).join(' ')}
                 </dd>
               </div>
               {birthdate ? (
                 <div>
-                  <dt className="text-xs text-gray-400">{labels.birthdateLabel}</dt>
-                  <dd className="mt-0.5 font-medium text-gray-900">
+                  <dt className="text-gray-400">{labels.birthdateLabel}</dt>
+                  <dd className="mt-0.5 font-medium text-gray-800">
                     {birthdate}
                     {age !== null && age >= 0 ? ` (${age} ${labels.ageUnit})` : ''}
                   </dd>
@@ -206,24 +367,37 @@ export function NewPatientForm({ locale, dictionary }: NewPatientFormProps) {
               ) : null}
               {sex ? (
                 <div>
-                  <dt className="text-xs text-gray-400">{labels.sexLabel}</dt>
-                  <dd className="mt-0.5 font-medium text-gray-900">
+                  <dt className="text-gray-400">{labels.sexLabel}</dt>
+                  <dd className="mt-0.5 font-medium text-gray-800">
                     {sex === 'M' ? labels.sexMale : sex === 'F' ? labels.sexFemale : labels.sexOther}
                   </dd>
                 </div>
               ) : null}
-              {region ? (
+              {city ? (
                 <div>
-                  <dt className="text-xs text-gray-400">{labels.regionLabel}</dt>
-                  <dd className="mt-0.5 font-medium text-gray-900">{region}</dd>
+                  <dt className="text-gray-400">{labels.cityLabel}</dt>
+                  <dd className="mt-0.5 font-medium text-gray-800">{city}</dd>
                 </div>
               ) : null}
             </dl>
           ) : (
-            <p className="mt-3 text-sm text-gray-400">{labels.summaryEmpty}</p>
+            <div className="flex flex-col items-center gap-3 py-4">
+              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gray-100">
+                <svg className="h-6 w-6 text-gray-300" viewBox="0 0 20 20" fill="currentColor">
+                  <path d="M10 8a3 3 0 100-6 3 3 0 000 6zM3.465 14.493a1.23 1.23 0 00.41 1.412A9.957 9.957 0 0010 18c2.31 0 4.438-.784 6.131-2.1.43-.333.604-.903.408-1.41a7.002 7.002 0 00-13.074.003z" />
+                </svg>
+              </div>
+              <div className="w-full space-y-1.5">
+                <div className="h-2 w-3/4 rounded-full bg-gray-100" />
+                <div className="h-2 w-1/2 rounded-full bg-gray-100" />
+                <div className="h-2 w-2/3 rounded-full bg-gray-100" />
+              </div>
+              <p className="text-center text-xs text-gray-900">{labels.summaryEmpty}</p>
+            </div>
           )}
         </div>
       </aside>
+      </div>{/* fin flex gap-6 */}
     </div>
   );
 }
