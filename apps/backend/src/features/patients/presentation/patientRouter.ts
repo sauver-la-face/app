@@ -3,6 +3,7 @@ import {
   createPatientSchema,
   patientAccessCodeSchema,
   patientDetailsSchema,
+  patientHistoryResponseSchema,
   patientListResponseSchema,
   updatePatientSchema,
 } from '@sauver-la-face/shared';
@@ -82,6 +83,33 @@ const getPatientRoute = createRoute({
         },
       },
       description: 'Details patient',
+    },
+    404: {
+      content: {
+        'application/json': {
+          schema: notFoundErrorSchema,
+        },
+      },
+      description: 'Patient introuvable',
+    },
+  },
+  tags: ['Patients'],
+});
+
+const getPatientHistoryRoute = createRoute({
+  method: 'get',
+  path: '/patients/{patientId}/history',
+  request: {
+    params: uuidParamSchema,
+  },
+  responses: {
+    200: {
+      content: {
+        'application/json': {
+          schema: patientHistoryResponseSchema,
+        },
+      },
+      description: 'Historique complet du patient',
     },
     404: {
       content: {
@@ -202,6 +230,22 @@ export function createPatientRouter(patientUsecase: PatientUsecase): OpenAPIHono
   router.openapi(getPatientRoute, async (context) => {
     try {
       const response = await patientUsecase.getPatient(context.req.param('patientId'));
+      return context.json(response, 200);
+    } catch (error) {
+      if (error instanceof PatientNotFoundError) {
+        return context.json(
+          { code: error.code as 'PATIENT_NOT_FOUND', message: error.message },
+          404,
+        );
+      }
+
+      throw error;
+    }
+  });
+
+  router.openapi(getPatientHistoryRoute, async (context) => {
+    try {
+      const response = await patientUsecase.getPatientHistory(context.req.param('patientId'));
       return context.json(response, 200);
     } catch (error) {
       if (error instanceof PatientNotFoundError) {
