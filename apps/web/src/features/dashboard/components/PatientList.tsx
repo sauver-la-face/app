@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import type { PatientSummary } from '@sauver-la-face/shared';
 import type { Dictionary } from '@/i18n/dictionaries';
 
@@ -7,6 +8,7 @@ interface PatientListProps {
   patients: PatientSummary[];
   alertPatientIds: Set<string>;
   dictionary: Dictionary;
+  locale: string;
 }
 
 function StatusBadge({
@@ -81,7 +83,7 @@ function formatLastSync(lastSyncedAt: string | null, neverSyncedLabel: string): 
   return new Date(lastSyncedAt).toLocaleDateString();
 }
 
-export function PatientList({ patients, alertPatientIds, dictionary }: PatientListProps) {
+export function PatientList({ patients, alertPatientIds, dictionary, locale }: PatientListProps) {
   const { dashboard } = dictionary;
 
   if (patients.length === 0) {
@@ -116,7 +118,14 @@ export function PatientList({ patients, alertPatientIds, dictionary }: PatientLi
                 : dashboard.anonymous;
             return (
               <tr key={patient.patientId} className="hover:bg-gray-50">
-                <td className="px-4 py-3 font-medium text-gray-900">{displayName}</td>
+                <td className="px-4 py-3 font-medium text-gray-900">
+                  <Link
+                    href={`/${locale}/patients/${patient.patientId}`}
+                    className="hover:text-[#2EAC8E] hover:underline"
+                  >
+                    {displayName}
+                  </Link>
+                </td>
                 <td className="px-4 py-3 text-gray-500">{patient.region ?? '—'}</td>
                 <td className="px-4 py-3">
                   <StatusBadge

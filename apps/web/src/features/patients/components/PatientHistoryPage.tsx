@@ -8,7 +8,7 @@ import { useEffect } from 'react';
 import type { Locale } from '@/i18n/config';
 import type { Dictionary } from '@/i18n/dictionaries';
 import { useSession } from '@/lib/authClient';
-import { usePatientHistory } from '../hooks/usePatientHistory';
+import { apiBaseUrl, usePatientHistory } from '../hooks/usePatientHistory';
 
 export function PatientHistoryPage({
   locale,
@@ -134,7 +134,7 @@ export function PatientHistoryPage({
                 >
                   <Image
                     loader={passthroughImageLoader}
-                    src={photo.fileUrl}
+                    src={`${apiBaseUrl}/photos/${photo.mediaId}`}
                     alt={photo.description ?? `Photo ${photo.mediaId}`}
                     className="h-56 w-full object-cover"
                     width={640}
@@ -298,7 +298,7 @@ export function PatientHistoryPage({
                           <Image
                             key={photo.mediaId}
                             loader={passthroughImageLoader}
-                            src={photo.fileUrl}
+                            src={`${apiBaseUrl}/photos/${photo.mediaId}`}
                             alt={photo.description ?? photo.fileType}
                             className="h-24 w-24 rounded-2xl object-cover"
                             width={96}

@@ -1,3 +1,5 @@
+import { eq } from 'drizzle-orm';
+
 import type { DbClient } from '@shared/db';
 
 import { media } from '../../../infrastructure/schema';
@@ -16,5 +18,14 @@ export class PgPhotoRepository implements PhotoRepository {
       taken_at: photo.takenAt,
       description: null,
     });
+  }
+
+  async findMediaById(mediaId: string): Promise<{ fileUrl: string } | null> {
+    const [row] = await this.db
+      .select({ fileUrl: media.file_url })
+      .from(media)
+      .where(eq(media.uuid_media, mediaId))
+      .limit(1);
+    return row ?? null;
   }
 }

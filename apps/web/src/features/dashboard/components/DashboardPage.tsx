@@ -88,6 +88,7 @@ export function DashboardPage({ locale, dictionary }: DashboardPageProps) {
                 patients={patientsData?.patients ?? []}
                 alertPatientIds={alertPatientIds}
                 dictionary={dictionary}
+                locale={locale}
               />
             </section>
           </>

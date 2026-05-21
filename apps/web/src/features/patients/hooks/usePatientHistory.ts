@@ -3,7 +3,7 @@
 import type { PatientHistoryResponse } from '@sauver-la-face/shared';
 import { useQuery } from '@tanstack/react-query';
 
-const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001';
+export const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001';
 
 export function usePatientHistory(patientId: string) {
   return useQuery({

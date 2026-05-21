@@ -35,6 +35,7 @@ function makeRepository(): PhotoRepository & { saveCalls: number } {
     save: mock(async () => {
       saveCalls++;
     }),
+    findMediaById: mock(async () => null),
   };
 }
 

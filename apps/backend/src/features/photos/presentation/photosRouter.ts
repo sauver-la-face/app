@@ -1,7 +1,9 @@
+import { GetObjectCommand, type S3Client } from '@aws-sdk/client-s3';
 import { Hono } from 'hono';
 import { z } from 'zod';
 
 import { PhotoIntegrityError, type PhotosUsecase } from '../application/photosUsecase';
+import type { PhotoRepository } from '../domain/photoRepository';
 
 const uploadQuerySchema = z.object({
   checksum: z.string().regex(/^[a-f0-9]{64}$/i, 'CHECKSUM_INVALID'),
@@ -9,7 +11,12 @@ const uploadQuerySchema = z.object({
   takenAt: z.string().datetime('TAKEN_AT_INVALID'),
 });
 
-export function createPhotosRouter(photosUsecase: PhotosUsecase): Hono {
+export function createPhotosRouter(
+  photosUsecase: PhotosUsecase,
+  photoRepository: PhotoRepository,
+  s3Client: S3Client,
+  bucket: string,
+): Hono {
   const router = new Hono();
 
   router.post('/photos', async (context) => {
@@ -54,6 +61,36 @@ export function createPhotosRouter(photosUsecase: PhotosUsecase): Hono {
 
       throw error;
     }
+  });
+
+  router.get('/photos/:mediaId', async (context) => {
+    const { mediaId } = context.req.param();
+
+    const record = await photoRepository.findMediaById(mediaId);
+    if (!record) {
+      return context.json({ code: 'NOT_FOUND' }, 404);
+    }
+
+    // Extrait la clé S3 depuis l'URL stockée : "{baseUrl}/{bucket}/{key}" → "{key}"
+    const separator = `/${bucket}/`;
+    const parts = record.fileUrl.split(separator);
+    const key = parts.length >= 2 ? parts.slice(1).join(separator) : record.fileUrl;
+
+    const command = new GetObjectCommand({ Bucket: bucket, Key: key });
+    const s3Response = await s3Client.send(command);
+
+    if (!s3Response.Body) {
+      return context.json({ code: 'NOT_FOUND' }, 404);
+    }
+
+    const buffer = Buffer.from(await s3Response.Body.transformToByteArray());
+
+    return new Response(buffer, {
+      headers: {
+        'Content-Type': s3Response.ContentType ?? 'image/jpeg',
+        'Cache-Control': 'private, max-age=3600',
+      },
+    });
   });
 
   return router;
