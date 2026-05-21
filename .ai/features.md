@@ -319,7 +319,7 @@ Mobile (SQLite) → Hono sync.usecase.ts → compare avec PostgreSQL
 
 ### WEB-02 — Visualisation chronologique patient
 
-`[~]` 🟡 Majeur · `apps/web/src/app/patients/[id]/`
+`[x]` 🟡 Majeur · `apps/web/src/app/patients/[id]/`
 
 **Comportement attendu :**
 
