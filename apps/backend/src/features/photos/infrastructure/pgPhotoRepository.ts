@@ -1,6 +1,5 @@
-import { eq } from 'drizzle-orm';
-
 import type { DbClient } from '@shared/db';
+import { eq } from 'drizzle-orm';
 
 import { media } from '../../../infrastructure/schema';
 import type { Photo } from '../domain/photo';

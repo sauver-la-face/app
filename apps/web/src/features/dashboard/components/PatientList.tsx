@@ -1,7 +1,7 @@
 'use client';
 
-import Link from 'next/link';
 import type { PatientSummary } from '@sauver-la-face/shared';
+import Link from 'next/link';
 import type { Dictionary } from '@/i18n/dictionaries';
 
 interface PatientListProps {

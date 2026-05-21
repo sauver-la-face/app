@@ -154,7 +154,8 @@ export function createApp(): OpenAPIHono<{ Variables: SessionVariables }> {
   app.route('/', createAlertRouter(alertUsecase));
   app.route('/', createPatientRouter(patientUsecase));
   app.route('/', createSyncRouter(syncUsecase));
-  if (photosUsecase && photoRepository) app.route('/', createPhotosRouter(photosUsecase, photoRepository, s3Client, bucket));
+  if (photosUsecase && photoRepository)
+    app.route('/', createPhotosRouter(photosUsecase, photoRepository, s3Client, bucket));
   if (exportsUsecase) app.route('/', createExportsRouter(exportsUsecase));
   app.route('/', createInstructionsRouter(instructionsUsecase));
 
