@@ -336,7 +336,7 @@ Mobile (SQLite) → Hono sync.usecase.ts → compare avec PostgreSQL
 
 ### WEB-03 — Gestion des utilisateurs et codes d'accès
 
-`[ ]` 🟡 Majeur · `apps/web/src/app/patients/`
+`[~]` 🟡 Majeur · `apps/web/src/app/patients/`
 
 **Comportement attendu :**
 
