@@ -103,10 +103,10 @@ export function PatientHistoryPage({
           <p className="mt-2 max-w-2xl text-sm text-gray-600">{labels.historySubtitle}</p>
         </div>
         <Link
-          href={`/${locale}`}
+          href={`/${locale}/patients`}
           className="rounded-full border border-black/10 bg-white px-5 py-3 text-sm font-medium text-gray-700 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
         >
-          {labels.backToDashboard}
+          {labels.backToPatients}
         </Link>
       </div>
 

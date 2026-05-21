@@ -2,6 +2,7 @@
 
 import type { PatientSummary } from '@sauver-la-face/shared';
 import Link from 'next/link';
+import { PatientCodeBadge, PatientStatusBadge } from '@/features/patients/components/PatientBadges';
 import type { Dictionary } from '@/i18n/dictionaries';
 
 interface PatientListProps {
@@ -9,73 +10,6 @@ interface PatientListProps {
   alertPatientIds: Set<string>;
   dictionary: Dictionary;
   locale: string;
-}
-
-function StatusBadge({
-  syncStatus,
-  hasAlert,
-  dictionary,
-}: {
-  syncStatus: PatientSummary['syncStatus'];
-  hasAlert: boolean;
-  dictionary: Dictionary['dashboard'];
-}) {
-  if (hasAlert) {
-    return (
-      <span className="inline-flex items-center rounded-full bg-red-100 px-2.5 py-0.5 text-xs font-medium text-red-800">
-        {dictionary.statusAlert}
-      </span>
-    );
-  }
-  if (syncStatus === 'offline') {
-    return (
-      <span className="inline-flex items-center rounded-full bg-orange-100 px-2.5 py-0.5 text-xs font-medium text-orange-800">
-        {dictionary.statusOffline}
-      </span>
-    );
-  }
-  if (syncStatus === 'never_synced') {
-    return (
-      <span className="inline-flex items-center rounded-full bg-gray-100 px-2.5 py-0.5 text-xs font-medium text-gray-600">
-        {dictionary.statusNeverSynced}
-      </span>
-    );
-  }
-  return (
-    <span className="inline-flex items-center rounded-full bg-green-100 px-2.5 py-0.5 text-xs font-medium text-green-800">
-      {dictionary.statusOk}
-    </span>
-  );
-}
-
-function CodeBadge({
-  status,
-  dictionary,
-}: {
-  status: PatientSummary['patientCodeStatus'];
-  dictionary: Dictionary['dashboard'];
-}) {
-  const labels: Record<PatientSummary['patientCodeStatus'], string> = {
-    active: dictionary.codeActive,
-    expired: dictionary.codeExpired,
-    revoked: dictionary.codeRevoked,
-    used: dictionary.codeUsed,
-    none: dictionary.codeNone,
-  };
-  const colors: Record<PatientSummary['patientCodeStatus'], string> = {
-    active: 'bg-[#2EAC8E]/10 text-[#2EAC8E]',
-    expired: 'bg-yellow-100 text-yellow-800',
-    revoked: 'bg-red-100 text-red-800',
-    used: 'bg-blue-100 text-blue-800',
-    none: 'bg-gray-100 text-gray-500',
-  };
-  return (
-    <span
-      className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${colors[status]}`}
-    >
-      {labels[status]}
-    </span>
-  );
 }
 
 function formatLastSync(lastSyncedAt: string | null, neverSyncedLabel: string): string {
@@ -108,6 +42,9 @@ export function PatientList({ patients, alertPatientIds, dictionary, locale }: P
             <th className="px-4 py-3 text-left font-medium text-gray-600">
               {dashboard.colLastSync}
             </th>
+            <th className="px-4 py-3 text-left font-medium text-gray-600">
+              {dictionary.patientManagement.colActions}
+            </th>
           </tr>
         </thead>
         <tbody className="divide-y divide-gray-100">
@@ -116,6 +53,7 @@ export function PatientList({ patients, alertPatientIds, dictionary, locale }: P
               patient.firstName || patient.lastName
                 ? [patient.firstName, patient.lastName].filter(Boolean).join(' ')
                 : dashboard.anonymous;
+
             return (
               <tr key={patient.patientId} className="hover:bg-gray-50">
                 <td className="px-4 py-3 font-medium text-gray-900">
@@ -128,17 +66,33 @@ export function PatientList({ patients, alertPatientIds, dictionary, locale }: P
                 </td>
                 <td className="px-4 py-3 text-gray-500">{patient.region ?? '—'}</td>
                 <td className="px-4 py-3">
-                  <StatusBadge
+                  <PatientStatusBadge
                     syncStatus={patient.syncStatus}
                     hasAlert={alertPatientIds.has(patient.patientId)}
                     dictionary={dashboard}
                   />
                 </td>
                 <td className="px-4 py-3">
-                  <CodeBadge status={patient.patientCodeStatus} dictionary={dashboard} />
+                  <PatientCodeBadge status={patient.patientCodeStatus} dictionary={dashboard} />
                 </td>
                 <td className="px-4 py-3 text-gray-500">
                   {formatLastSync(patient.lastSyncedAt, dashboard.statusNeverSynced)}
+                </td>
+                <td className="px-4 py-3">
+                  <div className="flex flex-wrap gap-2">
+                    <Link
+                      href={`/${locale}/patients/${patient.patientId}`}
+                      className="rounded-full border border-gray-200 bg-white px-3 py-1.5 text-xs font-medium text-gray-700 hover:bg-gray-50"
+                    >
+                      {dictionary.patientManagement.viewHistory}
+                    </Link>
+                    <Link
+                      href={`/${locale}/patients`}
+                      className="rounded-full bg-gray-900 px-3 py-1.5 text-xs font-semibold text-white hover:bg-gray-800"
+                    >
+                      {dictionary.patientManagement.managePatient}
+                    </Link>
+                  </div>
                 </td>
               </tr>
             );

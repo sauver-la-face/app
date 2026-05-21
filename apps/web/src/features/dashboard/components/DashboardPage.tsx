@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useEffect, useMemo } from 'react';
 import type { Dictionary } from '@/i18n/dictionaries';
@@ -47,6 +48,12 @@ export function DashboardPage({ locale, dictionary }: DashboardPageProps) {
         <div className="mb-6 flex items-center justify-between">
           <h1 className="text-2xl font-semibold text-gray-900">{dictionary.dashboard.title}</h1>
           <div className="flex items-center gap-4">
+            <Link
+              href={`/${locale}/patients`}
+              className="rounded-md border border-[#2EAC8E]/20 bg-[#EAF7F2] px-3 py-1.5 text-sm font-medium text-[#1F6A57] hover:bg-[#def2ea]"
+            >
+              {dictionary.patientManagement.title}
+            </Link>
             <span className="text-sm text-gray-500">
               {dictionary.dashboard.signedInAs}{' '}
               <span className="font-medium text-gray-700">
