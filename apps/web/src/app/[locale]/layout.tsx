@@ -3,6 +3,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { UserGreeting } from '@/features/auth/components/UserGreeting';
+import { SearchBar } from '@/features/layout/components/SearchBar';
 import { LocaleSwitcher } from '@/features/i18n/components/LocaleSwitcher';
 import { isLocale, type Locale, locales } from '@/i18n/config';
 import { getDictionary } from '@/i18n/dictionaries';
@@ -60,11 +61,7 @@ export default async function LocaleLayout(props: {
           </div>
           {/* Barre de recherche */}
           <div className="flex flex-1 justify-center">
-            <input
-              type="search"
-              placeholder={dictionary.common.searchPlaceholder}
-              className="h-[49px] w-full max-w-[600px] rounded-full border border-black/15 bg-[#EBEBEB] px-6 text-sm text-gray-700 placeholder:text-gray-500 shadow-[inset_0px_3px_6px_rgba(0,0,0,0.15)] focus:border-[#2EAC8E] focus:outline-none focus:ring-1 focus:ring-[#2EAC8E]"
-            />
+            <SearchBar placeholder={dictionary.common.searchPlaceholder} />
           </div>
           {/* Greeting + LocaleSwitcher */}
           <div className="flex shrink-0 items-center gap-6">
