@@ -22,7 +22,7 @@ async function createPatient(input: CreatePatientInput): Promise<PatientDetails>
   });
 
   if (!res.ok) {
-    const data = await res.json().catch(() => ({})) as { code?: string };
+    const data = (await res.json().catch(() => ({}))) as { code?: string };
     throw new Error(data.code ?? 'CREATE_PATIENT_FAILED');
   }
 

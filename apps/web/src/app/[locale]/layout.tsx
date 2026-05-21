@@ -3,8 +3,8 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { UserGreeting } from '@/features/auth/components/UserGreeting';
-import { SearchBar } from '@/features/layout/components/SearchBar';
 import { LocaleSwitcher } from '@/features/i18n/components/LocaleSwitcher';
+import { SearchBar } from '@/features/layout/components/SearchBar';
 import { isLocale, type Locale, locales } from '@/i18n/config';
 import { getDictionary } from '@/i18n/dictionaries';
 
