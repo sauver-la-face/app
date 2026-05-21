@@ -1,3 +1,7 @@
-:80 {
+{$CADDY_DOMAIN:localhost} {
+	tls {
+		protocols tls1.3
+	}
+
 	reverse_proxy backend:3001
 }
