@@ -1,4 +1,4 @@
-import { media } from '@infrastructure/schema';
+import { media, medicalEvent, medicalProcedure } from '@infrastructure/schema';
 import type { DbClient } from '@shared/db';
 import { eq } from 'drizzle-orm';
 import type { Photo } from '../domain/photo';
@@ -25,5 +25,18 @@ export class PgPhotoRepository implements PhotoRepository {
       .where(eq(media.uuid_media, mediaId))
       .limit(1);
     return row ?? null;
+  }
+
+  async findEventOwnerPatientId(eventId: string): Promise<string | null> {
+    const [row] = await this.db
+      .select({ patientId: medicalProcedure.uuid_patient })
+      .from(medicalEvent)
+      .innerJoin(
+        medicalProcedure,
+        eq(medicalProcedure.uuid_medical_procedure, medicalEvent.uuid_medical_procedure),
+      )
+      .where(eq(medicalEvent.uuid_event, eventId))
+      .limit(1);
+    return row?.patientId ?? null;
   }
 }

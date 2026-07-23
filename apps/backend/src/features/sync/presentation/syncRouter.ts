@@ -1,6 +1,16 @@
 import { createRoute, OpenAPIHono } from '@hono/zod-openapi';
 import { syncRequestSchema, syncResponseSchema } from '@sauver-la-face/shared';
-import { syncVersionErrorSchema, validationErrorSchema } from '@shared/openapi';
+import {
+  type PatientSessionVariables,
+  requirePatientAuth,
+} from '@shared/middleware/patientAuthMiddleware';
+import {
+  patientMismatchErrorSchema,
+  syncVersionErrorSchema,
+  unauthorizedErrorSchema,
+  validationErrorSchema,
+} from '@shared/openapi';
+import type { TokenProvider } from '../../auth/application/tokenProvider';
 import type { SyncUsecase } from '../application/syncUsecase';
 import { SyncVersionError } from '../domain/syncDomain';
 
@@ -34,6 +44,22 @@ const syncRoute = createRoute({
       },
       description: 'Erreur de validation',
     },
+    401: {
+      content: {
+        'application/json': {
+          schema: unauthorizedErrorSchema,
+        },
+      },
+      description: 'Authentification patient requise',
+    },
+    403: {
+      content: {
+        'application/json': {
+          schema: patientMismatchErrorSchema,
+        },
+      },
+      description: 'Le patient authentifie ne correspond pas au patientId du payload',
+    },
     409: {
       content: {
         'application/json': {
@@ -46,8 +72,16 @@ const syncRoute = createRoute({
   tags: ['Sync'],
 });
 
-export function createSyncRouter(syncUsecase: SyncUsecase): OpenAPIHono {
-  const router = new OpenAPIHono();
+// SEC-02/A01/A07 : le patient authentifie (JWT verifie) doit correspondre au
+// patientId du payload - sinon n'importe qui peut ecrire des donnees
+// medicales au nom d'un autre patient.
+export function createSyncRouter(
+  syncUsecase: SyncUsecase,
+  tokenProvider: TokenProvider,
+): OpenAPIHono<{ Variables: PatientSessionVariables }> {
+  const router = new OpenAPIHono<{ Variables: PatientSessionVariables }>();
+
+  router.use('/sync', requirePatientAuth(tokenProvider));
 
   router.openapi(syncRoute, async (context) => {
     const body = await context.req.json().catch(() => undefined);
@@ -60,6 +94,16 @@ export function createSyncRouter(syncUsecase: SyncUsecase): OpenAPIHono {
           details: parsedBody.error.flatten(),
         },
         400,
+      );
+    }
+
+    if (context.get('patientId') !== parsedBody.data.patientId) {
+      return context.json(
+        {
+          code: 'PATIENT_MISMATCH' as const,
+          message: 'Le patient authentifie ne correspond pas au patientId du payload',
+        },
+        403,
       );
     }
 

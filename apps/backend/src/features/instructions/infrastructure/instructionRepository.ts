@@ -82,6 +82,14 @@ export class InMemoryInstructionRepository implements InstructionRepository {
 
     return { ...record };
   }
+
+  async findPatientIdByInstructionId(instructionId: string): Promise<string | null> {
+    const record = this.records.find((candidate) => candidate.instructionId === instructionId);
+    if (!record) {
+      return null;
+    }
+    return this.procedures.get(record.medicalProcedureId)?.patientId ?? null;
+  }
 }
 
 export class PgInstructionRepository implements InstructionRepository {
@@ -169,6 +177,19 @@ export class PgInstructionRepository implements InstructionRepository {
     }
 
     return this.findById(instructionId);
+  }
+
+  async findPatientIdByInstructionId(instructionId: string): Promise<string | null> {
+    const [row] = await this.db
+      .select({ patientId: medicalProcedure.uuid_patient })
+      .from(instructions)
+      .innerJoin(
+        medicalProcedure,
+        eq(instructions.uuid_medical_procedure, medicalProcedure.uuid_medical_procedure),
+      )
+      .where(eq(instructions.uuid_instructions, instructionId))
+      .limit(1);
+    return row?.patientId ?? null;
   }
 }
 

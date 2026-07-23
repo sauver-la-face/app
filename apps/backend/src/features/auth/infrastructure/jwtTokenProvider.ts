@@ -1,4 +1,4 @@
-import { sign } from 'hono/jwt';
+import { sign, verify } from 'hono/jwt';
 import type { TokenPayload, TokenProvider } from '../application/tokenProvider';
 
 export class JwtTokenProvider implements TokenProvider {
@@ -14,6 +14,30 @@ export class JwtTokenProvider implements TokenProvider {
       exp: now + oneYearInSeconds,
     };
 
-    return sign(data, this.secret);
+    return sign(data, this.secret, 'HS256');
+  }
+
+  async verify(token: string): Promise<TokenPayload | null> {
+    try {
+      const payload = await verify(token, this.secret, 'HS256');
+
+      if (
+        payload.role !== 'patient' ||
+        typeof payload.uuid_patient !== 'string' ||
+        typeof payload.uuid_patient_code !== 'string'
+      ) {
+        return null;
+      }
+
+      return {
+        uuid_patient: payload.uuid_patient,
+        uuid_patient_code: payload.uuid_patient_code,
+        role: 'patient',
+      };
+    } catch {
+      // Signature invalide, token expire ou malforme : hono/jwt leve une
+      // exception dans tous ces cas - on la traduit en 401 cote appelant.
+      return null;
+    }
   }
 }

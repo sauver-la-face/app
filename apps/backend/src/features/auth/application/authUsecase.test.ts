@@ -13,6 +13,7 @@ class MockPatientCodeRepository implements PatientCodeRepository {
 
 class MockTokenProvider implements TokenProvider {
   sign = mock(async (_payload: TokenPayload) => 'mock-token');
+  verify = mock(async (_token: string) => null as TokenPayload | null);
 }
 
 describe('AuthUsecase', () => {
