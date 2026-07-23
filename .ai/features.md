@@ -762,7 +762,7 @@ La couverture `bun test --coverage` montrait un `% Lines` très faible sur `infr
 
 ### DEVOPS-08 — Mise à jour de la doc suite au split tests unitaires/intégration
 
-`[ ]` 🟢 Mineur · `README.md` · `CLAUDE.md` · `AGENTS.md` · `docs/onboarding.md` · `apps/backend/.env.example`
+`[x]` 🟢 Mineur · `README.md` · `CLAUDE.md` · `AGENTS.md` · `docs/onboarding.md` · `apps/backend/.env.example`
 
 **Contexte :**
 
