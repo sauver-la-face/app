@@ -1,8 +1,8 @@
 import { drizzleAdapter } from '@better-auth/drizzle-adapter';
+import * as schema from '@infrastructure/schema';
 import { db } from '@shared/db';
 import { betterAuth } from 'better-auth';
 import { twoFactor } from 'better-auth/plugins';
-import * as schema from '../../../infrastructure/schema';
 
 const secret = process.env.BETTER_AUTH_SECRET;
 if (!secret && process.env.NODE_ENV === 'production') {

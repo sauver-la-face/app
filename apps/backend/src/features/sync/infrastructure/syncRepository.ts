@@ -1,7 +1,3 @@
-import type { SyncServerState } from '@sauver-la-face/shared';
-import type { DbClient } from '@shared/db';
-import { and, eq, inArray, isNotNull } from 'drizzle-orm';
-
 import {
   instructions,
   media,
@@ -9,7 +5,10 @@ import {
   medicalEventSymptom,
   medicalProcedure,
   patient,
-} from '../../../infrastructure/schema';
+} from '@infrastructure/schema';
+import type { SyncServerState } from '@sauver-la-face/shared';
+import type { DbClient } from '@shared/db';
+import { and, eq, inArray, isNotNull } from 'drizzle-orm';
 import type { SyncChanges, SyncRepository } from '../domain/syncRepository';
 
 type SyncStateByPatient = Record<string, SyncServerState>;

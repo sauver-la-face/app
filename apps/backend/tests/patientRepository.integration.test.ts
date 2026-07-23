@@ -1,10 +1,10 @@
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'bun:test';
+import { patient, patientCode } from '@infrastructure/schema';
+import { createDb, type DbClient } from '@shared/db';
 import {
   type PatientPersistenceRecord,
   PgPatientsRepository,
 } from '../src/features/patients/infrastructure/patientRepository';
-import { patient, patientCode } from '../src/infrastructure/schema';
-import { createDb, type DbClient } from '../src/shared/db';
 
 // Nécessite TEST_DATABASE_URL — pointe vers une base Postgres dédiée aux tests
 // (jamais la base de dev : les tables sont vidées avant chaque test).

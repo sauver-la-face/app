@@ -1,8 +1,8 @@
 import { createRoute, OpenAPIHono, z } from '@hono/zod-openapi';
 import { patientCodeSchema } from '@sauver-la-face/shared';
 import { logger } from '@shared/logger';
+import { rateLimiter } from '@shared/middleware/rateLimiter';
 import { Hono } from 'hono';
-import { rateLimiter } from '../../../shared/middleware/rateLimiter';
 import type { AuthUsecase } from '../application/authUsecase';
 import { auth } from '../infrastructure/authConfig';
 

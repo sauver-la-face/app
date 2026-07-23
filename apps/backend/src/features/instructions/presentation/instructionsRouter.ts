@@ -5,7 +5,7 @@ import {
   instructionSchema,
 } from '@sauver-la-face/shared';
 
-import { validationErrorSchema } from '../../../shared/openapi';
+import { validationErrorSchema } from '@shared/openapi';
 import {
   InstructionNotFoundError,
   type InstructionsUsecase,
