@@ -82,7 +82,7 @@ Audit de sécurité (revue OWASP A01, 2026-07-23) : aucun middleware d'authentif
 
 ### SEC-02 — Vérification JWT patient côté serveur (A01/A07)
 
-`[ ]` 🔴 Critique · `apps/backend/src/features/sync/` · `apps/backend/src/features/photos/` · `apps/backend/src/features/instructions/` · `apps/backend/src/features/auth/`
+`[x]` 🔴 Critique · `apps/backend/src/features/sync/` · `apps/backend/src/features/photos/` · `apps/backend/src/features/instructions/` · `apps/backend/src/features/auth/`
 
 **Contexte :**
 
