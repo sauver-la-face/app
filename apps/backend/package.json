@@ -19,7 +19,7 @@
     "@aws-sdk/s3-request-presigner": "^3.1051.0",
     "@better-auth/drizzle-adapter": "^1.6.9",
     "@hono/swagger-ui": "^0.6.1",
-    "@hono/zod-openapi": "^0.16.0",
+    "@hono/zod-openapi": "^1.5.1",
     "@sauver-la-face/shared": "workspace:*",
     "better-auth": "^1.0.0",
     "dotenv": "^17.4.1",
