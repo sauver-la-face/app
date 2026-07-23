@@ -760,6 +760,26 @@ La couverture `bun test --coverage` montrait un `% Lines` très faible sur `infr
 
 ---
 
+### DEVOPS-08 — Mise à jour de la doc suite au split tests unitaires/intégration
+
+`[ ]` 🟢 Mineur · `README.md` · `CLAUDE.md` · `AGENTS.md` · `docs/onboarding.md` · `apps/backend/.env.example`
+
+**Contexte :**
+
+DEVOPS-05 a introduit `bun run test:unit` / `bun run test:integration` et la variable `TEST_DATABASE_URL`, mais plusieurs docs mentionnaient encore l'ancienne commande unique `bun test --recursive` sans distinction — un nouveau développeur qui suit ces docs ne saurait pas que les tests d'intégration nécessitent une base Postgres de test dédiée.
+
+**Comportement attendu :**
+
+- Toute doc qui documente comment lancer les tests référence `test:unit` / `test:integration`, pas `bun test --recursive`
+- `apps/backend/.env.example` documente `TEST_DATABASE_URL` avec une explication de son rôle (base dédiée, jamais la base de dev)
+
+**Règles de code :**
+
+- Fichiers corrigés : `README.md`, `CLAUDE.md`, `AGENTS.md`, `docs/onboarding.md` (section "Vérifier que tout fonctionne" — garde `test:unit` seul, l'intégration demande un setup DB supplémentaire non couvert par l'onboarding rapide), `apps/backend/.env.example`
+- Tester : `grep -r "bun test --recursive"` sur tout le repo (hors `node_modules`) ne retourne plus aucun résultat
+
+---
+
 ### DEVOPS-01 — Interface d'administration PostgreSQL (pgAdmin)
 
 `[x]` 🟢 Mineur · `docker-compose.yml`
