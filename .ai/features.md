@@ -739,7 +739,7 @@ La couverture `bun test --coverage` montrait un `% Lines` très faible sur `infr
 
 ### DEVOPS-07 — Alias TypeScript `@infrastructure/*` (backend)
 
-`[ ]` 🟢 Mineur · `apps/backend/tsconfig.json` · `apps/backend/src/`
+`[x]` 🟢 Mineur · `apps/backend/tsconfig.json` · `apps/backend/src/`
 
 **Contexte :**
 
