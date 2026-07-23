@@ -58,7 +58,7 @@ export function PatientManagementPage({
     <main className="mx-auto flex w-full max-w-6xl flex-1 flex-col px-6 py-10">
       <div className="mb-8 flex flex-wrap items-start justify-between gap-4">
         <div>
-          <p className="text-sm uppercase tracking-[0.3em] text-[#2EAC8E]">{labels.eyebrow}</p>
+          <p className="text-sm uppercase tracking-[0.3em] text-[#178064]">{labels.eyebrow}</p>
           <h1 className="mt-3 text-4xl font-semibold text-gray-900">{labels.title}</h1>
           <p className="mt-2 max-w-3xl text-sm text-gray-600">{labels.subtitle}</p>
         </div>
@@ -139,7 +139,7 @@ export function PatientManagementPage({
             <button
               type="submit"
               disabled={createPatientMutation.isPending}
-              className="mt-2 rounded-full bg-[#2EAC8E] px-5 py-3 text-sm font-semibold text-white transition hover:bg-[#25866f] disabled:cursor-not-allowed disabled:opacity-60"
+              className="mt-2 rounded-full bg-[#178064] px-5 py-3 text-sm font-semibold text-white transition hover:bg-[#25866f] disabled:cursor-not-allowed disabled:opacity-60"
             >
               {createPatientMutation.isPending ? labels.creating : labels.createAction}
             </button>
@@ -149,7 +149,7 @@ export function PatientManagementPage({
         <Panel title={labels.generatedCodeTitle}>
           {generatedCode ? (
             <div className="space-y-5">
-              <div className="rounded-[24px] border border-[#2EAC8E]/20 bg-[#EAF7F2] p-6">
+              <div className="rounded-[24px] border border-[#178064]/20 bg-[#EAF7F2] p-6">
                 <p className="text-xs uppercase tracking-[0.2em] text-[#2E7F69]">
                   {labels.generatedCodeLabel}
                 </p>
@@ -341,7 +341,7 @@ function FormField({
         name={name}
         type={type}
         placeholder={placeholder}
-        className="rounded-[18px] border border-black/10 bg-[#FBFAF6] px-4 py-3 text-sm text-gray-900 outline-none transition focus:border-[#2EAC8E] focus:ring-2 focus:ring-[#2EAC8E]/15"
+        className="rounded-[18px] border border-black/10 bg-[#FBFAF6] px-4 py-3 text-sm text-gray-900 outline-none transition focus:border-[#178064] focus:ring-2 focus:ring-[#178064]/15"
       />
     </label>
   );
@@ -350,7 +350,7 @@ function FormField({
 function InlineMessage({ tone, label }: { tone: 'error' | 'success'; label: string }) {
   const styles = {
     error: 'border-red-100 bg-red-50 text-red-700',
-    success: 'border-[#2EAC8E]/20 bg-[#EAF7F2] text-[#1F6A57]',
+    success: 'border-[#178064]/20 bg-[#EAF7F2] text-[#1F6A57]',
   };
 
   return <p className={`rounded-[18px] border px-4 py-3 text-sm ${styles[tone]}`}>{label}</p>;
@@ -364,7 +364,7 @@ function CenteredState({ label }: { label: string }) {
   return (
     <main className="flex flex-1 items-center justify-center px-6 py-10">
       <div className="flex items-center gap-4 rounded-full bg-white px-6 py-4 shadow-sm">
-        <div className="h-6 w-6 animate-spin rounded-full border-4 border-[#2EAC8E] border-t-transparent" />
+        <div className="h-6 w-6 animate-spin rounded-full border-4 border-[#178064] border-t-transparent" />
         <p className="text-sm text-gray-600">{label}</p>
       </div>
     </main>

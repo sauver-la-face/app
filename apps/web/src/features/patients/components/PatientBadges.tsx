@@ -59,7 +59,7 @@ export function PatientCodeBadge({
   };
 
   const colors: Record<PatientCodeStatus, string> = {
-    active: 'bg-[#2EAC8E]/10 text-[#2EAC8E]',
+    active: 'bg-[#178064]/10 text-[#178064]',
     expired: 'bg-yellow-100 text-yellow-800',
     revoked: 'bg-red-100 text-red-800',
     used: 'bg-blue-100 text-blue-800',

@@ -37,7 +37,7 @@ export default function LoginPage({ params }: { params: { locale: Locale } }) {
           </Link>
         </div>
 
-        <p className="mt-2 text-center text-xs text-gray-400">{common.protectedAccess}</p>
+        <p className="mt-2 text-center text-xs text-gray-500">{common.protectedAccess}</p>
       </div>
     </main>
   );

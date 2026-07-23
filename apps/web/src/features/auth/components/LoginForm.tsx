@@ -133,7 +133,7 @@ export function LoginForm({ locale, dictionary }: { locale: Locale; dictionary: 
             type="email"
             required
             autoComplete="email"
-            className="h-14 w-full rounded-[5px] border border-black/30 pl-12 pr-4 text-sm shadow-[0px_4px_4px_rgba(0,0,0,0.25)] focus:border-[#2EAC8E] focus:outline-none focus:ring-1 focus:ring-[#2EAC8E]"
+            className="h-14 w-full rounded-[5px] border border-black/30 pl-12 pr-4 text-sm shadow-[0px_4px_4px_rgba(0,0,0,0.25)] focus:border-[#178064] focus:outline-none focus:ring-1 focus:ring-[#178064]"
             placeholder={login.emailPlaceholder}
           />
         </div>
@@ -153,13 +153,13 @@ export function LoginForm({ locale, dictionary }: { locale: Locale; dictionary: 
             type={showPassword ? 'text' : 'password'}
             required
             autoComplete="current-password"
-            className="h-14 w-full rounded-[5px] border border-black/30 pl-12 pr-12 text-sm shadow-[0px_4px_4px_rgba(0,0,0,0.25)] focus:border-[#2EAC8E] focus:outline-none focus:ring-1 focus:ring-[#2EAC8E]"
+            className="h-14 w-full rounded-[5px] border border-black/30 pl-12 pr-12 text-sm shadow-[0px_4px_4px_rgba(0,0,0,0.25)] focus:border-[#178064] focus:outline-none focus:ring-1 focus:ring-[#178064]"
             placeholder={login.passwordPlaceholder}
           />
           <button
             type="button"
             onClick={() => setShowPassword((v) => !v)}
-            className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+            className="absolute right-3 top-1/2 flex h-7 w-7 -translate-y-1/2 items-center justify-center text-gray-500 hover:text-gray-700"
             aria-label={showPassword ? 'Masquer le mot de passe' : 'Afficher le mot de passe'}
           >
             <EyeIcon open={showPassword} />
@@ -177,7 +177,7 @@ export function LoginForm({ locale, dictionary }: { locale: Locale; dictionary: 
         <button
           type="submit"
           disabled={loading}
-          className="h-14 w-full rounded-[10px] bg-[#2EAC8E] text-base font-medium text-white shadow-sm transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
+          className="h-14 w-full rounded-[10px] bg-[#178064] text-base font-medium text-white shadow-sm transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
         >
           {loading ? login.submitting : login.submit}
         </button>
