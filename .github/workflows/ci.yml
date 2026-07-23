@@ -58,8 +58,8 @@ jobs:
             echo "apps/mobile/src non trouvé — typecheck ignoré (feature non implémentée)"
           fi
 
-  test:
-    name: Tests (bun:test)
+  test-unit:
+    name: Tests unitaires (bun:test)
     runs-on: ubuntu-latest
     env:
       NODE_ENV: test
@@ -76,5 +76,47 @@ jobs:
       - name: Installer les dépendances
         run: bun install
 
-      - name: Lancer les tests
-        run: bun test --recursive
+      - name: Lancer les tests unitaires
+        run: bun run --cwd apps/backend test:unit
+
+  test-integration:
+    name: Tests d'intégration (bun:test)
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: ci
+          POSTGRES_PASSWORD: ci
+          POSTGRES_DB: sauver_la_face
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    env:
+      NODE_ENV: test
+      DATABASE_URL: postgresql://ci:ci@localhost:5432/sauver_la_face
+      TEST_DATABASE_URL: postgresql://ci:ci@localhost:5432/sauver_la_face
+      BETTER_AUTH_SECRET: ci-test-secret
+      BETTER_AUTH_URL: http://localhost:3001
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Installer les dépendances
+        run: bun install
+
+      - name: Compiler le package shared
+        run: bun run build:shared
+
+      - name: Appliquer les migrations Drizzle
+        run: bun run --cwd apps/backend db:migrate
+
+      - name: Lancer les tests d'intégration
+        run: bun run --cwd apps/backend test:integration
