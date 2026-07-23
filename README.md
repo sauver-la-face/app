@@ -159,8 +159,11 @@ gh pr create --base dev --title "feat: AUTH-01 authentification patient"
 bun run lint        # vérifie le code
 bun run format      # formate le code
 
-# Tests
-bun test --recursive
+# Tests unitaires (rapide, aucune dépendance externe)
+bun run --cwd apps/backend test:unit
+
+# Tests d'intégration (nécessite TEST_DATABASE_URL — voir .env.example)
+bun run --cwd apps/backend test:integration
 
 # Installer Drizzle
 bun add drizzle-orm

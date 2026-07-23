@@ -122,8 +122,11 @@ bun run dev:web
 # Lancer l'app mobile
 bun run dev:mobile
 
-# Tests
-bun test --recursive
+# Tests unitaires (rapide, aucune dépendance externe)
+bun run --cwd apps/backend test:unit
+
+# Tests d'intégration (nécessite TEST_DATABASE_URL — voir .env.example)
+bun run --cwd apps/backend test:integration
 
 # Lint / Format
 bun run lint

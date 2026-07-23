@@ -39,8 +39,8 @@ bun run dev:web
 ### 3. Vérifier que tout fonctionne
 
 ```bash
-bun test --recursive   # tous les tests passent
-bun run lint           # aucune erreur Biome
+bun run --cwd apps/backend test:unit   # tests unitaires, tous passent
+bun run lint                           # aucune erreur Biome
 ```
 
 ---
