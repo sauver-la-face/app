@@ -75,6 +75,7 @@ apps/web/src/
 
 - `expo-secure-store` ne stocke que des **strings** — toujours sérialiser les objets avec `JSON.stringify` avant stockage et `JSON.parse` à la lecture
 - Jamais stocker de token dans `AsyncStorage` (non chiffré) — uniquement `expo-secure-store`
+- **Accessibilité — cibles tactiles** : toute zone cliquable (`Pressable`, `TouchableOpacity`, bouton, icône interactive) doit mesurer au moins **48 × 48 dp** de surface cliquable (recommandation Material Design / Android), au besoin via `hitSlop` ou du padding sans réduire la zone visible. Ne pas confondre avec le minimum web WCAG 2.5.8 (24 px) — voir section Accessibilité de `docs/architecture.md`.
 
 ## Workflow Git — obligatoire avant toute feature
 
