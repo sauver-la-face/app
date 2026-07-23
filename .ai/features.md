@@ -56,6 +56,31 @@
 
 ---
 
+### SEC-01 — Scoping médecin-patient (contrôle d'accès aux ressources)
+
+`[ ]` 🔴 Critique · `apps/backend/src/features/patients/` · `apps/backend/src/features/photos/` · `apps/backend/src/features/exports/`
+
+**Contexte :**
+
+Audit de sécurité (revue OWASP A01, 2026-07-23) : aucun contrôle d'autorisation au niveau des données n'existe actuellement. La table `patient` ne porte aucune colonne de rattachement à un médecin, et les repositories (`patientRepository`, `photoRepository`, `exportsUsecase`) résolvent les ressources par identifiant seul (`patientId`, `mediaId`), sans filtrage par l'identité de l'appelant. Aucun middleware d'authentification n'est monté sur les routers patient/photos/exports/sync/instructions (`index.ts`) — seul un middleware d'audit (journalisation, non bloquant) est appliqué globalement. Un `sessionMiddleware` existe pour le flux de connexion médecin (Better Auth) mais n'est jamais activé via `.use()`. Résultat : IDOR confirmé — toute personne connaissant ou devinant un UUID `patientId`/`mediaId` peut lire, voire modifier, le dossier, l'historique ou les photos d'un patient suivi par un autre médecin.
+
+**Comportement attendu :**
+
+- Chaque patient est rattaché à un médecin (colonne de rattachement sur la table `patient`, ou table de liaison si plusieurs médecins doivent pouvoir suivre un même patient)
+- Un middleware d'authentification (session Better Auth) est monté sur tous les routers exposant des données patient : `patientRouter`, `photosRouter`, `exportsRouter`, `syncRouter`, `instructionsRouter`
+- Chaque use case (`patientUsecase`, `photosUsecase`, `exportsUsecase`) reçoit l'identité du médecin appelant et vérifie que la ressource demandée (patient, media, export) lui est bien rattachée avant de la retourner
+- Accès refusé (`403`) si le médecin appelant n'est pas rattaché au patient concerné
+- Les routes patient (auth par code 6 chiffres) restent distinctes : un patient n'accède qu'à ses propres données, jamais à celles d'un autre patient
+
+**Règles de code :**
+
+- Le contrôle d'appartenance (patient ↔ médecin) est une règle métier : elle va dans `domain/`, jamais dans `presentation/` ni codée en dur dans une requête SQL
+- Le filtrage par médecin se fait au niveau du repository (`WHERE`) plutôt qu'un filtrage post-fetch en mémoire — éviter de charger une ressource pour ensuite la rejeter
+- Ne pas dupliquer la vérification d'appartenance dans chaque router — centraliser dans l'`application/usecase` ou un middleware partagé
+- Tester : médecin A ne peut pas lire/modifier un patient de médecin B (404 ou 403 selon le choix retenu), médecin A ne peut pas accéder à un `mediaId`/export d'un patient de médecin B, patient authentifié n'accède qu'à ses propres données
+
+---
+
 ### SYNC-01 — Réception et résolution des conflits (server-wins)
 
 `[x]` 🔴 Critique · `apps/backend/src/features/sync/`
@@ -727,6 +752,28 @@ La couverture `bun test --coverage` montrait un `% Lines` très faible sur `infr
 - Ajouter le service `pgadmin` dans `docker-compose.yml`
 - Ajouter `PGADMIN_EMAIL` et `PGADMIN_PASSWORD` dans `.env.example` racine
 - Le service ne doit tourner qu'en développement — ne jamais déployer en production
+
+---
+
+### DEVOPS-06 — Suivi automatisé des dépendances vulnérables (Dependabot)
+
+`[x]` 🔴 Critique · `.github/dependabot.yml`
+
+**Contexte :**
+
+Audit de sécurité (revue OWASP A06, 2026-07-23) : aucun outil de suivi des vulnérabilités des dépendances n'existait — pas de Dependabot, pas de Renovate, pas d'étape `bun audit`/`npm audit` en CI. Risque de dérive silencieuse des versions de dépendances contenant des CVE connues.
+
+**Comportement attendu :**
+
+- Dependabot ouvre automatiquement une PR quand une dépendance a une mise à jour de sécurité ou une nouvelle version disponible
+- Trois écosystèmes surveillés : `bun` (monorepo complet via le `bun.lock` racine — `apps/*`, `packages/*`), `docker` (`apps/backend/Dockerfile`), `github-actions` (les workflows CI/CD)
+- Fréquence hebdomadaire (lundi)
+
+**Règles de code :**
+
+- Les mises à jour `minor`/`patch` Bun sont groupées dans une seule PR (`groups.minor-and-patch`) pour limiter le bruit — les montées majeures restent individuelles pour revue manuelle
+- Ne pas ajouter d'écosystème pour un fichier qui n'existe pas (ex. pas d'entrée `docker` pour mobile/web tant qu'ils n'ont pas de Dockerfile)
+- Si un nouveau workspace ou Dockerfile est ajouté, ajouter l'entrée correspondante dans `dependabot.yml`
 
 ---
 
