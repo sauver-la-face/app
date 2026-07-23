@@ -7,14 +7,14 @@ import {
   patientListResponseSchema,
   updatePatientSchema,
 } from '@sauver-la-face/shared';
-import type { MiddlewareHandler } from 'hono';
-import { requirePhysicianAuth } from '../../../shared/middleware/physicianAuthMiddleware';
+import { requirePhysicianAuth } from '@shared/middleware/physicianAuthMiddleware';
 import {
   notFoundErrorSchema,
   patientCodeGenerationErrorSchema,
   uuidParamSchema,
   validationErrorSchema,
-} from '../../../shared/openapi';
+} from '@shared/openapi';
+import type { MiddlewareHandler } from 'hono';
 import type { SessionVariables } from '../../auth/presentation/authRouter';
 import {
   PatientCodeGenerationError,

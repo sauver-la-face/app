@@ -1,9 +1,9 @@
 import { GetObjectCommand, type S3Client } from '@aws-sdk/client-s3';
+import { requirePhysicianAuth } from '@shared/middleware/physicianAuthMiddleware';
 import type { MiddlewareHandler } from 'hono';
 import { Hono } from 'hono';
 import { z } from 'zod';
 
-import { requirePhysicianAuth } from '../../../shared/middleware/physicianAuthMiddleware';
 import type { SessionVariables } from '../../auth/presentation/authRouter';
 import { PhotoIntegrityError, type PhotosUsecase } from '../application/photosUsecase';
 import type { PhotoRepository } from '../domain/photoRepository';

@@ -1,12 +1,12 @@
-import type { DbClient } from '@shared/db';
-import { eq, lte } from 'drizzle-orm';
 import {
   medicalEvent,
   medicalEventSymptom,
   medicalProcedure,
   patient,
   symptom,
-} from '../../../infrastructure/schema';
+} from '@infrastructure/schema';
+import type { DbClient } from '@shared/db';
+import { eq, lte } from 'drizzle-orm';
 import type {
   AlertRepository,
   SyncOverdueAlertSource,

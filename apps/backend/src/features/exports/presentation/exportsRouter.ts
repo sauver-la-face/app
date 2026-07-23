@@ -1,7 +1,7 @@
+import { requirePhysicianAuth } from '@shared/middleware/physicianAuthMiddleware';
 import type { MiddlewareHandler } from 'hono';
 import { Hono } from 'hono';
 
-import { requirePhysicianAuth } from '../../../shared/middleware/physicianAuthMiddleware';
 import type { SessionVariables } from '../../auth/presentation/authRouter';
 import { type ExportsUsecase, PatientNotFoundForExportError } from '../application/exportsUsecase';
 

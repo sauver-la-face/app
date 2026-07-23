@@ -175,8 +175,11 @@ gh pr create --base dev --title "feat: XXX-00 nom"
 ## Autres commandes
 
 ```bash
-# Tests
-bun test --recursive
+# Tests unitaires (rapide, aucune dépendance externe)
+bun run --cwd apps/backend test:unit
+
+# Tests d'intégration (nécessite TEST_DATABASE_URL — voir .env.example)
+bun run --cwd apps/backend test:integration
 
 # Lint / Format
 bun run lint

@@ -58,7 +58,7 @@
 
 ### SEC-01 — Authentification médecin obligatoire sur les routes dashboard (A01)
 
-`[ ]` 🔴 Critique · `apps/backend/src/features/patients/` · `apps/backend/src/features/photos/` · `apps/backend/src/features/exports/`
+`[~]` 🔴 Critique · `apps/backend/src/features/patients/` · `apps/backend/src/features/photos/` · `apps/backend/src/features/exports/`
 
 **Contexte :**
 
@@ -733,6 +733,49 @@ La couverture `bun test --coverage` montrait un `% Lines` très faible sur `infr
 - Chaque test d'intégration vide les tables concernées en `beforeEach` (pas de dépendance à l'ordre d'exécution) et ferme le pool en `afterAll`
 - `.github/workflows/ci.yml` : job `test-integration` avec `services.postgres` (health check), étape `db:migrate` avant les tests — `services.minio` non ajouté tant qu'aucun test n'exerce S3 (l'image officielle `minio/minio` n'a pas de commande par défaut, GitHub Actions ne permet pas de `command:` sur un service ; prévoir `bitnami/minio` ou équivalent le jour où un test S3 sera écrit)
 - Tester : round-trip création/lecture patient en DB réelle, contrainte unique réelle sur le code d'accès patient, comportement après révocation
+
+---
+
+### DEVOPS-07 — Alias TypeScript `@infrastructure/*` (backend)
+
+`[x]` 🟢 Mineur · `apps/backend/tsconfig.json` · `apps/backend/src/`
+
+**Contexte :**
+
+`CLAUDE.md` impose déjà `@shared/*` pour importer depuis `shared/` — jamais de chemin relatif. En pratique la règle n'était pas totalement respectée (`../../../shared/logger`, `../../../shared/openapi`, `../../../shared/middleware/rateLimiter` présents dans plusieurs features) et aucun alias équivalent n'existait pour `src/infrastructure/schema`, importé en `../../../infrastructure/schema` depuis quasiment chaque `infrastructure/*Repository.ts` du backend.
+
+**Comportement attendu :**
+
+- Un alias `@infrastructure/*` résout vers `apps/backend/src/infrastructure/*`, au même titre que `@shared/*`
+- Plus aucun import relatif à 2+ niveaux (`../../` ou plus) vers `shared/` ou `infrastructure/` dans le backend
+- Les imports internes à une feature (ex: `presentation/` → `infrastructure/` de la même feature, ou `domain/` voisin) restent en relatif — l'alias ne concerne que les imports cross-cutting (`shared/`, `infrastructure/`)
+
+**Règles de code :**
+
+- `apps/backend/tsconfig.json` : ajouter `"@infrastructure/*": ["./src/infrastructure/*"]` dans `paths`, à côté de `@shared/*`
+- Remplacer tous les imports relatifs vers `infrastructure/schema` et `shared/*` (features, `tests/`, `src/shared/db.ts`, `src/infrastructure/jobs.ts`) par l'alias correspondant
+- Après remplacement, faire tourner `bunx biome check --write .` pour l'ordre des imports (alias avant relatif, tri alphabétique) — Biome le fait automatiquement, ne pas réordonner à la main
+- Tester : `bunx tsc --noEmit` sans erreur, `bun run test:unit` + `bun run test:integration` inchangés (103 + 5 tests), aucun import relatif profond restant sur `shared/`/`infrastructure/`
+
+---
+
+### DEVOPS-08 — Mise à jour de la doc suite au split tests unitaires/intégration
+
+`[x]` 🟢 Mineur · `README.md` · `CLAUDE.md` · `AGENTS.md` · `docs/onboarding.md` · `apps/backend/.env.example`
+
+**Contexte :**
+
+DEVOPS-05 a introduit `bun run test:unit` / `bun run test:integration` et la variable `TEST_DATABASE_URL`, mais plusieurs docs mentionnaient encore l'ancienne commande unique `bun test --recursive` sans distinction — un nouveau développeur qui suit ces docs ne saurait pas que les tests d'intégration nécessitent une base Postgres de test dédiée.
+
+**Comportement attendu :**
+
+- Toute doc qui documente comment lancer les tests référence `test:unit` / `test:integration`, pas `bun test --recursive`
+- `apps/backend/.env.example` documente `TEST_DATABASE_URL` avec une explication de son rôle (base dédiée, jamais la base de dev)
+
+**Règles de code :**
+
+- Fichiers corrigés : `README.md`, `CLAUDE.md`, `AGENTS.md`, `docs/onboarding.md` (section "Vérifier que tout fonctionne" — garde `test:unit` seul, l'intégration demande un setup DB supplémentaire non couvert par l'onboarding rapide), `apps/backend/.env.example`
+- Tester : `grep -r "bun test --recursive"` sur tout le repo (hors `node_modules`) ne retourne plus aucun résultat
 
 ---
 

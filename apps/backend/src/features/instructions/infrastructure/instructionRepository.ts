@@ -1,7 +1,6 @@
+import { instructions, medicalProcedure } from '@infrastructure/schema';
 import type { DbClient } from '@shared/db';
 import { and, desc, eq, isNull } from 'drizzle-orm';
-
-import { instructions, medicalProcedure } from '../../../infrastructure/schema';
 import type {
   CreateInstructionRecord,
   InstructionPersistenceRecord,
