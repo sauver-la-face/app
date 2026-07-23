@@ -323,6 +323,13 @@ projet mais le fondement même de l'utilisabilité du produit.
 
 ### Conformité mesurée (critère 3)
 
+Pour **prouver** la conformité du prototype — et non l'affirmer — la démarche suivie est
+**mesurer → corriger → re-mesurer**, appuyée sur des rapports d'audit archivés dans le dépôt.
+Un audit automatisé a été réalisé sur les trois pages clés du dashboard ; chaque violation
+détectée a été corrigée dans le code, puis une seconde mesure a validé la correction. Les
+tableaux ci-dessous présentent, dans l'ordre, l'état initial mesuré, les violations trouvées,
+les corrections apportées et l'état final re-mesuré.
+
 - **Méthode** : audit **Lighthouse** (catégorie Accessibilité, propulsée par axe-core) exécuté sur Chrome headless, sur les pages clés du dashboard. Rapports HTML + JSON archivés dans [`docs/audits-accessibilite/`](audits-accessibilite/). Chaque violation est mappée au critère WCAG 2.2 exact.
 - **Date de l'audit** : 2026-07-23 · outil : Lighthouse 12.2.1 / axe-core 4.10.
 
@@ -373,9 +380,52 @@ mesures post-correction).
 > manuelle et ne sont pas couverts par ce score. Le test mobile TalkBack reste également à
 > réaliser sur device réel.
 
----
+### Cibles tactiles sur mobile — standard 48×48 dp
 
-## Contraintes de volume
+Deux normes coexistent selon la surface, et il ne faut pas les confondre :
+
+| Surface | Norme | Cible minimale |
+|---|---|---|
+| Dashboard web | WCAG 2.5.8 (AA) | 24 × 24 CSS px |
+| Application mobile (Android) | Material Design / bonnes pratiques Android | **48 × 48 dp** |
+
+Le `dp` (*density-independent pixel*) est l'unité Android ; 48 dp est le seuil de confort
+tactile recommandé, plus strict que le minimum WCAG web. **Règle de code établie** : toute
+cible tactile de l'app mobile (`Pressable`, `TouchableOpacity`, boutons, icônes cliquables)
+doit mesurer **au moins 48 × 48 dp** de zone cliquable — au besoin via `hitSlop` ou du
+padding, sans réduire la zone visible. Règle reportée dans `CLAUDE.md` (section Règles mobile).
+
+> État actuel : l'app mobile ne contient pas encore d'UI interactive (seule la logique i18n
+> est implémentée). Il n'y a donc aucune cible tactile à auditer aujourd'hui — la règle
+> 48 × 48 dp est **définie en amont** pour être respectée dès le premier composant tactile.
+> Affirmer une conformité mesurée sur une UI inexistante n'aurait aucune valeur de preuve.
+
+### Synthèse — preuve de conformité au référentiel (critère 3)
+
+| Exigence du référentiel | Surface | Méthode de preuve | Statut |
+|---|---|---|---|
+| Contraste texte/fond ≥ 4.5:1 (WCAG 1.4.3 AA) | Dashboard web | Mesure Lighthouse/axe, avant/après | ✅ **Vérifié conforme** (100/100) |
+| Taille de cible ≥ 24 px (WCAG 2.5.8 AA) | Dashboard web | Mesure Lighthouse + inspection code | ✅ **Vérifié conforme** (28×28 px) |
+| Absence de violation WCAG 2.2 A/AA automatisable | Dashboard web | Audit Lighthouse (login, dashboard, patients) | ✅ **Vérifié conforme** (3 pages à 100/100) |
+| Taille de cible tactile ≥ 48 dp (Material) | App mobile | Règle de code établie ([CLAUDE.md](../CLAUDE.md)) | 🟡 **Standard défini** — UI mobile pas encore développée |
+| Navigation au lecteur d'écran (TalkBack) | App mobile | Test manuel sur device réel | 🟡 **À réaliser** — nécessite UI mobile + device |
+| Critères WCAG non automatisables (tabulation, alt, structure) | Dashboard web | Revue manuelle | 🟡 **À compléter** — hors périmètre de l'audit automatisé |
+
+**Lecture de la preuve** : le prototype **implémenté et auditable** (le dashboard web) répond
+aux exigences du référentiel WCAG 2.2 AA sur l'ensemble des critères automatiquement
+vérifiables — mesuré, corrigé, re-mesuré. Les lignes en 🟡 ne sont pas des non-conformités du
+prototype existant mais des exigences **dont le périmètre (mobile, manuel) n'est pas encore
+implémenté ou automatisable** ; le standard applicable y est défini par avance.
+
+### Conclusion
+
+Le prototype implémenté et auditable répond aux exigences du référentiel WCAG 2.2 AA sur
+l'ensemble des critères automatiquement vérifiables, avec une démarche mesurée, corrigée et
+re-mesurée, appuyée sur des rapports archivés. Les exigences restantes (application mobile,
+tests manuels au lecteur d'écran) ne constituent pas des non-conformités du prototype
+existant, mais des vérifications dont le périmètre n'est pas encore implémenté — et pour
+lesquelles le standard applicable (48 × 48 dp sur mobile, revue manuelle des critères non
+automatisables) est défini par avance dans les conventions de code du projet.
 
 Ces contraintes ont guidé les choix d'architecture (polling vs WebSocket, SQLite vs autre, etc.) :
 

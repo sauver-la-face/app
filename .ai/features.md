@@ -456,6 +456,32 @@ L'audit a révélé 4 violations sur 3 pages (login 92/100, dashboard 95/100, pa
 
 ---
 
+### A11Y-02 — Rédaction critère 3 + standard cibles tactiles mobile (48 dp)
+
+`[ ]` 🟢 Mineur · `docs/architecture.md` · `CLAUDE.md`
+
+**Contexte :**
+
+Complète la présentation du critère 3 (C2.2.3) pour le dossier de certification. A11Y-01 a
+mesuré et corrigé le dashboard web ; A11Y-02 rédige la présentation narrative (démarche
+mesurer → corriger → re-mesurer, conclusion) directement dans la section Accessibilité de
+`docs/architecture.md`, et ajoute le **tableau de synthèse de conformité** prouvant que le
+prototype répond aux exigences. Établit aussi le standard **48 × 48 dp** pour les cibles
+tactiles mobile (Material Design), distinct du minimum web WCAG 2.5.8 (24 px).
+
+**Comportement attendu :**
+
+- La section Accessibilité de `architecture.md` se lit comme une présentation rédigée du critère 3, pas seulement des tableaux
+- Un tableau de synthèse distingue clairement ce qui est **vérifié conforme** (web) de ce qui est **défini mais pas encore implémenté** (mobile, tests manuels) — sans maquiller une conformité non mesurée
+- La règle 48 × 48 dp est inscrite dans les règles mobile de `CLAUDE.md`
+
+**Règles de code :**
+
+- Aucune affirmation de conformité sur une surface non implémentée (l'UI mobile n'existe pas encore → règle définie en amont, pas conformité mesurée)
+- Ne pas confondre 48 dp (mobile/Material) et 24 px (web/WCAG 2.5.8) — les deux normes documentées séparément
+
+---
+
 ## APPLICATION MOBILE
 
 ### MOB-02 — Authentification patient (code 6 chiffres)
