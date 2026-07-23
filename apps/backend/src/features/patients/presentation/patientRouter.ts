@@ -12,7 +12,7 @@ import {
   patientCodeGenerationErrorSchema,
   uuidParamSchema,
   validationErrorSchema,
-} from '../../../shared/openapi';
+} from '@shared/openapi';
 import {
   PatientCodeGenerationError,
   PatientNotFoundError,

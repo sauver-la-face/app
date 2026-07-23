@@ -737,6 +737,29 @@ La couverture `bun test --coverage` montrait un `% Lines` très faible sur `infr
 
 ---
 
+### DEVOPS-07 — Alias TypeScript `@infrastructure/*` (backend)
+
+`[ ]` 🟢 Mineur · `apps/backend/tsconfig.json` · `apps/backend/src/`
+
+**Contexte :**
+
+`CLAUDE.md` impose déjà `@shared/*` pour importer depuis `shared/` — jamais de chemin relatif. En pratique la règle n'était pas totalement respectée (`../../../shared/logger`, `../../../shared/openapi`, `../../../shared/middleware/rateLimiter` présents dans plusieurs features) et aucun alias équivalent n'existait pour `src/infrastructure/schema`, importé en `../../../infrastructure/schema` depuis quasiment chaque `infrastructure/*Repository.ts` du backend.
+
+**Comportement attendu :**
+
+- Un alias `@infrastructure/*` résout vers `apps/backend/src/infrastructure/*`, au même titre que `@shared/*`
+- Plus aucun import relatif à 2+ niveaux (`../../` ou plus) vers `shared/` ou `infrastructure/` dans le backend
+- Les imports internes à une feature (ex: `presentation/` → `infrastructure/` de la même feature, ou `domain/` voisin) restent en relatif — l'alias ne concerne que les imports cross-cutting (`shared/`, `infrastructure/`)
+
+**Règles de code :**
+
+- `apps/backend/tsconfig.json` : ajouter `"@infrastructure/*": ["./src/infrastructure/*"]` dans `paths`, à côté de `@shared/*`
+- Remplacer tous les imports relatifs vers `infrastructure/schema` et `shared/*` (features, `tests/`, `src/shared/db.ts`, `src/infrastructure/jobs.ts`) par l'alias correspondant
+- Après remplacement, faire tourner `bunx biome check --write .` pour l'ordre des imports (alias avant relatif, tri alphabétique) — Biome le fait automatiquement, ne pas réordonner à la main
+- Tester : `bunx tsc --noEmit` sans erreur, `bun run test:unit` + `bun run test:integration` inchangés (103 + 5 tests), aucun import relatif profond restant sur `shared/`/`infrastructure/`
+
+---
+
 ### DEVOPS-01 — Interface d'administration PostgreSQL (pgAdmin)
 
 `[x]` 🟢 Mineur · `docker-compose.yml`

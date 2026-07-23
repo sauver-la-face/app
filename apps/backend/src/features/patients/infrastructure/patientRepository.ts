@@ -1,6 +1,3 @@
-import type { DbClient } from '@shared/db';
-import { and, desc, eq, inArray, isNull } from 'drizzle-orm';
-
 import {
   instructions,
   media,
@@ -10,7 +7,9 @@ import {
   patient,
   patientCode,
   symptom,
-} from '../../../infrastructure/schema';
+} from '@infrastructure/schema';
+import type { DbClient } from '@shared/db';
+import { and, desc, eq, inArray, isNull } from 'drizzle-orm';
 import type {
   PatientCodeRecord,
   PatientHistoryInstructionRecord,

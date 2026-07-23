@@ -1,6 +1,3 @@
-import type { DbClient } from '@shared/db';
-import { eq, inArray } from 'drizzle-orm';
-
 import {
   instructions,
   media,
@@ -9,7 +6,9 @@ import {
   medicalProcedure,
   patient,
   symptom,
-} from '../../../infrastructure/schema';
+} from '@infrastructure/schema';
+import type { DbClient } from '@shared/db';
+import { eq, inArray } from 'drizzle-orm';
 import type {
   EventExportData,
   InstructionExportData,

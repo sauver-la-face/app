@@ -1,4 +1,4 @@
-import { logger } from '../../../shared/logger';
+import { logger } from '@shared/logger';
 import { PATIENT_CODE_TTL_HOURS } from '../domain/authDomain';
 import type { PatientCodeRepository } from '../domain/patientCodeRepository';
 

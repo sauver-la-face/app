@@ -1,7 +1,7 @@
+import * as schema from '@infrastructure/schema';
 import { PatientCodeValue } from '@sauver-la-face/shared';
 import { and, eq, isNull, lt } from 'drizzle-orm';
 import type { NodePgDatabase } from 'drizzle-orm/node-postgres';
-import * as schema from '../../../infrastructure/schema';
 import type { PatientCode, PatientCodeRepository } from '../domain/patientCodeRepository';
 
 export class DrizzlePatientCodeRepository implements PatientCodeRepository {
