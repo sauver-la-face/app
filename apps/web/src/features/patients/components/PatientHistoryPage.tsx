@@ -98,7 +98,7 @@ export function PatientHistoryPage({
     <main className="mx-auto flex w-full max-w-6xl flex-1 flex-col px-6 py-10">
       <div className="mb-8 flex flex-wrap items-start justify-between gap-4">
         <div>
-          <p className="text-sm uppercase tracking-[0.3em] text-[#2EAC8E]">{labels.historyTitle}</p>
+          <p className="text-sm uppercase tracking-[0.3em] text-[#178064]">{labels.historyTitle}</p>
           <h1 className="mt-3 text-4xl font-semibold text-gray-900">{fullName}</h1>
           <p className="mt-2 max-w-2xl text-sm text-gray-600">{labels.historySubtitle}</p>
         </div>
@@ -219,7 +219,7 @@ export function PatientHistoryPage({
                     </div>
                     <div className="rounded-full bg-[#EAE6DD] p-1">
                       <div
-                        className="h-3 rounded-full bg-[#2EAC8E]"
+                        className="h-3 rounded-full bg-[#178064]"
                         style={{
                           width: totalWidth,
                           minWidth: point.totalSymptoms > 0 ? '1rem' : 0,
@@ -404,7 +404,7 @@ function CenteredState({ label }: { label: string }) {
   return (
     <main className="flex flex-1 items-center justify-center px-6 py-10">
       <div className="flex items-center gap-4 rounded-full bg-white px-6 py-4 shadow-sm">
-        <div className="h-6 w-6 animate-spin rounded-full border-4 border-[#2EAC8E] border-t-transparent" />
+        <div className="h-6 w-6 animate-spin rounded-full border-4 border-[#178064] border-t-transparent" />
         <p className="text-sm text-gray-600">{label}</p>
       </div>
     </main>

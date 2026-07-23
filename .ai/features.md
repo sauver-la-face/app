@@ -429,6 +429,33 @@ Mobile (SQLite) → Hono sync.usecase.ts → compare avec PostgreSQL
 
 ---
 
+### A11Y-01 — Corrections d'accessibilité WCAG 2.2 AA (dashboard)
+
+`[ ]` 🟡 Majeur · `apps/web/src/features/` · `docs/architecture.md`
+
+**Contexte :**
+
+Audit d'accessibilité du dashboard web (Lighthouse / axe-core) au titre de la compétence
+C2.2.3, critère 3 (« le prototype répond aux exigences du référentiel »). Le référentiel
+retenu est **WCAG 2.2 niveau AA** (voir section Accessibilité de `docs/architecture.md`).
+L'audit a révélé 4 violations sur 3 pages (login 92/100, dashboard 95/100, patients 100/100).
+
+**Comportement attendu :**
+
+- Les pages du dashboard atteignent 100/100 sur la catégorie Accessibilité de Lighthouse
+- Aucune violation WCAG 2.2 A/AA automatiquement détectable
+
+**Règles de code :**
+
+- Contraste : vert de marque `#2EAC8E` (2.83:1) assombri en `#178064` (4.87:1) ; texte `text-gray-400` (2.53:1) → `text-gray-500`
+- Taille de cible (WCAG 2.5.8, nouveau en 2.2) : bouton « afficher le mot de passe » agrandi de 20×20 à 28×28 px
+- Rapports d'audit avant/après archivés dans `docs/audits-accessibilite/`
+- Résultats consignés dans la section Accessibilité de `docs/architecture.md` (critère 3)
+- Dette connue à tracer séparément : le vert de marque est écrit en dur (17 occurrences) au lieu d'un token — tokenisation à prévoir
+- Tester : `bunx lighthouse <url> --only-categories=accessibility` sur login/dashboard/patients → 100/100
+
+---
+
 ## APPLICATION MOBILE
 
 ### MOB-02 — Authentification patient (code 6 chiffres)

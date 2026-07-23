@@ -35,7 +35,7 @@ export function DashboardPage({ locale, dictionary }: DashboardPageProps) {
   if (sessionPending || !session) {
     return (
       <div className="flex flex-1 items-center justify-center">
-        <span className="text-sm text-gray-400">{dictionary.common.loading}</span>
+        <span className="text-sm text-gray-500">{dictionary.common.loading}</span>
       </div>
     );
   }
@@ -50,7 +50,7 @@ export function DashboardPage({ locale, dictionary }: DashboardPageProps) {
           <div className="flex items-center gap-4">
             <Link
               href={`/${locale}/patients`}
-              className="rounded-md border border-[#2EAC8E]/20 bg-[#EAF7F2] px-3 py-1.5 text-sm font-medium text-[#1F6A57] hover:bg-[#def2ea]"
+              className="rounded-md border border-[#178064]/20 bg-[#EAF7F2] px-3 py-1.5 text-sm font-medium text-[#1F6A57] hover:bg-[#def2ea]"
             >
               {dictionary.patientManagement.title}
             </Link>
@@ -76,7 +76,7 @@ export function DashboardPage({ locale, dictionary }: DashboardPageProps) {
 
         {isLoading ? (
           <div className="flex items-center justify-center py-16">
-            <span className="text-sm text-gray-400">{dictionary.common.loading}</span>
+            <span className="text-sm text-gray-500">{dictionary.common.loading}</span>
           </div>
         ) : (
           <>

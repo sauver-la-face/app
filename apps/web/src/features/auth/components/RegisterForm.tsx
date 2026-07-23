@@ -43,7 +43,7 @@ export function RegisterForm({ locale, dictionary }: { locale: Locale; dictionar
   }
 
   const inputClass =
-    'h-9 w-full rounded-[5px] border border-black/30 px-3 text-sm shadow-[0px_4px_4px_rgba(0,0,0,0.25)] focus:border-[#2EAC8E] focus:outline-none focus:ring-1 focus:ring-[#2EAC8E]';
+    'h-9 w-full rounded-[5px] border border-black/30 px-3 text-sm shadow-[0px_4px_4px_rgba(0,0,0,0.25)] focus:border-[#178064] focus:outline-none focus:ring-1 focus:ring-[#178064]';
 
   return (
     <form onSubmit={handleSubmit} className="space-y-2">
@@ -119,7 +119,7 @@ export function RegisterForm({ locale, dictionary }: { locale: Locale; dictionar
         <button
           type="submit"
           disabled={loading}
-          className="h-9 w-full rounded-[10px] bg-[#2EAC8E] text-sm font-medium text-white shadow-sm transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
+          className="h-9 w-full rounded-[10px] bg-[#178064] text-sm font-medium text-white shadow-sm transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
         >
           {loading ? register.submitting : register.submit}
         </button>

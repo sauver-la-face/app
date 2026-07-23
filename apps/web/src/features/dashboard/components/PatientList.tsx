@@ -59,7 +59,7 @@ export function PatientList({ patients, alertPatientIds, dictionary, locale }: P
                 <td className="px-4 py-3 font-medium text-gray-900">
                   <Link
                     href={`/${locale}/patients/${patient.patientId}`}
-                    className="hover:text-[#2EAC8E] hover:underline"
+                    className="hover:text-[#178064] hover:underline"
                   >
                     {displayName}
                   </Link>
