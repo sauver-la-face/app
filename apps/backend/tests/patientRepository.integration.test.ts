@@ -1,11 +1,10 @@
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'bun:test';
-
-import { createDb, type DbClient } from '../src/shared/db';
-import { patient, patientCode } from '../src/infrastructure/schema';
 import {
-  PgPatientsRepository,
   type PatientPersistenceRecord,
+  PgPatientsRepository,
 } from '../src/features/patients/infrastructure/patientRepository';
+import { patient, patientCode } from '../src/infrastructure/schema';
+import { createDb, type DbClient } from '../src/shared/db';
 
 // Nécessite TEST_DATABASE_URL — pointe vers une base Postgres dédiée aux tests
 // (jamais la base de dev : les tables sont vidées avant chaque test).
@@ -39,7 +38,7 @@ describe.skipIf(!testDatabaseUrl)('PgPatientsRepository (integration)', () => {
     lastSyncedAt: null,
   };
 
-  it("crée un patient et le relit depuis Postgres", async () => {
+  it('crée un patient et le relit depuis Postgres', async () => {
     const created = await repository.create(newPatient);
 
     const found = await repository.findById(created.patientId);
