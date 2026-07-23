@@ -707,7 +707,7 @@ La couverture `bun test --coverage` montrait un `% Lines` très faible sur `infr
 - `apps/backend/package.json` : scripts `test:unit` (`--path-ignore-patterns '**/*.integration.test.ts'`) et `test:integration` (filtre `integration`, `--pass-with-no-tests` tant que la suite est encore restreinte)
 - Les tests d'intégration lisent `TEST_DATABASE_URL` (jamais `DATABASE_URL` de dev) — doivent `skipIf` proprement si la variable est absente plutôt que planter
 - Chaque test d'intégration vide les tables concernées en `beforeEach` (pas de dépendance à l'ordre d'exécution) et ferme le pool en `afterAll`
-- `.github/workflows/ci.yml` : job `test-integration` avec `services.postgres` + `services.minio` (health checks), étape `db:migrate` avant les tests
+- `.github/workflows/ci.yml` : job `test-integration` avec `services.postgres` (health check), étape `db:migrate` avant les tests — `services.minio` non ajouté tant qu'aucun test n'exerce S3 (l'image officielle `minio/minio` n'a pas de commande par défaut, GitHub Actions ne permet pas de `command:` sur un service ; prévoir `bitnami/minio` ou équivalent le jour où un test S3 sera écrit)
 - Tester : round-trip création/lecture patient en DB réelle, contrainte unique réelle sur le code d'accès patient, comportement après révocation
 
 ---
