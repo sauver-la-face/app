@@ -689,7 +689,7 @@ Une GitHub App n'appartient à aucune personne — elle est rattachée au repo. 
 
 ### DEVOPS-05 — Tests d'intégration backend (Postgres réel) + CI dédiée
 
-`[ ]` 🟡 Majeur · `.github/workflows/ci.yml` · `apps/backend/tests/`
+`[x]` 🟡 Majeur · `.github/workflows/ci.yml` · `apps/backend/tests/`
 
 **Contexte :**
 
