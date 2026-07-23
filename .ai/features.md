@@ -779,6 +779,26 @@ DEVOPS-05 a introduit `bun run test:unit` / `bun run test:integration` et la var
 
 ---
 
+### DEVOPS-09 — Mettre à jour le workflow Git dans CLAUDE.md (worktree)
+
+`[ ]` 🟢 Mineur · `CLAUDE.md`
+
+**Contexte :**
+
+`CLAUDE.md` documentait encore l'ancien workflow (`git checkout -b feature/XXX-00-nom` directement sur le dossier courant), alors que toutes les features depuis DEVOPS-05 sont développées dans des git worktree isolés (`git worktree add`) pour ne jamais travailler directement sur `dev`. `CLAUDE.md` étant le fichier d'instructions chargé automatiquement à chaque session, le documenter correctement évite qu'une future session sans contexte reparte sur l'ancien réflexe.
+
+**Comportement attendu :**
+
+- La section "Workflow Git" de `CLAUDE.md` décrit le workflow worktree (`git fetch` → `git worktree add` → push), pas l'ancien `checkout -b`
+- Mention explicite du nettoyage du worktree après merge
+
+**Règles de code :**
+
+- Section "Workflow Git" de `CLAUDE.md` alignée avec `.claude/skills/feature-start/SKILL.md`
+- Tester : relire la section, vérifier qu'elle correspond exactement aux commandes utilisées par le skill `feature-start`
+
+---
+
 ### DEVOPS-01 — Interface d'administration PostgreSQL (pgAdmin)
 
 `[x]` 🟢 Mineur · `docker-compose.yml`
