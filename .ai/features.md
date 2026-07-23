@@ -458,7 +458,7 @@ L'audit a révélé 4 violations sur 3 pages (login 92/100, dashboard 95/100, pa
 
 ### A11Y-02 — Rédaction critère 3 + standard cibles tactiles mobile (48 dp)
 
-`[ ]` 🟢 Mineur · `docs/architecture.md` · `CLAUDE.md`
+`[x]` 🟢 Mineur · `docs/architecture.md` · `CLAUDE.md`
 
 **Contexte :**
 
