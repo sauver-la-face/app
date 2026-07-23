@@ -78,11 +78,14 @@ apps/web/src/
 
 ## Workflow Git — obligatoire avant toute feature
 
+Chaque feature se développe dans un **git worktree isolé**, jamais directement sur `dev` — voir le skill `/feature-start`.
+
 **Démarrage :**
 
 ```bash
-git checkout dev && git pull origin dev
-git checkout -b feature/XXX-00-nom
+git fetch origin dev
+git worktree add ../sauverLaFace-XXX-00 -b feature/XXX-00-nom origin/dev
+git -C ../sauverLaFace-XXX-00 push -u origin HEAD
 ```
 
 Le statut passe automatiquement de `[ ]` à `[~]` via GitHub Actions dès la création de la branche.
@@ -96,6 +99,7 @@ gh pr create --base dev --title "feat: XXX-00 nom" --body "..."
 - Aucun push direct sur `dev`
 - La PR est créée uniquement quand la feature est terminée et testée — pas avant
 - Une fois la PR mergée, le statut passe automatiquement de `[~]` à `[x]` via GitHub Actions
+- Une fois la PR mergée, supprimer le worktree : `git worktree remove ../sauverLaFace-XXX-00`
 
 ## Règles features
 
