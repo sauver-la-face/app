@@ -431,7 +431,7 @@ Mobile (SQLite) → Hono sync.usecase.ts → compare avec PostgreSQL
 
 ### A11Y-01 — Corrections d'accessibilité WCAG 2.2 AA (dashboard)
 
-`[ ]` 🟡 Majeur · `apps/web/src/features/` · `docs/architecture.md`
+`[x]` 🟡 Majeur · `apps/web/src/features/` · `docs/architecture.md`
 
 **Contexte :**
 
