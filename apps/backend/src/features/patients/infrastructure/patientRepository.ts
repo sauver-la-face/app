@@ -485,13 +485,15 @@ function cloneHistory(history: PatientHistoryRecord): PatientHistoryRecord {
   };
 }
 
-function isUniqueViolation(error: unknown): error is { code: string } {
-  return (
-    typeof error === 'object' &&
-    error !== null &&
-    'code' in error &&
-    (error as { code: string }).code === '23505'
-  );
+function isUniqueViolation(error: unknown): boolean {
+  if (typeof error !== 'object' || error === null) {
+    return false;
+  }
+
+  // drizzle-orm enveloppe l'erreur pg dans une DrizzleQueryError : le code
+  // Postgres (23505 = unique_violation) est exposé sur `.cause`, pas `.code`.
+  const { code, cause } = error as { code?: string; cause?: unknown };
+  return code === '23505' || isUniqueViolation(cause);
 }
 
 export type { PatientHistoryRecord, PatientPersistenceRecord };

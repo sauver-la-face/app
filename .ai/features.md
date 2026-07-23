@@ -687,6 +687,31 @@ Une GitHub App n'appartient à aucune personne — elle est rattachée au repo. 
 
 ---
 
+### DEVOPS-05 — Tests d'intégration backend (Postgres réel) + CI dédiée
+
+`[ ]` 🟡 Majeur · `.github/workflows/ci.yml` · `apps/backend/tests/`
+
+**Contexte :**
+
+La couverture `bun test --coverage` montrait un `% Lines` très faible sur `infrastructure/` (ex: `patientRepository.ts` ~30%, `syncRepository.ts` ~23%) car ces adapters Drizzle/S3 n'ont de sens qu'exécutés contre une vraie base — les mocker revient à tester des appels de mock, pas un comportement réel. Un premier test d'intégration sur `PgPatientsRepository` a d'ailleurs révélé un vrai bug : `isUniqueViolation()` ne détectait plus les violations de contrainte unique Postgres (code `23505`) depuis que `drizzle-orm` enveloppe l'erreur driver dans une `DrizzleQueryError` — le code réel est exposé sur `.cause`, plus directement sur `.code`. Conséquence : `issueAccessCode` (boucle de retry sur collision de code patient à 6 chiffres) plantait en 500 au lieu de réessayer.
+
+**Comportement attendu :**
+
+- Convention de nommage `*.integration.test.ts` pour distinguer les tests d'intégration des tests unitaires
+- `bun run test:unit` exclut les tests d'intégration (rapide, aucune dépendance externe)
+- `bun run test:integration` ne lance que les tests d'intégration, contre une vraie base Postgres de test
+- La CI exécute les deux en parallèle : `test-unit` (sans service) et `test-integration` (avec service containers Postgres + MinIO)
+
+**Règles de code :**
+
+- `apps/backend/package.json` : scripts `test:unit` (`--path-ignore-patterns '**/*.integration.test.ts'`) et `test:integration` (filtre `integration`, `--pass-with-no-tests` tant que la suite est encore restreinte)
+- Les tests d'intégration lisent `TEST_DATABASE_URL` (jamais `DATABASE_URL` de dev) — doivent `skipIf` proprement si la variable est absente plutôt que planter
+- Chaque test d'intégration vide les tables concernées en `beforeEach` (pas de dépendance à l'ordre d'exécution) et ferme le pool en `afterAll`
+- `.github/workflows/ci.yml` : job `test-integration` avec `services.postgres` + `services.minio` (health checks), étape `db:migrate` avant les tests
+- Tester : round-trip création/lecture patient en DB réelle, contrainte unique réelle sur le code d'accès patient, comportement après révocation
+
+---
+
 ### DEVOPS-01 — Interface d'administration PostgreSQL (pgAdmin)
 
 `[x]` 🟢 Mineur · `docker-compose.yml`

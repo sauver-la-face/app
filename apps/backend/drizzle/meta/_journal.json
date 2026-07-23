@@ -36,6 +36,6 @@
       "when": 1778109000000,
       "tag": "0004_patient_sync_timestamp",
       "breakpoints": true
-    },
+    }
   ]
 }
