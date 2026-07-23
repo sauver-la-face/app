@@ -7,12 +7,15 @@ import {
   patientListResponseSchema,
   updatePatientSchema,
 } from '@sauver-la-face/shared';
+import type { MiddlewareHandler } from 'hono';
+import { requirePhysicianAuth } from '../../../shared/middleware/physicianAuthMiddleware';
 import {
   notFoundErrorSchema,
   patientCodeGenerationErrorSchema,
   uuidParamSchema,
   validationErrorSchema,
 } from '../../../shared/openapi';
+import type { SessionVariables } from '../../auth/presentation/authRouter';
 import {
   PatientCodeGenerationError,
   PatientNotFoundError,
@@ -201,8 +204,18 @@ const issueAccessCodeRoute = createRoute({
   tags: ['Patients'],
 });
 
-export function createPatientRouter(patientUsecase: PatientUsecase): OpenAPIHono {
-  const router = new OpenAPIHono();
+// SEC-01/A01 : ces routes exposent des dossiers patients (dashboard medecin).
+// L'equipe de Toulouse suit collectivement les memes patients (pas de
+// patientele privee par medecin) - seule une session medecin valide est
+// exigee ici, aucun controle d'appartenance par patient.
+export function createPatientRouter(
+  patientUsecase: PatientUsecase,
+  authMiddleware: MiddlewareHandler<{ Variables: SessionVariables }> = requirePhysicianAuth,
+): OpenAPIHono<{ Variables: SessionVariables }> {
+  const router = new OpenAPIHono<{ Variables: SessionVariables }>();
+
+  router.use('/patients/*', authMiddleware);
+  router.use('/patients', authMiddleware);
 
   router.openapi(listPatientsRoute, async (context) => {
     const response = await patientUsecase.listPatients();

@@ -1,7 +1,10 @@
 import { GetObjectCommand, type S3Client } from '@aws-sdk/client-s3';
+import type { MiddlewareHandler } from 'hono';
 import { Hono } from 'hono';
 import { z } from 'zod';
 
+import { requirePhysicianAuth } from '../../../shared/middleware/physicianAuthMiddleware';
+import type { SessionVariables } from '../../auth/presentation/authRouter';
 import { PhotoIntegrityError, type PhotosUsecase } from '../application/photosUsecase';
 import type { PhotoRepository } from '../domain/photoRepository';
 
@@ -16,8 +19,9 @@ export function createPhotosRouter(
   photoRepository: PhotoRepository,
   s3Client: S3Client,
   bucket: string,
-): Hono {
-  const router = new Hono();
+  authMiddleware: MiddlewareHandler<{ Variables: SessionVariables }> = requirePhysicianAuth,
+): Hono<{ Variables: SessionVariables }> {
+  const router = new Hono<{ Variables: SessionVariables }>();
 
   router.post('/photos', async (context) => {
     let formData: FormData;
@@ -63,7 +67,9 @@ export function createPhotosRouter(
     }
   });
 
-  router.get('/photos/:mediaId', async (context) => {
+  // SEC-01/A01 : consultation d'une photo reservee aux medecins authentifies
+  // (equipe partagee - pas de controle d'appartenance par patient).
+  router.get('/photos/:mediaId', authMiddleware, async (context) => {
     const { mediaId } = context.req.param();
 
     const record = await photoRepository.findMediaById(mediaId);

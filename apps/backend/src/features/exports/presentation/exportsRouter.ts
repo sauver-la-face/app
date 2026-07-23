@@ -1,5 +1,8 @@
+import type { MiddlewareHandler } from 'hono';
 import { Hono } from 'hono';
 
+import { requirePhysicianAuth } from '../../../shared/middleware/physicianAuthMiddleware';
+import type { SessionVariables } from '../../auth/presentation/authRouter';
 import { type ExportsUsecase, PatientNotFoundForExportError } from '../application/exportsUsecase';
 
 // Hono pur (pas OpenAPIHono) : les réponses binaires (PDF) et textuelles (CSV)
@@ -10,8 +13,16 @@ import { type ExportsUsecase, PatientNotFoundForExportError } from '../applicati
 
 const PATIENT_ID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
-export function createExportsRouter(exportsUsecase: ExportsUsecase): Hono {
-  const router = new Hono();
+// SEC-01/A01 : ces routes exposent des dossiers patients (dashboard medecin).
+// L'equipe de Toulouse suit collectivement les memes patients - seule une
+// session medecin valide est exigee ici, aucun controle d'appartenance par patient.
+export function createExportsRouter(
+  exportsUsecase: ExportsUsecase,
+  authMiddleware: MiddlewareHandler<{ Variables: SessionVariables }> = requirePhysicianAuth,
+): Hono<{ Variables: SessionVariables }> {
+  const router = new Hono<{ Variables: SessionVariables }>();
+
+  router.use('/exports/*', authMiddleware);
 
   router.get('/exports/patients/:patientId/pdf', async (context) => {
     const patientId = context.req.param('patientId');
