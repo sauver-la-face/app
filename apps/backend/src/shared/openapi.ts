@@ -37,3 +37,18 @@ export const syncVersionErrorSchema = z.object({
   message: z.string(),
   serverSchemaVersion: z.number().int().positive(),
 });
+
+export const unauthorizedErrorSchema = z.object({
+  code: z.literal('UNAUTHORIZED'),
+  message: z.string(),
+});
+
+export const patientMismatchErrorSchema = z.object({
+  code: z.literal('PATIENT_MISMATCH'),
+  message: z.string(),
+});
+
+export const forbiddenErrorSchema = z.object({
+  code: z.literal('FORBIDDEN'),
+  message: z.string(),
+});

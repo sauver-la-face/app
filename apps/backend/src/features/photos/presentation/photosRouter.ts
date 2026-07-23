@@ -1,12 +1,19 @@
 import { GetObjectCommand, type S3Client } from '@aws-sdk/client-s3';
+import {
+  type PatientSessionVariables,
+  requirePatientAuth,
+} from '@shared/middleware/patientAuthMiddleware';
 import { requirePhysicianAuth } from '@shared/middleware/physicianAuthMiddleware';
 import type { MiddlewareHandler } from 'hono';
 import { Hono } from 'hono';
 import { z } from 'zod';
 
+import type { TokenProvider } from '../../auth/application/tokenProvider';
 import type { SessionVariables } from '../../auth/presentation/authRouter';
 import { PhotoIntegrityError, type PhotosUsecase } from '../application/photosUsecase';
 import type { PhotoRepository } from '../domain/photoRepository';
+
+type Variables = SessionVariables & PatientSessionVariables;
 
 const uploadQuerySchema = z.object({
   checksum: z.string().regex(/^[a-f0-9]{64}$/i, 'CHECKSUM_INVALID'),
@@ -19,11 +26,19 @@ export function createPhotosRouter(
   photoRepository: PhotoRepository,
   s3Client: S3Client,
   bucket: string,
-  authMiddleware: MiddlewareHandler<{ Variables: SessionVariables }> = requirePhysicianAuth,
-): Hono<{ Variables: SessionVariables }> {
-  const router = new Hono<{ Variables: SessionVariables }>();
+  tokenProvider: TokenProvider,
+  // requirePhysicianAuth ne lit/ecrit jamais `patientId` - cast sans risque
+  // vers le type Variables plus large partage avec les routes patient.
+  physicianAuthMiddleware: MiddlewareHandler<{
+    Variables: Variables;
+  }> = requirePhysicianAuth as unknown as MiddlewareHandler<{ Variables: Variables }>,
+): Hono<{ Variables: Variables }> {
+  const router = new Hono<{ Variables: Variables }>();
 
-  router.post('/photos', async (context) => {
+  // SEC-02/A01/A07 : le patient authentifie (JWT verifie) doit etre le
+  // proprietaire de l'eventId cible - sinon n'importe quel patient pourrait
+  // uploader une photo sur le dossier d'un autre patient.
+  router.post('/photos', requirePatientAuth(tokenProvider), async (context) => {
     let formData: FormData;
 
     try {
@@ -45,6 +60,11 @@ export function createPhotosRouter(
 
     if (!(file instanceof File) || file.size === 0) {
       return context.json({ code: 'VALIDATION_ERROR', message: 'Missing or empty file' }, 400);
+    }
+
+    const ownerPatientId = await photoRepository.findEventOwnerPatientId(parsed.data.eventId);
+    if (!ownerPatientId || ownerPatientId !== context.get('patientId')) {
+      return context.json({ code: 'FORBIDDEN' }, 403);
     }
 
     const buffer = Buffer.from(await file.arrayBuffer());
@@ -69,7 +89,7 @@ export function createPhotosRouter(
 
   // SEC-01/A01 : consultation d'une photo reservee aux medecins authentifies
   // (equipe partagee - pas de controle d'appartenance par patient).
-  router.get('/photos/:mediaId', authMiddleware, async (context) => {
+  router.get('/photos/:mediaId', physicianAuthMiddleware, async (context) => {
     const { mediaId } = context.req.param();
 
     const record = await photoRepository.findMediaById(mediaId);

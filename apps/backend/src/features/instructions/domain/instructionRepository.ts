@@ -23,4 +23,7 @@ export interface InstructionRepository {
     instructionId: string,
     acknowledgedAt: Date,
   ): Promise<InstructionPersistenceRecord | null>;
+  // SEC-02/A01 : resout le patient proprietaire d'une instruction (via sa
+  // procedure medicale), pour verifier l'appartenance avant accuse de lecture.
+  findPatientIdByInstructionId(instructionId: string): Promise<string | null>;
 }

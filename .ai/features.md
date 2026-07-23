@@ -80,6 +80,33 @@ Audit de sécurité (revue OWASP A01, 2026-07-23) : aucun middleware d'authentif
 
 ---
 
+### SEC-02 — Vérification JWT patient côté serveur (A01/A07)
+
+`[ ]` 🔴 Critique · `apps/backend/src/features/sync/` · `apps/backend/src/features/photos/` · `apps/backend/src/features/instructions/` · `apps/backend/src/features/auth/`
+
+**Contexte :**
+
+Suite à SEC-01 : le JWT patient est signé (`jwtTokenProvider.ts`) mais aucune fonction `verify()` n'existe côté serveur, et aucune route mobile ne vérifie le token. Conséquence concrète et confirmée dans le code : `POST /sync` lit `patientId` directement depuis le corps de la requête (`syncRequestSchema.patientId`) sans aucune vérification — n'importe qui peut écrire des données médicales (symptômes, media, accusés de lecture) au nom de n'importe quel patient. Même trou sur `POST /photos` (upload) et sur les routes `instructions` côté patient. `POST /instructions` (création côté médecin) n'a par ailleurs jamais été rattaché à `requirePhysicianAuth` lors de SEC-01 (oubli de périmètre).
+
+**Comportement attendu :**
+
+- `TokenProvider.verify(token)` vérifie la signature et l'expiration du JWT (`hono/jwt`), retourne le payload (`uuid_patient`, `uuid_patient_code`, `role`) ou `null` si invalide/expiré
+- Middleware `requirePatientAuth` : lit `Authorization: Bearer <token>`, vérifie le token, rejette en 401 si absent/invalide, sinon expose `patientId` dans le contexte
+- `POST /sync` : `patientId` du token doit correspondre au `patientId` du corps — 403 sinon, jamais de confiance aveugle dans le body
+- `POST /photos` : le patient authentifié doit être le propriétaire de l'`eventId` ciblé (chaîne media → event → procedure → patient) — 403 sinon
+- `GET /patients/{patientId}/instructions` : le patient authentifié doit correspondre au `patientId` du chemin — 403 sinon
+- `POST /instructions/{instructionId}/acknowledge` : le patient authentifié doit être le propriétaire de l'instruction (via la procédure médicale liée) — 403 sinon
+- `POST /instructions` (création) : rattaché à `requirePhysicianAuth` (oubli de SEC-01, corrigé ici)
+
+**Règles de code :**
+
+- `verify()` vit dans `TokenProvider` (interface) / `JwtTokenProvider` (implémentation) — même fichier que `sign()`
+- `requirePatientAuth` est une factory qui prend le `TokenProvider` en paramètre (pas de singleton comme `requirePhysicianAuth`, car dépend du secret JWT injecté) — reste dans `shared/middleware/`
+- Les contrôles d'appartenance (event/instruction → patient) vivent dans les repositories concernés (nouvelle méthode dédiée), jamais recalculés en dur dans le router
+- Tester : token absent → 401, token invalide/expiré → 401, `patientId` du body/chemin différent du token → 403, cas nominal → 200/201
+
+---
+
 ### SYNC-01 — Réception et résolution des conflits (server-wins)
 
 `[x]` 🔴 Critique · `apps/backend/src/features/sync/`
