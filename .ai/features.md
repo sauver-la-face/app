@@ -58,7 +58,7 @@
 
 ### SEC-01 — Scoping médecin-patient (contrôle d'accès aux ressources)
 
-`[ ]` 🔴 Critique · `apps/backend/src/features/patients/` · `apps/backend/src/features/photos/` · `apps/backend/src/features/exports/`
+`[~]` 🔴 Critique · `apps/backend/src/features/patients/` · `apps/backend/src/features/photos/` · `apps/backend/src/features/exports/`
 
 **Contexte :**
 
