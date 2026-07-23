@@ -781,7 +781,7 @@ DEVOPS-05 a introduit `bun run test:unit` / `bun run test:integration` et la var
 
 ### DEVOPS-09 — Mettre à jour le workflow Git dans CLAUDE.md (worktree)
 
-`[ ]` 🟢 Mineur · `CLAUDE.md`
+`[x]` 🟢 Mineur · `CLAUDE.md`
 
 **Contexte :**
 
