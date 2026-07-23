@@ -11,7 +11,7 @@ jobs:
     name: Lint & Format (Biome)
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - uses: oven-sh/setup-bun@v2
         with:
@@ -27,7 +27,7 @@ jobs:
     name: Vérification TypeScript
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - uses: oven-sh/setup-bun@v2
         with:
@@ -67,7 +67,7 @@ jobs:
       BETTER_AUTH_SECRET: ci-test-secret
       BETTER_AUTH_URL: http://localhost:3001
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - uses: oven-sh/setup-bun@v2
         with:
@@ -103,7 +103,7 @@ jobs:
       BETTER_AUTH_SECRET: ci-test-secret
       BETTER_AUTH_URL: http://localhost:3001
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - uses: oven-sh/setup-bun@v2
         with:
