@@ -56,28 +56,27 @@
 
 ---
 
-### SEC-01 — Scoping médecin-patient (contrôle d'accès aux ressources)
+### SEC-01 — Authentification médecin obligatoire sur les routes dashboard (A01)
 
 `[~]` 🔴 Critique · `apps/backend/src/features/patients/` · `apps/backend/src/features/photos/` · `apps/backend/src/features/exports/`
 
 **Contexte :**
 
-Audit de sécurité (revue OWASP A01, 2026-07-23) : aucun contrôle d'autorisation au niveau des données n'existe actuellement. La table `patient` ne porte aucune colonne de rattachement à un médecin, et les repositories (`patientRepository`, `photoRepository`, `exportsUsecase`) résolvent les ressources par identifiant seul (`patientId`, `mediaId`), sans filtrage par l'identité de l'appelant. Aucun middleware d'authentification n'est monté sur les routers patient/photos/exports/sync/instructions (`index.ts`) — seul un middleware d'audit (journalisation, non bloquant) est appliqué globalement. Un `sessionMiddleware` existe pour le flux de connexion médecin (Better Auth) mais n'est jamais activé via `.use()`. Résultat : IDOR confirmé — toute personne connaissant ou devinant un UUID `patientId`/`mediaId` peut lire, voire modifier, le dossier, l'historique ou les photos d'un patient suivi par un autre médecin.
+Audit de sécurité (revue OWASP A01, 2026-07-23) : aucun middleware d'authentification n'est monté sur les routers patient/photos/exports/sync/instructions (`index.ts`) — seul un middleware d'audit (journalisation, non bloquant) est appliqué globalement. Un `sessionMiddleware` existe pour le flux de connexion médecin (Better Auth) mais n'est jamais activé via `.use()`. Résultat confirmé : n'importe qui, même sans être connecté, peut appeler ces routes et lire/modifier le dossier, l'historique, les photos ou les exports de n'importe quel patient.
+
+**Décision explicite sur le modèle d'accès (2026-07-23) :** les chirurgiens de Toulouse forment une seule équipe soignante qui suit collectivement les mêmes patients — ce n'est **pas** une patientèle privée par médecin. Le correctif est donc uniquement une exigence d'authentification (401 si non connecté), **sans** rattachement patient ↔ médecin ni contrôle d'appartenance (403). Un premier essai de scoping strict par médecin a été fait puis annulé pour cette raison — voir `physicianAuthMiddleware.ts` pour le raisonnement. Si un jour plusieurs équipes distinctes doivent utiliser la plateforme sans se voir mutuellement, prévoir une table de liaison `patient_physician` (many-to-many) à ce moment-là, pas avant.
 
 **Comportement attendu :**
 
-- Chaque patient est rattaché à un médecin (colonne de rattachement sur la table `patient`, ou table de liaison si plusieurs médecins doivent pouvoir suivre un même patient)
-- Un middleware d'authentification (session Better Auth) est monté sur tous les routers exposant des données patient : `patientRouter`, `photosRouter`, `exportsRouter`, `syncRouter`, `instructionsRouter`
-- Chaque use case (`patientUsecase`, `photosUsecase`, `exportsUsecase`) reçoit l'identité du médecin appelant et vérifie que la ressource demandée (patient, media, export) lui est bien rattachée avant de la retourner
-- Accès refusé (`403`) si le médecin appelant n'est pas rattaché au patient concerné
-- Les routes patient (auth par code 6 chiffres) restent distinctes : un patient n'accède qu'à ses propres données, jamais à celles d'un autre patient
+- Un middleware d'authentification (session Better Auth) est monté sur `patientRouter`, `photosRouter` (route de consultation uniquement) et `exportsRouter` — 401 si aucune session médecin valide
+- Tout médecin authentifié voit tous les patients (équipe partagée) — aucun filtrage par propriétaire
+- Les routes patient (auth par code 6 chiffres, upload photo, sync mobile) restent hors périmètre de ce ticket — l'authentification JWT patient est un sujet séparé (aucune fonction `verify()` n'existe encore pour le token patient)
 
 **Règles de code :**
 
-- Le contrôle d'appartenance (patient ↔ médecin) est une règle métier : elle va dans `domain/`, jamais dans `presentation/` ni codée en dur dans une requête SQL
-- Le filtrage par médecin se fait au niveau du repository (`WHERE`) plutôt qu'un filtrage post-fetch en mémoire — éviter de charger une ressource pour ensuite la rejeter
-- Ne pas dupliquer la vérification d'appartenance dans chaque router — centraliser dans l'`application/usecase` ou un middleware partagé
-- Tester : médecin A ne peut pas lire/modifier un patient de médecin B (404 ou 403 selon le choix retenu), médecin A ne peut pas accéder à un `mediaId`/export d'un patient de médecin B, patient authentifié n'accède qu'à ses propres données
+- Le gardien d'authentification est un middleware partagé (`shared/middleware/physicianAuthMiddleware.ts`), injectable dans chaque router pour rester testable sans dépendre de Better Auth/une vraie base
+- Ne pas ajouter de colonne de rattachement ni de vérification d'appartenance tant que le besoin d'équipes distinctes n'est pas réel (YAGNI)
+- Tester : 401 sans session sur chaque router concerné, 200 pour tout médecin authentifié
 
 ---
 
