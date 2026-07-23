@@ -58,7 +58,7 @@
 
 ### SEC-01 — Authentification médecin obligatoire sur les routes dashboard (A01)
 
-`[~]` 🔴 Critique · `apps/backend/src/features/patients/` · `apps/backend/src/features/photos/` · `apps/backend/src/features/exports/`
+`[x]` 🔴 Critique · `apps/backend/src/features/patients/` · `apps/backend/src/features/photos/` · `apps/backend/src/features/exports/`
 
 **Contexte :**
 
