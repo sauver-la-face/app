@@ -11,7 +11,7 @@
   },
   "dependencies": {
     "expo": "~52.0.0",
-    "react-native": "0.76.0",
+    "react-native": "0.86.2",
     "expo-sqlite": "~14.0.0",
     "expo-secure-store": "~13.0.0",
     "expo-notifications": "~0.29.0",
