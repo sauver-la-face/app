@@ -168,6 +168,30 @@ Mobile (SQLite) → Hono sync.usecase.ts → compare avec PostgreSQL
 
 ---
 
+### ALERT-02 — Seuil d'alerte d'inactivité paramétrable
+
+`[ ]` 🟡 Majeur · `apps/backend/src/features/alerts/`
+
+**Contexte :**
+
+Le seuil actuel (ALERT-01) est fixe à 7 jours, identique pour tous les patients. Suggestion de Mathieu Baro (revue Bloc 2) : un patient opéré récemment et un patient suivi depuis longtemps n'ont pas le même niveau de risque en cas d'absence de connexion, un seuil uniforme ne reflète pas cette réalité médicale.
+
+**Comportement attendu :**
+
+- Seuil configurable au niveau global (valeur par défaut applicable à tous les patients)
+- Seuil configurable individuellement par patient, surchargeant la valeur globale si renseigné
+- Si aucun seuil individuel n'est défini, le seuil global s'applique (comportement actuel préservé par défaut)
+
+**Règles de code :**
+
+- Ajouter une colonne `alert_threshold_days` (nullable, integer) sur la table `patient` — migration additive, aucun impact sur les patients existants (valeur NULL → seuil global appliqué)
+- Le seuil global reste un paramètre de configuration (variable d'environnement ou table `settings`), pas une constante en dur
+- La logique de lecture du seuil (individuel puis fallback global) va dans `alerts/domain/` — jamais dans `application/`
+- Dépend de **ALERT-01** (déjà implémenté), extension non bloquante
+- Tester : patient sans seuil individuel → seuil global appliqué, patient avec seuil individuel → surcharge appliquée, changement du seuil global sans impact sur les seuils individuels déjà définis
+
+---
+
 ### PHOTO-01 — Stockage et validation des photos
 
 `[x]` 🟡 Majeur · `apps/backend/src/features/photos/`
@@ -916,6 +940,31 @@ Audit de sécurité (revue OWASP A06, 2026-07-23) : aucun outil de suivi des vul
 - Les mises à jour `minor`/`patch` Bun sont groupées dans une seule PR (`groups.minor-and-patch`) pour limiter le bruit — les montées majeures restent individuelles pour revue manuelle
 - Ne pas ajouter d'écosystème pour un fichier qui n'existe pas (ex. pas d'entrée `docker` pour mobile/web tant qu'ils n'ont pas de Dockerfile)
 - Si un nouveau workspace ou Dockerfile est ajouté, ajouter l'entrée correspondante dans `dependabot.yml`
+
+---
+
+### NOTIF-01 — Notification push patient en cas de retard de suivi
+
+`[ ]` 🟡 Majeur · `apps/backend/src/features/notifications/`
+
+**Contexte :**
+
+Idée de Mathieu Baro (revue Bloc 2) : le système actuel (ALERT-01) notifie uniquement le médecin sur son dashboard en cas d'absence de synchronisation. Aucune notification n'est envoyée au patient concerné. Proposition : relancer directement le patient par notification push, en plus de l'alerte médecin existante.
+
+**Comportement attendu :**
+
+- Déclenchement manuel : le médecin envoie une notification de relance depuis la fiche patient du dashboard
+- Déclenchement automatique : réutilise le seuil d'inactivité (ALERT-01, ou ALERT-02 si le seuil configurable est implémenté) pour envoyer la relance sans action du médecin
+- Le patient reçoit une notification push simple, pictographique, cohérente avec l'accessibilité du reste de l'app (pas de texte dense)
+- Un patient ne reçoit qu'une relance par période d'inactivité, pas de spam en cas de relances répétées côté médecin
+
+**Règles de code :**
+
+- Réutilise le mécanisme d'enregistrement du token Expo déjà prévu dans **MOB-07** — aucune nouvelle plomberie mobile nécessaire
+- La détection "patient en retard" réutilise la logique de seuil de **ALERT-01** (et **ALERT-02** si le seuil par patient est implémenté)
+- Le déclenchement manuel est une action côté dashboard (`apps/web/src/features/patients/actions/`) qui appelle l'endpoint backend d'envoi
+- Le déclenchement automatique est un job planifié côté backend, similaire au cron de soft delete des codes patients (AUTH-01)
+- Tester : déclenchement manuel envoie bien la notification, déclenchement automatique respecte le seuil, pas de double envoi sur la même période d'inactivité
 
 ---
 

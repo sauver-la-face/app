@@ -3,7 +3,7 @@
   "version": "0.0.1",
   "private": true,
   "scripts": {
-    "dev": "next dev",
+    "dev": "next dev --port 3000",
     "build": "next build",
     "generate:api-types": "bunx openapi-typescript http://localhost:3001/openapi.json -o src/api.types.ts",
     "start": "next start",
