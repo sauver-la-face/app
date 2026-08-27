@@ -13,6 +13,29 @@ updates:
         update-types:
           - "minor"
           - "patch"
+    ignore:
+      # Migrations pilotées à la main : ces paquets sont solidaires d'un SDK ou
+      # d'un framework et ne peuvent pas monter de majeure isolément.
+      #
+      # - expo-* suit la numérotation du SDK Expo installé (SDK 52 → expo-sqlite
+      #   ~14, expo-secure-store ~13). Une montée passe par `expo` lui-même, puis
+      #   `expo install --fix` et `npx expo-doctor`.
+      # - react est hoisté à la racine, donc partagé entre web et mobile :
+      #   react-native 0.76 impose `react: ^18.2.0` et next 14 ne supporte pas
+      #   React 19 (support à partir de Next 15).
+      #
+      # Les minor et patch continuent d'arriver normalement — seules les majeures
+      # sont retenues. Voir .ai/features.md pour le suivi de ces migrations.
+      - dependency-name: "expo"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "expo-*"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "react"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "react-dom"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "react-native"
+        update-types: ["version-update:semver-major"]
 
   # Image de base du backend
   - package-ecosystem: "docker"
@@ -20,6 +43,10 @@ updates:
     schedule:
       interval: "weekly"
       day: "monday"
+    groups:
+      docker-backend:
+        patterns:
+          - "*"
 
   # Actions utilisées dans les workflows CI/CD
   - package-ecosystem: "github-actions"
@@ -27,3 +54,7 @@ updates:
     schedule:
       interval: "weekly"
       day: "monday"
+    groups:
+      github-actions:
+        patterns:
+          - "*"
