@@ -9,7 +9,7 @@
       "!**/.next",
       "!**/.expo",
       "!.claude",
-      "!docs/audits-accessibilite"
+      "!apps/web/next-env.d.ts"
     ]
   },
   "linter": {

@@ -58,6 +58,32 @@ jobs:
             echo "apps/mobile/src non trouvé — typecheck ignoré (feature non implémentée)"
           fi
 
+  build-web:
+    name: Build Next.js (web)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Installer les dépendances
+        run: bun install
+
+      - name: Compiler le package shared
+        run: bun run build:shared
+
+      - name: Construire le dashboard web
+        run: |
+          if [ -d "apps/web/src" ]; then
+            bun run --cwd apps/web build
+          else
+            echo "apps/web/src non trouvé — build ignoré (feature non implémentée)"
+          fi
+        env:
+          NEXT_PUBLIC_API_URL: http://localhost:3001
+
   test-unit:
     name: Tests unitaires (bun:test)
     runs-on: ubuntu-latest

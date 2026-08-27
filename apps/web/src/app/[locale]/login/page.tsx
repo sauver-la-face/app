@@ -3,7 +3,8 @@ import { LoginForm } from '@/features/auth/components/LoginForm';
 import type { Locale } from '@/i18n/config';
 import { getDictionary } from '@/i18n/dictionaries';
 
-export default function LoginPage({ params }: { params: { locale: Locale } }) {
+export default async function LoginPage(props: { params: Promise<{ locale: Locale }> }) {
+  const params = await props.params;
   const dictionary = getDictionary(params.locale);
   const { common, login } = dictionary;
 
