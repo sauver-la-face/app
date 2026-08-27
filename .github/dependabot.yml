@@ -17,12 +17,16 @@ updates:
       # Migrations pilotées à la main : ces paquets sont solidaires d'un SDK ou
       # d'un framework et ne peuvent pas monter de majeure isolément.
       #
-      # - expo-* suit la numérotation du SDK Expo installé (SDK 52 → expo-sqlite
-      #   ~14, expo-secure-store ~13). Une montée passe par `expo` lui-même, puis
-      #   `expo install --fix` et `npx expo-doctor`.
-      # - react est hoisté à la racine, donc partagé entre web et mobile :
-      #   react-native 0.76 impose `react: ^18.2.0` et next 14 ne supporte pas
-      #   React 19 (support à partir de Next 15).
+      # - expo-* suit la numérotation du SDK Expo installé (SDK 57 → expo-sqlite
+      #   ~57.0.2, expo-secure-store ~57.0.2). Adopter une de ces majeures seule
+      #   désaligne le SDK et casse au build, pas au lint. Une montée de SDK passe
+      #   par `expo` lui-même, puis `expo install --fix` et `npx expo-doctor`.
+      # - react est hoisté à la racine, donc partagé entre web et mobile. Les deux
+      #   branches convergent aujourd'hui sur react 19.2 :
+      #       expo 57 → react-native 0.86 → react ^19.1.1
+      #       next 16                       → react 19.2
+      #   Une majeure de react devra donc être coordonnée des deux côtés à la fois,
+      #   comme l'a été le passage à 19 (PR #58).
       #
       # Les minor et patch continuent d'arriver normalement — seules les majeures
       # sont retenues. Voir .ai/features.md pour le suivi de ces migrations.
