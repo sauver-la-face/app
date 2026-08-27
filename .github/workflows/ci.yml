@@ -84,6 +84,35 @@ jobs:
         env:
           NEXT_PUBLIC_API_URL: http://localhost:3001
 
+      # Meme job que le build : `next start` a besoin du dossier .next produit
+      # juste au-dessus, et les artefacts ne sont pas partages entre jobs.
+      - name: Démarrer le serveur de production
+        run: |
+          if [ -d "apps/web/src" ]; then
+            nohup bun run --cwd apps/web start > /tmp/web-server.log 2>&1 &
+            for _ in $(seq 1 60); do
+              if curl -sf -o /dev/null http://localhost:3000; then
+                echo "Serveur prêt"
+                exit 0
+              fi
+              sleep 1
+            done
+            echo "Le serveur n'a pas répondu sur http://localhost:3000"
+            exit 1
+          fi
+        env:
+          NEXT_PUBLIC_API_URL: http://localhost:3001
+
+      - name: Tests de rendu des routes
+        run: |
+          if [ -d "apps/web/tests" ]; then
+            bun run --cwd apps/web test
+          else
+            echo "apps/web/tests non trouvé — tests de rendu ignorés"
+          fi
+        env:
+          WEB_BASE_URL: http://localhost:3000
+
   test-unit:
     name: Tests unitaires (bun:test)
     runs-on: ubuntu-latest
