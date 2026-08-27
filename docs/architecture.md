@@ -324,13 +324,13 @@ projet mais le fondement même de l'utilisabilité du produit.
 ### Conformité mesurée (critère 3)
 
 Pour **prouver** la conformité du prototype — et non l'affirmer — la démarche suivie est
-**mesurer → corriger → re-mesurer**, appuyée sur des rapports d'audit archivés dans le dépôt.
+**mesurer → corriger → re-mesurer**.
 Un audit automatisé a été réalisé sur les trois pages clés du dashboard ; chaque violation
 détectée a été corrigée dans le code, puis une seconde mesure a validé la correction. Les
 tableaux ci-dessous présentent, dans l'ordre, l'état initial mesuré, les violations trouvées,
 les corrections apportées et l'état final re-mesuré.
 
-- **Méthode** : audit **Lighthouse** (catégorie Accessibilité, propulsée par axe-core) exécuté sur Chrome headless, sur les pages clés du dashboard. Rapports HTML + JSON archivés dans [`docs/audits-accessibilite/`](audits-accessibilite/). Chaque violation est mappée au critère WCAG 2.2 exact.
+- **Méthode** : audit **Lighthouse** (catégorie Accessibilité, propulsée par axe-core) exécuté sur Chrome headless, sur les pages clés du dashboard. Chaque violation est mappée au critère WCAG 2.2 exact. Mesures reproductibles via `bunx lighthouse <url> --only-categories=accessibility`.
 - **Date de l'audit** : 2026-07-23 · outil : Lighthouse 12.2.1 / axe-core 4.10.
 
 #### Scores par page (avant correction)
@@ -370,9 +370,7 @@ les corrections apportées et l'état final re-mesuré.
 | `/fr/login` | 92 / 100 | **100 / 100** ✅ |
 
 Les trois pages du dashboard atteignent **100/100** sur la catégorie Accessibilité de
-Lighthouse, sans aucune violation WCAG 2.2 A/AA détectée. Rapports avant/après archivés
-dans [`docs/audits-accessibilite/`](audits-accessibilite/) (dossier `apres/` pour les
-mesures post-correction).
+Lighthouse, sans aucune violation WCAG 2.2 A/AA détectée.
 
 > Réserve honnête : Lighthouse/axe couvre les vérifications **automatisables** (~40 % des
 > critères WCAG). Les critères non automatisables (ordre de tabulation logique, pertinence

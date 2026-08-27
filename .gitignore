@@ -30,3 +30,11 @@ pino.log
 # OS
 .DS_Store
 Thumbs.db
+
+# Windows / Cygwin
+*.stackdump
+
+# Documents de rendu (volumineux, conserves hors depot)
+docs/Rapport_Bloc2_Sauver_la_Face.pdf
+docs/VF Projet Sauver la face*.pdf
+docs/*.xlsx
