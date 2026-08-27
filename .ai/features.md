@@ -453,6 +453,31 @@ Le seuil actuel (ALERT-01) est fixe à 7 jours, identique pour tous les patients
 
 ---
 
+### WEB-06 — Suppression de la page racine morte
+
+`[x]` 🟢 Mineur · `apps/web/src/app/page.tsx`
+
+**Contexte :**
+
+Depuis l'introduction du routage par locale (`app/[locale]/`), le proxy redirige
+systématiquement `/` vers `/{locale}`, rendant `app/page.tsx` inatteignable. Cette page
+dupliquait `app/[locale]/page.tsx` (même session, même déconnexion) sans i18n et avec du
+texte en dur. Elle importait `useRouter` et `useEffect` sans directive `'use client'`, ce
+qui faisait échouer `next build` — sans que la CI le détecte, aucun job ne lançant de build.
+
+**Comportement attendu :**
+
+- `apps/web/src/app/page.tsx` est supprimée
+- `next build` passe sur le dashboard
+- La CI exécute un job `build-web` qui aurait attrapé cette régression
+
+**Règles de code :**
+
+- Toute route publique du dashboard vit sous `app/[locale]/` — pas de page à la racine de
+  `app/` en dehors du layout et de `globals.css`
+
+---
+
 ### A11Y-01 — Corrections d'accessibilité WCAG 2.2 AA (dashboard)
 
 `[x]` 🟡 Majeur · `apps/web/src/features/` · `docs/architecture.md`
