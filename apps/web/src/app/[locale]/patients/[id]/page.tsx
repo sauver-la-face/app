@@ -2,7 +2,10 @@ import { PatientHistoryPage } from '@/features/patients/components/PatientHistor
 import type { Locale } from '@/i18n/config';
 import { getDictionary } from '@/i18n/dictionaries';
 
-export default function PatientPage({ params }: { params: { locale: Locale; id: string } }) {
+export default async function PatientPage(props: {
+  params: Promise<{ locale: Locale; id: string }>;
+}) {
+  const params = await props.params;
   const dictionary = getDictionary(params.locale);
 
   return (

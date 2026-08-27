@@ -104,12 +104,12 @@ bun run dev:mobile
 
 ## Structure du projet
 
-```
+```text
 sauver-la-face/
   apps/
     backend/        ← API REST (Bun + Hono + Drizzle)
-    web/            ← Dashboard médecins (Next.js 14)
-    mobile/         ← App patient (React Native + Expo SDK 52)
+    web/            ← Dashboard médecins (Next.js 16)
+    mobile/         ← App patient (React Native + Expo SDK 57)
   packages/
     shared/         ← Schémas Zod + types TypeScript partagés
     config/         ← tsconfig de base partagé
