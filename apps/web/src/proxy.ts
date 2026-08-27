@@ -32,7 +32,7 @@ function extractLocale(pathname: string): Locale | null {
   return isLocale(segment) ? segment : null;
 }
 
-export function middleware(request: NextRequest) {
+export default function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   if (pathname.startsWith('/_next') || pathname.startsWith('/api') || PUBLIC_FILE.test(pathname)) {

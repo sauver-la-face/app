@@ -1,12 +1,13 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import { useEffect } from 'react';
+import { use, useEffect } from 'react';
 import type { Locale } from '@/i18n/config';
 import { getDictionary } from '@/i18n/dictionaries';
 import { signOut, useSession } from '@/lib/authClient';
 
-export default function HomePage({ params }: { params: { locale: Locale } }) {
+export default function HomePage(props: { params: Promise<{ locale: Locale }> }) {
+  const params = use(props.params);
   const { data: session, isPending } = useSession();
   const router = useRouter();
   const dictionary = getDictionary(params.locale);

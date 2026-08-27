@@ -9,8 +9,8 @@ export const metadata: Metadata = {
   description: 'Healthcare portal',
 };
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
-  const localeHeader = headers().get('x-slf-locale');
+export default async function RootLayout({ children }: { children: React.ReactNode }) {
+  const localeHeader = (await headers()).get('x-slf-locale');
   const locale = isLocale(localeHeader) ? localeHeader : defaultLocale;
 
   return (
