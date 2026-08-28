@@ -165,6 +165,12 @@ bun run --cwd apps/backend test:unit
 # Tests d'intégration (nécessite TEST_DATABASE_URL — voir .env.example)
 bun run --cwd apps/backend test:integration
 
+# Tests de rendu du dashboard (interrogent les routes servies par Next)
+# Le serveur doit tourner : les tests ne le démarrent pas eux-mêmes.
+bun run --cwd apps/web build
+bun run --cwd apps/web start &
+bun run --cwd apps/web test
+
 # Installer Drizzle
 bun add drizzle-orm
 
