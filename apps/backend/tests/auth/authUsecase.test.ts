@@ -14,10 +14,6 @@ let auth: typeof import('../../src/features/auth/infrastructure/authConfig').aut
 
 type PluginLike = { id?: string };
 type AuthApiExtension = {
-  enableTwoFactor(args: {
-    body: { password: string };
-    headers: Headers;
-  }): Promise<{ totpURI?: string } | null>;
   deleteUser(args: { headers: Headers; body: { password: string } }): Promise<unknown>;
 };
 type SignInWithSessionToken = {
@@ -125,8 +121,17 @@ if (!hasAuthTestEnvironment) {
           headers: mockHeaders(cookie),
         });
 
+        // better-auth 1.7 renvoie une union discriminee :
+        //   { method: 'otp' } | { method: 'totp'; totpURI; backupCodes }
+        // L'assertion sur `method` fait echouer le test si l'API cessait de
+        // renvoyer la variante totp ; le garde satisfait le typage.
         expect(twoFactorResult).toBeTruthy();
-        expect(twoFactorResult?.totpURI).toBeTruthy();
+        expect(twoFactorResult?.method).toBe('totp');
+
+        if (twoFactorResult?.method === 'totp') {
+          expect(twoFactorResult.totpURI).toBeTruthy();
+          expect(twoFactorResult.backupCodes.length).toBeGreaterThan(0);
+        }
       });
     });
 
