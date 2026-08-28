@@ -64,7 +64,7 @@ export function PatientManagementPage({
         </div>
         <Link
           href={`/${locale}/dashboard`}
-          className="rounded-full border border-black/10 bg-white px-5 py-3 text-sm font-medium text-gray-700 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
+          className="rounded-full border border-black/10 bg-white px-5 py-3 text-sm font-medium text-gray-700 shadow-xs transition hover:-translate-y-0.5 hover:shadow-md"
         >
           {labels.backToDashboard}
         </Link>
@@ -171,7 +171,7 @@ export function PatientManagementPage({
                       setCopySuccess(true);
                     });
                   }}
-                  className="rounded-full border border-black/10 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
+                  className="rounded-full border border-black/10 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-xs transition hover:-translate-y-0.5 hover:shadow-md"
                 >
                   {copySuccess ? labels.copyDone : labels.copyCode}
                 </button>
@@ -250,7 +250,7 @@ export function PatientManagementPage({
                           <div className="flex flex-wrap gap-3">
                             <Link
                               href={`/${locale}/patients/${patient.patientId}`}
-                              className="rounded-full border border-black/10 bg-white px-4 py-2 text-xs font-medium text-gray-700 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
+                              className="rounded-full border border-black/10 bg-white px-4 py-2 text-xs font-medium text-gray-700 shadow-xs transition hover:-translate-y-0.5 hover:shadow-md"
                             >
                               {labels.viewHistory}
                             </Link>
@@ -293,7 +293,7 @@ export function PatientManagementPage({
 
 function Panel({ title, children }: { title: string; children: React.ReactNode }) {
   return (
-    <section className="rounded-[28px] border border-black/10 bg-white p-6 shadow-sm">
+    <section className="rounded-[28px] border border-black/10 bg-white p-6 shadow-xs">
       <h2 className="text-lg font-semibold text-gray-900">{title}</h2>
       <div className="mt-5">{children}</div>
     </section>
@@ -341,7 +341,7 @@ function FormField({
         name={name}
         type={type}
         placeholder={placeholder}
-        className="rounded-[18px] border border-black/10 bg-[#FBFAF6] px-4 py-3 text-sm text-gray-900 outline-none transition focus:border-[#178064] focus:ring-2 focus:ring-[#178064]/15"
+        className="rounded-[18px] border border-black/10 bg-[#FBFAF6] px-4 py-3 text-sm text-gray-900 outline-hidden transition focus:border-[#178064] focus:ring-2 focus:ring-[#178064]/15"
       />
     </label>
   );
@@ -363,7 +363,7 @@ function EmptyState({ label }: { label: string }) {
 function CenteredState({ label }: { label: string }) {
   return (
     <main className="flex flex-1 items-center justify-center px-6 py-10">
-      <div className="flex items-center gap-4 rounded-full bg-white px-6 py-4 shadow-sm">
+      <div className="flex items-center gap-4 rounded-full bg-white px-6 py-4 shadow-xs">
         <div className="h-6 w-6 animate-spin rounded-full border-4 border-[#178064] border-t-transparent" />
         <p className="text-sm text-gray-600">{label}</p>
       </div>
