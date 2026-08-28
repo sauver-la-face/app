@@ -15,7 +15,8 @@ export const uuidParamSchema = z.object({
 
 export const validationErrorSchema = z.object({
   code: z.literal('VALIDATION_ERROR'),
-  details: z.record(z.unknown()),
+  // zod 4 exige la cle ET la valeur ; zod 3 sous-entendait des cles string
+  details: z.record(z.string(), z.unknown()),
 });
 
 export const notFoundErrorSchema = z.object({
