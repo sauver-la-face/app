@@ -38,8 +38,14 @@ updates:
         update-types: ["version-update:semver-major"]
       - dependency-name: "react-dom"
         update-types: ["version-update:semver-major"]
+      # react-native est en 0.x : par convention semver, ses ruptures passent en
+      # minor. Le SDK Expo epingle une version precise (SDK 57 -> 0.86.3), donc
+      # un passage en 0.87 desaligne le SDK sans etre une majeure au sens strict.
+      # Les patchs (0.86.x) restent autorises.
       - dependency-name: "react-native"
-        update-types: ["version-update:semver-major"]
+        update-types:
+          - "version-update:semver-major"
+          - "version-update:semver-minor"
 
   # Image de base du backend
   - package-ecosystem: "docker"
