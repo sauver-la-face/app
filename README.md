@@ -13,7 +13,7 @@ Installe ces outils avant de démarrer :
 | Outil                                                            | Version  | Installation                                                                                     |
 | ---------------------------------------------------------------- | -------- | ------------------------------------------------------------------------------------------------ |
 | [Bun](https://bun.sh)                                            | 1.1.x+   | `winget install Oven-sh.Bun` (Windows) / `curl -fsSL https://bun.sh/install \| bash` (Mac/Linux) |
-| [Node.js](https://nodejs.org)                                    | 20.x LTS | Requis pour Expo                                                                                 |
+| [Node.js](https://nodejs.org)                                    | 24.x LTS | Version de référence du projet (`engines`), alignée sur la CI                                     |
 | [Docker Desktop](https://www.docker.com/products/docker-desktop) | 24.x+    | Télécharger sur le site officiel                                                                 |
 | [Git](https://git-scm.com)                                       | —        | Télécharger sur le site officiel                                                                 |
 

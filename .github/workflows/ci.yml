@@ -13,6 +13,13 @@ jobs:
     steps:
       - uses: actions/checkout@v7
 
+      # Node est fixe explicitement : sans cela les jobs heritent de la version
+      # preinstallee sur le runner, qui change sans preavis. Doit rester en
+      # accord avec le champ engines de package.json.
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+
       - uses: oven-sh/setup-bun@v2
         with:
           bun-version: latest
@@ -28,6 +35,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
+
+      # Node est fixe explicitement : sans cela les jobs heritent de la version
+      # preinstallee sur le runner, qui change sans preavis. Doit rester en
+      # accord avec le champ engines de package.json.
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
 
       - uses: oven-sh/setup-bun@v2
         with:
@@ -63,6 +77,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
+
+      # Node est fixe explicitement : sans cela les jobs heritent de la version
+      # preinstallee sur le runner, qui change sans preavis. Doit rester en
+      # accord avec le champ engines de package.json.
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
 
       - uses: oven-sh/setup-bun@v2
         with:
@@ -124,6 +145,13 @@ jobs:
     steps:
       - uses: actions/checkout@v7
 
+      # Node est fixe explicitement : sans cela les jobs heritent de la version
+      # preinstallee sur le runner, qui change sans preavis. Doit rester en
+      # accord avec le champ engines de package.json.
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+
       - uses: oven-sh/setup-bun@v2
         with:
           bun-version: latest
@@ -159,6 +187,13 @@ jobs:
       BETTER_AUTH_URL: http://localhost:3001
     steps:
       - uses: actions/checkout@v7
+
+      # Node est fixe explicitement : sans cela les jobs heritent de la version
+      # preinstallee sur le runner, qui change sans preavis. Doit rester en
+      # accord avec le champ engines de package.json.
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
 
       - uses: oven-sh/setup-bun@v2
         with:
