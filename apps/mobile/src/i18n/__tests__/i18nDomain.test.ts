@@ -8,8 +8,10 @@ import km from '../locales/km.json';
 
 // Initialisation i18n isolée — sans expo-localization ni react-native
 i18n.use(initReactI18next).init({
-  compatibilityJSON: 'v3',
-  initImmediate: false,
+  // initAsync : `initImmediate` a ete renomme en v24 et son mapping de
+  // compatibilite supprime en v26. `compatibilityJSON` a disparu en v24 avec
+  // les anciens formats JSON.
+  initAsync: false,
   resources: {
     fr: { translation: fr },
     km: { translation: km },
