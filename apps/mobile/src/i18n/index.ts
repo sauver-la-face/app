@@ -9,7 +9,6 @@ export type { SupportedLanguage };
 export const SUPPORTED_LANGUAGES = ['fr', 'km'] as const satisfies readonly SupportedLanguage[];
 
 i18n.use(initReactI18next).init({
-  compatibilityJSON: 'v3',
   resources: {
     fr: { translation: fr },
     km: { translation: km },
