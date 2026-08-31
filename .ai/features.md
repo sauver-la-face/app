@@ -107,6 +107,46 @@ Suite à SEC-01 : le JWT patient est signé (`jwtTokenProvider.ts`) mais aucune 
 
 ---
 
+### SEC-03 — Révocation de session patient (A07)
+
+`[ ]` 🔴 Critique · `apps/backend/src/shared/middleware/` · `apps/backend/src/features/patients/` · `apps/backend/src/infrastructure/schema.ts`
+
+**Contexte :**
+
+Un token patient est signé pour un an (`jwtTokenProvider.ts`) et sa vérification ne porte
+que sur la signature, l'expiration et la forme du payload — aucun état serveur n'est
+consulté. `requirePatientAuth` accepte donc le token dès que `verify()` retourne non-null.
+
+Aucun mécanisme ne permet de couper l'accès d'un patient. `revokeActiveCodes()` ne révoque
+que les codes **jamais utilisés** (`WHERE used_at IS NULL`) et n'est appelée que par
+`issueAccessCode()` : émettre un nouveau code invalide les codes en attente, rien de plus.
+Le code qui a réellement ouvert la session porte `used_at`, échappe à la révocation, et
+`schema.ts` documente explicitement cette intention (« une fois utilisé, le code est valide
+pour toujours »). Aucune route de `patientRouter` ne révoque quoi que ce soit.
+
+Conséquence : sur un appareil perdu ou volé, l'accès aux données médicales du patient reste
+ouvert jusqu'à l'expiration naturelle du token, soit jusqu'à un an. Le payload transporte
+déjà `uuid_patient_code`, la vérification est donc possible sans changer le format du token.
+
+**Comportement attendu :**
+
+- Une route de révocation permet au médecin de couper la session d'un patient
+- Après révocation, toute requête portant un token issu du code révoqué reçoit un 401
+- La révocation vise le code **utilisé** qui a ouvert la session, contrairement à `revokeActiveCodes()` qui ne cible que les codes en attente
+- Un patient dont la session est révoquée retrouve l'accès après émission et saisie d'un nouveau code
+- La ligne A07 de l'audit OWASP est corrigée : elle classe aujourd'hui la catégorie en « ✅ Corrigé » alors que l'absence de révocation n'était pas couverte — le compromis « 1 an assumé offline-first » porte sur la durée, pas sur l'impossibilité de couper l'accès
+
+**Règles de code :**
+
+- La vérification de révocation vit dans `requirePatientAuth` (`shared/middleware/`), sur le `uuid_patient_code` du payload — un read par requête, cachable
+- La méthode de révocation de session est **distincte** de `revokeActiveCodes()` : ne pas ajouter `used_at` à la condition existante, qui sert l'émission de code et doit continuer à ne toucher que les codes en attente
+- Le commentaire de `schema.ts` sur `patient_code` doit refléter la nouvelle règle — c'est lui qui porte l'intention actuelle
+- Vérifier l'effet sur l'index unique `patient_code_code_active_unique` (`ON code WHERE deleted_at IS NULL AND revoked_at IS NULL`) : révoquer un code utilisé libère ses 6 chiffres pour une réattribution future
+- Aucune règle métier dans `presentation/` ni dans `infrastructure/` — la décision « ce token est-il encore valide » appartient au domaine
+- Tester : token valide avant révocation → 200, même token après révocation → 401, révocation d'un patient sans session active, non-régression de `issueAccessCode()` qui ne doit toujours révoquer que les codes en attente
+
+---
+
 ### SYNC-01 — Réception et résolution des conflits (server-wins)
 
 `[x]` 🔴 Critique · `apps/backend/src/features/sync/`
