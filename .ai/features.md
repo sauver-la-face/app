@@ -996,7 +996,7 @@ Idée de Mathieu Baro (revue Bloc 2) : le système actuel (ALERT-01) notifie uni
 
 ### DOCS-02 — Structure documentaire : ADR, OWASP et accessibilité séparés
 
-`[ ]` 🟢 Mineur · `docs/` · `.ai/` · `README.md` · `CLAUDE.md` · `.github/`
+`[x]` 🟢 Mineur · `docs/` · `.ai/` · `README.md` · `CLAUDE.md` · `.github/`
 
 **Contexte :**
 
