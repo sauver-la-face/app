@@ -36,6 +36,13 @@
       "when": 1778109000000,
       "tag": "0004_patient_sync_timestamp",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1788186931268,
+      "tag": "0005_patient_code_session_revocation",
+      "breakpoints": true
     }
   ]
 }

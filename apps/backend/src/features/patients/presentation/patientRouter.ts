@@ -204,6 +204,30 @@ const issueAccessCodeRoute = createRoute({
   tags: ['Patients'],
 });
 
+// SEC-03/A07 : coupe la session mobile en cours. Distincte de l'emission d'un
+// code, qui ne revoque que les codes en attente et laisse la session ouverte.
+const revokeSessionRoute = createRoute({
+  method: 'delete',
+  path: '/patients/{patientId}/session',
+  request: {
+    params: uuidParamSchema,
+  },
+  responses: {
+    204: {
+      description: 'Session patient revoquee',
+    },
+    404: {
+      content: {
+        'application/json': {
+          schema: notFoundErrorSchema,
+        },
+      },
+      description: 'Patient introuvable',
+    },
+  },
+  tags: ['Patients'],
+});
+
 // SEC-01/A01 : ces routes exposent des dossiers patients (dashboard medecin).
 // L'equipe de Toulouse suit collectivement les memes patients (pas de
 // patientele privee par medecin) - seule une session medecin valide est
@@ -292,6 +316,22 @@ export function createPatientRouter(
         parsedBody.data,
       );
       return context.json(response, 200);
+    } catch (error) {
+      if (error instanceof PatientNotFoundError) {
+        return context.json(
+          { code: error.code as 'PATIENT_NOT_FOUND', message: error.message },
+          404,
+        );
+      }
+
+      throw error;
+    }
+  });
+
+  router.openapi(revokeSessionRoute, async (context) => {
+    try {
+      await patientUsecase.revokeSession(context.req.param('patientId'));
+      return context.body(null, 204);
     } catch (error) {
       if (error instanceof PatientNotFoundError) {
         return context.json(

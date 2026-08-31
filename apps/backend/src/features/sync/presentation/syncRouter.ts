@@ -1,6 +1,7 @@
 import { createRoute, OpenAPIHono } from '@hono/zod-openapi';
 import { syncRequestSchema, syncResponseSchema } from '@sauver-la-face/shared';
 import {
+  type PatientSessionLookup,
   type PatientSessionVariables,
   requirePatientAuth,
 } from '@shared/middleware/patientAuthMiddleware';
@@ -78,10 +79,11 @@ const syncRoute = createRoute({
 export function createSyncRouter(
   syncUsecase: SyncUsecase,
   tokenProvider: TokenProvider,
+  patientCodes: PatientSessionLookup,
 ): OpenAPIHono<{ Variables: PatientSessionVariables }> {
   const router = new OpenAPIHono<{ Variables: PatientSessionVariables }>();
 
-  router.use('/sync', requirePatientAuth(tokenProvider));
+  router.use('/sync', requirePatientAuth(tokenProvider, patientCodes));
 
   router.openapi(syncRoute, async (context) => {
     const body = await context.req.json().catch(() => undefined);

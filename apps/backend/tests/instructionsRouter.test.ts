@@ -8,6 +8,7 @@ import { InstructionsUsecase } from '../src/features/instructions/application/in
 import { InMemoryInstructionRepository } from '../src/features/instructions/infrastructure/instructionRepository';
 import { createInstructionsRouter } from '../src/features/instructions/presentation/instructionsRouter';
 import type { PatientSessionVariables } from '../src/shared/middleware/patientAuthMiddleware';
+import { sessionVivante } from './patientSessionStub';
 
 const physicianId = '11111111-1111-4111-8111-111111111111';
 const medicalProcedureId = '22222222-2222-4222-8222-222222222222';
@@ -45,7 +46,16 @@ function createTestApp(seed: ConstructorParameters<typeof InMemoryInstructionRep
   });
   const usecase = new InstructionsUsecase(repository, silentLogger, () => now);
   const app = new Hono<{ Variables: SessionVariables & PatientSessionVariables }>();
-  app.route('/', createInstructionsRouter(usecase, repository, tokenProvider, fakePhysicianAuth()));
+  app.route(
+    '/',
+    createInstructionsRouter(
+      usecase,
+      repository,
+      tokenProvider,
+      sessionVivante(),
+      fakePhysicianAuth(),
+    ),
+  );
   return { app, repository };
 }
 
@@ -56,7 +66,7 @@ describe('instructions.router', () => {
     });
     const usecase = new InstructionsUsecase(repository, silentLogger, () => now);
     const app = new Hono<{ Variables: SessionVariables & PatientSessionVariables }>();
-    app.route('/', createInstructionsRouter(usecase, repository, tokenProvider));
+    app.route('/', createInstructionsRouter(usecase, repository, tokenProvider, sessionVivante()));
 
     const response = await app.request('/instructions', {
       method: 'POST',

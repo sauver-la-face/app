@@ -1,5 +1,6 @@
 import { GetObjectCommand, type S3Client } from '@aws-sdk/client-s3';
 import {
+  type PatientSessionLookup,
   type PatientSessionVariables,
   requirePatientAuth,
 } from '@shared/middleware/patientAuthMiddleware';
@@ -27,6 +28,7 @@ export function createPhotosRouter(
   s3Client: S3Client,
   bucket: string,
   tokenProvider: TokenProvider,
+  patientCodes: PatientSessionLookup,
   // requirePhysicianAuth ne lit/ecrit jamais `patientId` - cast sans risque
   // vers le type Variables plus large partage avec les routes patient.
   physicianAuthMiddleware: MiddlewareHandler<{
@@ -38,7 +40,7 @@ export function createPhotosRouter(
   // SEC-02/A01/A07 : le patient authentifie (JWT verifie) doit etre le
   // proprietaire de l'eventId cible - sinon n'importe quel patient pourrait
   // uploader une photo sur le dossier d'un autre patient.
-  router.post('/photos', requirePatientAuth(tokenProvider), async (context) => {
+  router.post('/photos', requirePatientAuth(tokenProvider, patientCodes), async (context) => {
     let formData: FormData;
 
     try {

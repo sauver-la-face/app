@@ -153,16 +153,28 @@ export function createApp(): OpenAPIHono<{ Variables: SessionVariables }> {
   // Routes métier
   app.route('/', createAlertRouter(alertUsecase));
   app.route('/', createPatientRouter(patientUsecase));
-  app.route('/', createSyncRouter(syncUsecase, tokenProvider));
+  app.route('/', createSyncRouter(syncUsecase, tokenProvider, patientCodeRepository));
   if (photosUsecase && photoRepository)
     app.route(
       '/',
-      createPhotosRouter(photosUsecase, photoRepository, s3Client, bucket, tokenProvider),
+      createPhotosRouter(
+        photosUsecase,
+        photoRepository,
+        s3Client,
+        bucket,
+        tokenProvider,
+        patientCodeRepository,
+      ),
     );
   if (exportsUsecase) app.route('/', createExportsRouter(exportsUsecase));
   app.route(
     '/',
-    createInstructionsRouter(instructionsUsecase, instructionRepository, tokenProvider),
+    createInstructionsRouter(
+      instructionsUsecase,
+      instructionRepository,
+      tokenProvider,
+      patientCodeRepository,
+    ),
   );
 
   if (process.env.NODE_ENV !== 'production') {

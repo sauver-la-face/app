@@ -6,6 +6,7 @@ import { SyncUsecase } from '../src/features/sync/application/syncUsecase';
 import { InMemorySyncRepository } from '../src/features/sync/infrastructure/syncRepository';
 import { createSyncRouter } from '../src/features/sync/presentation/syncRouter';
 import type { PatientSessionVariables } from '../src/shared/middleware/patientAuthMiddleware';
+import { sessionVivante } from './patientSessionStub';
 
 const patientId = '55555555-5555-4555-8555-555555555555';
 const otherPatientId = '66666666-6666-4666-8666-666666666666';
@@ -23,7 +24,7 @@ function createTestApp() {
   const repository = new InMemorySyncRepository();
   const usecase = new SyncUsecase(repository, { info: () => undefined, warn: () => undefined }, 1);
   const app = new OpenAPIHono<{ Variables: PatientSessionVariables }>();
-  app.route('/', createSyncRouter(usecase, tokenProvider));
+  app.route('/', createSyncRouter(usecase, tokenProvider, sessionVivante()));
   return app;
 }
 

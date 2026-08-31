@@ -44,6 +44,19 @@ export class DrizzlePatientCodeRepository implements PatientCodeRepository {
     };
   }
 
+  async findById(uuid_patient_code: string): Promise<PatientCode | null> {
+    const result = await this.db.query.patientCode.findFirst({
+      where: eq(schema.patientCode.uuid_patient_code, uuid_patient_code),
+    });
+
+    if (!result) return null;
+
+    return {
+      ...result,
+      code: PatientCodeValue.create(result.code),
+    };
+  }
+
   async findActiveByPatient(uuid_patient: string): Promise<PatientCode | null> {
     const result = await this.db.query.patientCode.findFirst({
       where: and(

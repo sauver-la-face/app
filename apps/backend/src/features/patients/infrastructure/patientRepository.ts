@@ -9,7 +9,7 @@ import {
   symptom,
 } from '@infrastructure/schema';
 import type { DbClient } from '@shared/db';
-import { and, desc, eq, inArray, isNull } from 'drizzle-orm';
+import { and, desc, eq, inArray, isNotNull, isNull } from 'drizzle-orm';
 import type {
   PatientCodeRecord,
   PatientHistoryInstructionRecord,
@@ -132,14 +132,45 @@ export class InMemoryPatientsRepository implements PatientRepository {
     }
   }
 
+  async revokeSession(patientId: string, revokedAt: Date): Promise<void> {
+    for (const codeRecord of this.codes) {
+      if (
+        codeRecord.patientId === patientId &&
+        codeRecord.usedAt !== null &&
+        codeRecord.deletedAt === null &&
+        codeRecord.revokedAt === null
+      ) {
+        codeRecord.revokedAt = revokedAt;
+      }
+    }
+  }
+
+  // Reserve aux tests et au mode sans base : en production c'est authUsecase,
+  // via DrizzlePatientCodeRepository, qui pose used_at a la connexion.
+  markCodeUsed(patientId: string, usedAt: Date): void {
+    const latest = this.getLatestCode(patientId);
+    if (latest) latest.usedAt = usedAt;
+  }
+
+  debugCodes(patientId: string): PatientCodeRecord[] {
+    return this.codes.filter((record) => record.patientId === patientId);
+  }
+
   async createAccessCode(patientId: string, code: string, createdAt: Date): Promise<boolean> {
     if (!this.patients.has(patientId)) {
       return false;
     }
 
+    // SEC-03 : `usedAt === null` est la condition ajoutee. Sans elle, revoquer
+    // une session liberait les six chiffres du code consomme, qui pouvaient
+    // etre reattribues a un autre patient - `findByCode` renvoyant alors une
+    // ligne indeterminee entre les deux. Un code ayant servi reste hors
+    // circulation, revoque ou non (ADR 0019).
     const duplicateCode = this.codes.some(
       (candidate) =>
-        candidate.code === code && candidate.deletedAt === null && candidate.revokedAt === null,
+        candidate.code === code &&
+        (candidate.usedAt !== null ||
+          (candidate.deletedAt === null && candidate.revokedAt === null)),
     );
 
     if (duplicateCode) {
@@ -355,6 +386,23 @@ export class PgPatientsRepository implements PatientRepository {
         and(
           eq(patientCode.uuid_patient, patientId),
           isNull(patientCode.used_at),
+          isNull(patientCode.deleted_at),
+          isNull(patientCode.revoked_at),
+        ),
+      );
+  }
+
+  // SEC-03/A07 : coupe la session ouverte en posant revoked_at sur le ou les
+  // codes CONSOMMES. `is_active` n'est pas touche : ce drapeau gouverne le
+  // cycle de vie d'un code en attente, pas celui d'une session.
+  async revokeSession(patientId: string, revokedAt: Date): Promise<void> {
+    await this.db
+      .update(patientCode)
+      .set({ revoked_at: revokedAt })
+      .where(
+        and(
+          eq(patientCode.uuid_patient, patientId),
+          isNotNull(patientCode.used_at),
           isNull(patientCode.deleted_at),
           isNull(patientCode.revoked_at),
         ),

@@ -5,6 +5,7 @@ import {
   instructionSchema,
 } from '@sauver-la-face/shared';
 import {
+  type PatientSessionLookup,
   type PatientSessionVariables,
   requirePatientAuth,
 } from '@shared/middleware/patientAuthMiddleware';
@@ -128,6 +129,7 @@ export function createInstructionsRouter(
   instructionsUsecase: InstructionsUsecase,
   instructionRepository: InstructionRepository,
   tokenProvider: TokenProvider,
+  patientCodes: PatientSessionLookup,
   physicianAuthMiddleware: MiddlewareHandler<{
     Variables: Variables;
   }> = requirePhysicianAuth as unknown as MiddlewareHandler<{ Variables: Variables }>,
@@ -135,8 +137,11 @@ export function createInstructionsRouter(
   const router = new OpenAPIHono<{ Variables: Variables }>();
 
   router.use('/instructions', physicianAuthMiddleware);
-  router.use('/patients/:patientId/instructions', requirePatientAuth(tokenProvider));
-  router.use('/instructions/:instructionId/acknowledge', requirePatientAuth(tokenProvider));
+  router.use('/patients/:patientId/instructions', requirePatientAuth(tokenProvider, patientCodes));
+  router.use(
+    '/instructions/:instructionId/acknowledge',
+    requirePatientAuth(tokenProvider, patientCodes),
+  );
 
   router.openapi(createInstructionRoute, async (context) => {
     const body = await context.req.json().catch(() => undefined);
