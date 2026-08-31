@@ -994,32 +994,46 @@ Idée de Mathieu Baro (revue Bloc 2) : le système actuel (ALERT-01) notifie uni
 
 ## DOCUMENTATION
 
-### DOCS-02 — Séparation documentation rédigée / documentation générée
+### DOCS-02 — Structure documentaire : ADR, OWASP et accessibilité séparés
 
-`[ ]` 🟢 Mineur · `docs/architectureAdr.md` · `.ai/` · `README.md` · `CLAUDE.md`
+`[ ]` 🟢 Mineur · `docs/` · `.ai/` · `README.md` · `CLAUDE.md` · `.github/`
 
 **Contexte :**
 
-`docs/architecture.md` mélangeait deux natures de contenu : treize décisions rédigées à la
-main (« Pourquoi Bun au lieu de Node », « Pourquoi Drizzle au lieu de Prisma ») et une
-description structurelle du système (couches backend / web / mobile, schéma de base de
-données, sécurité, accessibilité). Un script doit désormais produire automatiquement un
-fichier d'architecture à ce même chemin. Le nom doit donc être libéré, et les décisions
-rédigées mises hors de portée d'un écrasement par la génération.
+`docs/architecture.md` mélangeait quatre natures de contenu dans un seul fichier de
+434 lignes : des décisions techniques rédigées (« Pourquoi Bun au lieu de Node »), une
+description structurelle du système, un audit OWASP daté, et un livrable d'accessibilité
+rédigé pour un correcteur (« critère 3 », « preuve de conformité »). Quatre publics et
+quatre durées de vie dans un même document, sans moyen de distinguer la règle qui engage
+de l'argumentation qui plaide.
+
+Le script `init-project` installe par ailleurs une structure documentaire standard —
+`docs/adr/`, `docs/security/owasp.md`, template d'architecture, template de PR, job CI
+CHANGELOG — mais il ne crée que les fichiers absents. Tant que `docs/architecture.md`
+occupait le chemin, le template n'arrivait pas.
 
 **Comportement attendu :**
 
-- `docs/architecture.md` est renommé en `docs/architectureAdr.md` par `git mv`, de sorte que l'historique du fichier reste suivi
-- Les références au chemin sont mises à jour dans `README.md`, `.ai/context.md`, `.ai/features.md`, `docs/onboarding.md`, `docs/cdc.md`, `docs/lexique.md` et `CLAUDE.md`
-- Le chemin `docs/architecture.md` redevient disponible pour la sortie du script
-- Les entrées de `CHANGELOG.md` ne sont pas réécrites : elles décrivent l'état du repo à leur date
+- `docs/architecture.md` est renommé par `git mv` pour libérer le chemin au template, sans perdre l'historique du fichier
+- Les 22 décisions techniques disparaissent du fichier au profit de `docs/adr/`, une par fichier, chacune avec ses alternatives écartées et ses conséquences
+- Le livrable d'accessibilité vit dans `docs/accessibilite.md`, supprimable d'un seul `git rm` une fois le bloc 4 de la grille validé
+- Chaque section vidée laisse un renvoi vers sa nouvelle adresse — personne ne doit réécrire une décision au mauvais endroit
+- Toute référence de la documentation pointe vers un chemin existant
 
 **Règles de code :**
 
-- Un fichier produit par le script n'est jamais édité à la main — toute correction passe par le script qui le génère
-- Les décisions techniques rédigées (« pourquoi ce choix plutôt qu'un autre ») vivent dans `docs/architectureAdr.md`, jamais dans le fichier généré
+- Une décision structurante se crée par `bash docs/adr/nouvel-adr.sh "<titre à l'indicatif>"`, jamais en ajoutant un paragraphe à un fichier existant
+- Un ADR n'est pas modifié : quand la décision change, on en écrit un nouveau et l'ancien passe en « Remplacé par NNNN »
+- Le statut par défaut du helper est `Proposé` — le passer à `Accepté` seulement si la décision est en vigueur dans le code
+- Une affirmation de documentation contredite par le code se corrige, elle ne se recopie pas : la table JWT annonçait une « révocation explicite possible par le médecin » qui n'existe nulle part (voir SEC-03)
 - Les blocs de code Markdown déclarent leur langage (MD040)
-- Avant d'ouvrir la PR, vérifier qu'aucun lien de la documentation ne pointe vers un chemin disparu
+
+**Hors périmètre, à traiter en DOCS-03 :**
+
+- Migration de l'audit OWASP de `docs/architectureAdr.md` vers `docs/security/owasp.md`, qui devient la référence
+- Renommage de `docs/architectureAdr.md`, dont le nom annonce des ADR qu'il ne contient plus
+- Remplissage du template des six piliers, aujourd'hui vide
+- Import `@AGENTS.md` en tête de `CLAUDE.md`
 
 ---
 
