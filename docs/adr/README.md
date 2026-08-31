@@ -26,6 +26,7 @@ Une décision = un fichier. Voir `0000-template.md` pour le format.
 | [0020](0020-fixer-la-session-medecin-a-2h-d-inactivite-et-le-token-patient-a-un-an.md) | Fixer la session médecin à 2h d'inactivité et le token patient à un an | Accepté | 2026-08-31 |
 | [0021](0021-limiter-les-tentatives-d-authentification-a-3-par-15-minutes-et-par-ip.md) | Limiter les tentatives d'authentification à 3 par 15 minutes et par IP | Accepté | 2026-08-31 |
 | [0022](0022-faire-tourner-les-secrets-de-production-tous-les-90-jours.md) | Faire tourner les secrets de production tous les 90 jours | Accepté | 2026-08-31 |
+| [0023](0023-couper-une-session-patient-en-revoquant-le-code-porteur.md) | Couper une session patient en révoquant le code porteur | Accepté | 2026-08-31 |
 
 Les ADR 0002 à 0022 consignent des décisions prises avant la mise en place de ce
 dossier. Elles ont été reprises depuis `../architectureAdr.md` — sections

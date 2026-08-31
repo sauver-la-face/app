@@ -18,7 +18,7 @@ Créé le 2026-08-31 · Dernière revue : -
 | A04 | Cryptographic Failures | à faire | |
 | A05 | Injection | à faire | |
 | A06 | Insecure Design | à faire | |
-| A07 | Authentication Failures | à faire | |
+| A07 | Authentication Failures | fait | `shared/middleware/patientAuthMiddleware.ts` relit le code porteur à chaque requête (401 `SESSION_REVOKED`) · `DELETE /patients/{id}/session` coupe la session · [ADR 0023](../adr/0023-couper-une-session-patient-en-revoquant-le-code-porteur.md) |
 | A08 | Software or Data Integrity Failures | à faire | |
 | A09 | Security Logging & Alerting Failures | à faire | |
 | A10 | Mishandling of Exceptional Conditions | à faire | |
