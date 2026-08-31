@@ -486,7 +486,7 @@ qui faisait échouer `next build` — sans que la CI le détecte, aucun job ne l
 
 Audit d'accessibilité du dashboard web (Lighthouse / axe-core) au titre de la compétence
 C2.2.3, critère 3 (« le prototype répond aux exigences du référentiel »). Le référentiel
-retenu est **WCAG 2.2 niveau AA** (voir section Accessibilité de `docs/architectureAdr.md`).
+retenu est **WCAG 2.2 niveau AA** (voir `docs/accessibilite.md`).
 L'audit a révélé 4 violations sur 3 pages (login 92/100, dashboard 95/100, patients 100/100).
 
 **Comportement attendu :**
@@ -498,7 +498,7 @@ L'audit a révélé 4 violations sur 3 pages (login 92/100, dashboard 95/100, pa
 
 - Contraste : vert de marque `#2EAC8E` (2.83:1) assombri en `#178064` (4.87:1) ; texte `text-gray-400` (2.53:1) → `text-gray-500`
 - Taille de cible (WCAG 2.5.8, nouveau en 2.2) : bouton « afficher le mot de passe » agrandi de 20×20 à 28×28 px
-- Résultats consignés dans la section Accessibilité de `docs/architectureAdr.md` (critère 3)
+- Résultats consignés dans `docs/accessibilite.md` (critère 3)
 - Dette connue à tracer séparément : le vert de marque est écrit en dur (17 occurrences) au lieu d'un token — tokenisation à prévoir
 - Tester : `bunx lighthouse <url> --only-categories=accessibility` sur login/dashboard/patients → 100/100
 
@@ -512,14 +512,14 @@ L'audit a révélé 4 violations sur 3 pages (login 92/100, dashboard 95/100, pa
 
 Complète la présentation du critère 3 (C2.2.3) pour le dossier de certification. A11Y-01 a
 mesuré et corrigé le dashboard web ; A11Y-02 rédige la présentation narrative (démarche
-mesurer → corriger → re-mesurer, conclusion) directement dans la section Accessibilité de
-`docs/architectureAdr.md`, et ajoute le **tableau de synthèse de conformité** prouvant que le
+mesurer → corriger → re-mesurer, conclusion) directement dans
+`docs/accessibilite.md`, et ajoute le **tableau de synthèse de conformité** prouvant que le
 prototype répond aux exigences. Établit aussi le standard **48 × 48 dp** pour les cibles
 tactiles mobile (Material Design), distinct du minimum web WCAG 2.5.8 (24 px).
 
 **Comportement attendu :**
 
-- La section Accessibilité de `architectureAdr.md` se lit comme une présentation rédigée du critère 3, pas seulement des tableaux
+- `docs/accessibilite.md` se lit comme une présentation rédigée du critère 3, pas seulement des tableaux
 - Un tableau de synthèse distingue clairement ce qui est **vérifié conforme** (web) de ce qui est **défini mais pas encore implémenté** (mobile, tests manuels) — sans maquiller une conformité non mesurée
 - La règle 48 × 48 dp est inscrite dans les règles mobile de `CLAUDE.md`
 

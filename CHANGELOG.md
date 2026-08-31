@@ -15,6 +15,7 @@ Chaque version est marquée par un tag Git annoté (`vX.Y.Z`).
 
 ### Modifié
 
+- **DOCS-02** — accessibilité extraite dans `docs/accessibilite.md` ; décisions de schéma et de sécurité migrées en ADR 0015 à 0022
 - **DOCS-02** — `docs/architecture.md` renommé en `docs/architectureAdr.md` pour libérer le chemin ; sa section « Décisions d'architecture » renvoie désormais vers `docs/adr/` au lieu de la dupliquer
 
 Travaux en cours ou non démarrés :
