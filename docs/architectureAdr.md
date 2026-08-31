@@ -1,8 +1,9 @@
-[← README](../README.md) · [Onboarding](onboarding.md) · [Schéma BDD](schema.dbml) · [Lexique](lexique.md) · [CDC](cdc.md)
+[← README](../README.md) · [Onboarding](onboarding.md) · [ADR](adr/README.md) · [Schéma BDD](schema.dbml) · [Lexique](lexique.md) · [CDC](cdc.md)
 
 # Architecture — Sauver la Face
 
-> Décisions techniques, choix d'architecture et pourquoi ils ont été faits.
+> Description du système : couches, schéma de données, sécurité et accessibilité.
+> Les décisions techniques et leurs alternatives écartées vivent dans [`docs/adr/`](adr/README.md).
 
 ---
 
@@ -34,72 +35,17 @@
 
 ## Décisions d'architecture
 
-### Pourquoi offline-first sur le mobile
-Les patients sont au Cambodge avec une connexion réseau très instable. L'application doit fonctionner sans internet. Toutes les données (questionnaires, photos) sont d'abord stockées en SQLite local, puis synchronisées quand la connexion revient via une queue de sync (`sync_queue`).
+Une décision = un fichier, dans [`docs/adr/`](adr/README.md). L'index y donne la
+liste complète avec son statut et sa date.
 
-### Pourquoi server-wins pour les conflits
-Dans un contexte médical, les données du serveur (validées par un médecin) ont priorité sur celles du mobile. Si un patient modifie une réponse offline et que le médecin a modifié la même donnée entre-temps, la version médicale l'emporte. Tout conflit est loggé avant écrasement.
+Les treize décisions qui figuraient dans cette section ont été reprises dans les
+ADR **0002 à 0014** : offline-first mobile, conflits en server-wins, choix de
+Bun, Hono, Drizzle, Better Auth, de la GitHub App, de Caddy, d'OpenAPI, de
+MinIO, du polling plutôt que des WebSockets, de Pino, et de l'export des logs
+d'audit vers S3.
 
-### Pourquoi Bun au lieu de Node.js
-- Exécution TypeScript native sans transpilation
-- Gestion des dépendances intégrée (remplace npm/yarn)
-- Plus rapide au démarrage et à l'exécution
-- Compatible avec l'écosystème Node.js existant
-
-### Pourquoi Hono au lieu d'Express
-- Conçu pour les runtimes modernes (Bun, Deno, Workers)
-- Typage TypeScript natif sur les routes
-- Performances supérieures à Express pour les API REST
-
-### Pourquoi Drizzle ORM au lieu de Prisma
-- Requêtes SQL typées sans couche d'abstraction lourde
-- Migrations en TypeScript, versionnées dans le dépôt
-- Compatibilité native Bun (Prisma nécessite des workarounds)
-
-### Pourquoi Better Auth au lieu d'une auth custom
-La gestion de l'authentification (sessions, tokens, MFA, refresh) est complexe et critique pour la sécurité. Better Auth gère tout ça sans qu'on ait à le coder. On se concentre sur la logique métier.
-
-### Pourquoi une GitHub App pour les workflows GitHub Actions
-Les workflows qui commitent automatiquement sur `dev` (mise à jour `features.md`) ont besoin d'un token d'écriture. Trois options évaluées :
-- **PAT personnel** — simple mais lié à une personne. Si elle quitte le projet, les workflows cassent.
-- **Compte bot dédié** — indépendant des personnes mais nécessite un second compte GitHub et génère des tokens de longue durée (moins sécurisé).
-- **GitHub App** — retenu. Rattachée au repo, pas à une personne. Génère des tokens éphémères de 1 heure via `actions/create-github-app-token`. Révocable sans impact sur l'équipe. Standard industrie recommandé par GitHub.
-
-### Pourquoi Caddy comme reverse proxy
-- TLS 1.3 obligatoire pour les données de santé (RGPD + certification HDS) — Caddy l'active par défaut sans configuration
-- Certificats Let's Encrypt automatiques — renouvellement inclus, zéro intervention manuelle
-- En dev : certificat auto-signé en une ligne (`tls internal`)
-- Config minimaliste (3 lignes) vs Nginx (~30 lignes) ou Traefik (labels Docker complexes)
-- Hono ne termine jamais le TLS directement — Caddy est la seule porte d'entrée exposée à Internet
-
-### Pourquoi OpenAPI avec @hono/zod-openapi
-- Les schémas Zod de `@sauver-la-face/shared` sont réutilisés directement — aucune documentation manuelle
-- `/docs` génère une interface Swagger UI interactive en dev
-- `/openapi.json` permet de générer un client TypeScript pour le web et le mobile en une commande — les types sont toujours synchronisés avec le backend
-
-### Pourquoi MinIO au lieu de S3 directement
-- Déployable en local pour le développement (pas besoin de credentials cloud)
-- Compatible avec l'API S3 — aucun changement de code entre dev et prod
-- En production : OVH Object Storage S3-compatible (certifié HDS) — MinIO ne tourne qu'en dev
-
-### Pourquoi polling au lieu de WebSockets pour les alertes
-- 200 patients actifs max, 20 médecins max — le volume ne justifie pas la complexité des WebSockets
-- TanStack Query gère le polling avec `refetchInterval` en une ligne
-- Moins de surface d'attaque pour la sécurité
-- Plus simple à débugger et maintenir
-- Optimisation HTTP 304 : le backend calcule un ETag (hash MD5 des alertes actives) — si rien n'a changé, répond `304 Not Modified` sans body, TanStack Query conserve son cache automatiquement
-
-### Pourquoi Pino au lieu de Winston ou console.log
-- Le plus rapide des loggers Node.js (format JSON natif, pas de sérialisation coûteuse)
-- Format JSON adapté aux outils de monitoring (Datadog, Loki, etc.)
-- Niveaux structurés — permet de filtrer par `LOG_LEVEL` sans toucher au code
-
-### Logs d'audit — stockage S3
-Les logs d'audit (accès aux données médicales) sont une obligation HDS. Pino écrit dans un fichier local, un cron journalier exporte vers S3 :
-- **Dev** : bucket `logs-audit` sur MinIO local
-- **Prod** : bucket `logs-audit` sur OVH Object Storage (certifié HDS, rétention 1 an)
-
-Même client S3 dans le code — seules les variables d'environnement changent entre dev et prod.
+Une nouvelle décision structurante ne s'ajoute pas ici : elle se crée par
+`bash docs/adr/nouvel-adr.sh "<titre à l'indicatif>"`.
 
 ---
 
