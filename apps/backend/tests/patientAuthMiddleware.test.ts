@@ -115,6 +115,22 @@ describe('requirePatientAuth — revocation de session (SEC-03)', () => {
     expect(await response.json()).toMatchObject({ code: 'SESSION_REVOKED' });
   });
 
+  test('refuse un token dont le code porteur appartient a un autre patient', async () => {
+    const { app, tokenProvider } = buildApp(
+      codeFixture({ uuid_patient: '99999999-9999-4999-8999-999999999999' }),
+    );
+    const token = await tokenProvider.sign({
+      uuid_patient: PATIENT_ID,
+      uuid_patient_code: CODE_ID,
+      role: 'patient',
+    });
+
+    const response = await appeler(app, token);
+
+    expect(response.status).toBe(401);
+    expect(await response.json()).toMatchObject({ code: 'SESSION_REVOKED' });
+  });
+
   test('refuse un token dont le code porteur nexiste plus en base', async () => {
     const { app, tokenProvider } = buildApp(null);
     const token = await tokenProvider.sign({

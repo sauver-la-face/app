@@ -15,7 +15,7 @@ const tokenProvider = new JwtTokenProvider('test-secret');
 async function patientToken(uuid_patient: string): Promise<string> {
   return tokenProvider.sign({
     uuid_patient,
-    uuid_patient_code: 'code-id',
+    uuid_patient_code: `code:${uuid_patient}`,
     role: 'patient',
   });
 }

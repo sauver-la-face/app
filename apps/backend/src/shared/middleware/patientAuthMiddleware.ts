@@ -44,7 +44,15 @@ export function requirePatientAuth(
     // prouver la validite que la laisser passer par defaut.
     const patientCode = await patientCodes.findById(payload.uuid_patient_code);
 
-    if (!patientCode || !canSustainSession(patientCode)) {
+    // Le rattachement code -> patient est verifie en plus du cycle de vie. Le
+    // payload est signe, donc les deux champs concordent aujourd'hui ; mais si
+    // un chemin d'emission signait un jour un couple incoherent, la session
+    // survivrait a la revocation du bon patient. Une comparaison, aucun cout.
+    if (
+      !patientCode ||
+      !canSustainSession(patientCode) ||
+      patientCode.uuid_patient !== payload.uuid_patient
+    ) {
       return c.json({ code: 'SESSION_REVOKED', message: 'Session revoquee' }, 401);
     }
 
