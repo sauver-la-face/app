@@ -1,4 +1,4 @@
-[← README](../README.md) · [Contexte IA](context.md) · [Onboarding](../docs/onboarding.md) · [Architecture](../docs/architecture.md) · [CDC](../docs/cdc.md)
+[← README](../README.md) · [Contexte IA](context.md) · [Onboarding](../docs/onboarding.md) · [Architecture](../docs/architectureAdr.md) · [CDC](../docs/cdc.md)
 
 # Fonctionnalités à implémenter — Sauver la Face
 
@@ -480,13 +480,13 @@ qui faisait échouer `next build` — sans que la CI le détecte, aucun job ne l
 
 ### A11Y-01 — Corrections d'accessibilité WCAG 2.2 AA (dashboard)
 
-`[x]` 🟡 Majeur · `apps/web/src/features/` · `docs/architecture.md`
+`[x]` 🟡 Majeur · `apps/web/src/features/` · `docs/architectureAdr.md`
 
 **Contexte :**
 
 Audit d'accessibilité du dashboard web (Lighthouse / axe-core) au titre de la compétence
 C2.2.3, critère 3 (« le prototype répond aux exigences du référentiel »). Le référentiel
-retenu est **WCAG 2.2 niveau AA** (voir section Accessibilité de `docs/architecture.md`).
+retenu est **WCAG 2.2 niveau AA** (voir section Accessibilité de `docs/architectureAdr.md`).
 L'audit a révélé 4 violations sur 3 pages (login 92/100, dashboard 95/100, patients 100/100).
 
 **Comportement attendu :**
@@ -498,7 +498,7 @@ L'audit a révélé 4 violations sur 3 pages (login 92/100, dashboard 95/100, pa
 
 - Contraste : vert de marque `#2EAC8E` (2.83:1) assombri en `#178064` (4.87:1) ; texte `text-gray-400` (2.53:1) → `text-gray-500`
 - Taille de cible (WCAG 2.5.8, nouveau en 2.2) : bouton « afficher le mot de passe » agrandi de 20×20 à 28×28 px
-- Résultats consignés dans la section Accessibilité de `docs/architecture.md` (critère 3)
+- Résultats consignés dans la section Accessibilité de `docs/architectureAdr.md` (critère 3)
 - Dette connue à tracer séparément : le vert de marque est écrit en dur (17 occurrences) au lieu d'un token — tokenisation à prévoir
 - Tester : `bunx lighthouse <url> --only-categories=accessibility` sur login/dashboard/patients → 100/100
 
@@ -506,20 +506,20 @@ L'audit a révélé 4 violations sur 3 pages (login 92/100, dashboard 95/100, pa
 
 ### A11Y-02 — Rédaction critère 3 + standard cibles tactiles mobile (48 dp)
 
-`[x]` 🟢 Mineur · `docs/architecture.md` · `CLAUDE.md`
+`[x]` 🟢 Mineur · `docs/architectureAdr.md` · `CLAUDE.md`
 
 **Contexte :**
 
 Complète la présentation du critère 3 (C2.2.3) pour le dossier de certification. A11Y-01 a
 mesuré et corrigé le dashboard web ; A11Y-02 rédige la présentation narrative (démarche
 mesurer → corriger → re-mesurer, conclusion) directement dans la section Accessibilité de
-`docs/architecture.md`, et ajoute le **tableau de synthèse de conformité** prouvant que le
+`docs/architectureAdr.md`, et ajoute le **tableau de synthèse de conformité** prouvant que le
 prototype répond aux exigences. Établit aussi le standard **48 × 48 dp** pour les cibles
 tactiles mobile (Material Design), distinct du minimum web WCAG 2.5.8 (24 px).
 
 **Comportement attendu :**
 
-- La section Accessibilité de `architecture.md` se lit comme une présentation rédigée du critère 3, pas seulement des tableaux
+- La section Accessibilité de `architectureAdr.md` se lit comme une présentation rédigée du critère 3, pas seulement des tableaux
 - Un tableau de synthèse distingue clairement ce qui est **vérifié conforme** (web) de ce qui est **défini mais pas encore implémenté** (mobile, tests manuels) — sans maquiller une conformité non mesurée
 - La règle 48 × 48 dp est inscrite dans les règles mobile de `CLAUDE.md`
 
@@ -989,6 +989,37 @@ Idée de Mathieu Baro (revue Bloc 2) : le système actuel (ALERT-01) notifie uni
 - Le déclenchement manuel est une action côté dashboard (`apps/web/src/features/patients/actions/`) qui appelle l'endpoint backend d'envoi
 - Le déclenchement automatique est un job planifié côté backend, similaire au cron de soft delete des codes patients (AUTH-01)
 - Tester : déclenchement manuel envoie bien la notification, déclenchement automatique respecte le seuil, pas de double envoi sur la même période d'inactivité
+
+---
+
+## DOCUMENTATION
+
+### DOCS-02 — Séparation documentation rédigée / documentation générée
+
+`[ ]` 🟢 Mineur · `docs/architectureAdr.md` · `.ai/` · `README.md` · `CLAUDE.md`
+
+**Contexte :**
+
+`docs/architecture.md` mélangeait deux natures de contenu : treize décisions rédigées à la
+main (« Pourquoi Bun au lieu de Node », « Pourquoi Drizzle au lieu de Prisma ») et une
+description structurelle du système (couches backend / web / mobile, schéma de base de
+données, sécurité, accessibilité). Un script doit désormais produire automatiquement un
+fichier d'architecture à ce même chemin. Le nom doit donc être libéré, et les décisions
+rédigées mises hors de portée d'un écrasement par la génération.
+
+**Comportement attendu :**
+
+- `docs/architecture.md` est renommé en `docs/architectureAdr.md` par `git mv`, de sorte que l'historique du fichier reste suivi
+- Les références au chemin sont mises à jour dans `README.md`, `.ai/context.md`, `.ai/features.md`, `docs/onboarding.md`, `docs/cdc.md`, `docs/lexique.md` et `CLAUDE.md`
+- Le chemin `docs/architecture.md` redevient disponible pour la sortie du script
+- Les entrées de `CHANGELOG.md` ne sont pas réécrites : elles décrivent l'état du repo à leur date
+
+**Règles de code :**
+
+- Un fichier produit par le script n'est jamais édité à la main — toute correction passe par le script qui le génère
+- Les décisions techniques rédigées (« pourquoi ce choix plutôt qu'un autre ») vivent dans `docs/architectureAdr.md`, jamais dans le fichier généré
+- Les blocs de code Markdown déclarent leur langage (MD040)
+- Avant d'ouvrir la PR, vérifier qu'aucun lien de la documentation ne pointe vers un chemin disparu
 
 ---
 
