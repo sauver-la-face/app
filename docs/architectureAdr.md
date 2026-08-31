@@ -144,26 +144,14 @@ Toutes les migrations sont **additives** : on n'ajoute que des colonnes nullable
 
 ### Décisions de schéma
 
-**Timestamps — `timestamptz` obligatoire**
-Toutes les colonnes de date/heure utilisent `timestamp with time zone`. Les patients sont au Cambodge (UTC+7), les médecins en France (UTC+1/+2) — un `timestamp` sans timezone rendrait les horodatages ambigus. PostgreSQL stocke en UTC et convertit automatiquement.
+Les décisions de modélisation sont consignées une par fichier dans
+[`docs/adr/`](adr/README.md) :
 
-**Emails — index fonctionnel `lower(mail)`**
-`physician.mail` utilise un index unique fonctionnel sur `lower(mail)` plutôt qu'un unique inline. `Doctor@hopital.fr` et `doctor@hopital.fr` seraient deux comptes distincts avec un unique classique.
-
-**Codes symptômes — index fonctionnel `lower(code)`**
-Même principe pour `symptom.code` — cohérence avec `physician.mail`.
-
-**`is_active` — `boolean` natif PostgreSQL**
-`patient_code.is_active` utilise le type `boolean` (`true/false`) et non `integer` (`1/0`) — plus idiomatique, interdit les valeurs invalides.
-
-**Anonymisation RGPD — `patient.anonymized_at`**
-Le RGPD (art. 17) accorde un droit à l'effacement, mais l'art. 17.3.c prévoit une exception pour les données de santé nécessaires à des fins de santé publique. Conséquence : les données médicales (`medical_procedure`, `medical_event`, `media`) ne sont jamais supprimées. Seules les données d'identité (`first_name`, `last_name`, `birthdate`) sont mises à `NULL` lors d'une demande d'effacement, et `anonymized_at` est renseigné. L'UUID patient reste intact — tout l'historique médical reste traçable par UUID, mais plus rattachable à une personne identifiable.
-
-**Index partiels critiques**
-- `patient_code_code_active_unique` : `WHERE deleted_at IS NULL AND revoked_at IS NULL`
-  — `used_at IS NULL` intentionnellement absent : un code consommé qui sort de l'index (used_at renseigné) ne serait plus couvert par l'unicité, permettant sa réattribution à un autre patient. Seuls `deleted_at` et `revoked_at` garantissent qu'un code ne sera jamais réutilisé.
-- `patient_code_patient_active_unique` : `WHERE is_active = true AND used_at IS NULL AND deleted_at IS NULL AND revoked_at IS NULL` — un seul code actif non consommé par patient
-- `instructions_unread_idx` : `WHERE acknowledged_at IS NULL` — optimise le polling "instructions non lues" (requête critique pour les alertes)
+- [0015](adr/0015-stocker-toutes-les-dates-en-timestamptz.md) — stocker toutes les dates en `timestamptz`
+- [0016](adr/0016-garantir-l-unicite-des-emails-et-des-codes-par-un-index-fonctionnel-en-minuscules.md) — unicité insensible à la casse par index fonctionnel
+- [0017](adr/0017-utiliser-le-type-boolean-natif-de-postgresql-plutot-qu-un-entier.md) — `boolean` natif plutôt qu'un entier
+- [0018](adr/0018-anonymiser-les-patients-plutot-que-supprimer-leurs-donnees-medicales.md) — anonymiser plutôt que supprimer (RGPD art. 17.3.c)
+- [0019](adr/0019-restreindre-l-unicite-des-codes-patient-par-des-index-partiels.md) — index partiels sur les codes patient
 
 ---
 
@@ -183,31 +171,13 @@ Le RGPD (art. 17) accorde un droit à l'effacement, mais l'art. 17.3.c prévoit 
 | Autorisation dashboard | Session médecin obligatoire (401) sur `patientRouter`/`photosRouter`/`exportsRouter`/`instructions` — équipe soignante partagée, pas de patientèle privée par médecin |
 | Autorisation mobile | JWT patient vérifié côté serveur (401 si invalide, 403 si le patient authentifié n'est pas propriétaire de la ressource) sur `sync`/`photos`/`instructions` |
 
-### JWT — durée de vie et renouvellement
+### Décisions de sécurité
 
-| Profil | Expiration | Renouvellement |
-|---|---|---|
-| Médecin (web) | 2h d'inactivité | Silencieux automatique tant qu'actif — déconnexion si inactif 2h |
-| Patient (mobile) | 1 an | Renouvelé automatiquement à chaque connexion — révocation explicite possible par le médecin |
+Consignées dans [`docs/adr/`](adr/README.md) :
 
-### Rate limiting — protection force brute
-
-| Endpoint | Seuil | Blocage |
-|---|---|---|
-| Code 6 chiffres (patient) | 3 tentatives échouées | 15 minutes par IP |
-| Login médecin | 3 tentatives échouées | 15 minutes par IP |
-
-Les deux mécanismes sont indépendants : le blocage 15 min protège contre la force brute, l'expiration 48h gère le cycle de vie du code patient.
-
-### Rotation des secrets (production uniquement)
-
-| Secret | Fréquence |
-|---|---|
-| Clés JWT | Tous les 90 jours |
-| Credentials OVH Object Storage (S3) | Tous les 90 jours |
-
-> Dev : pas de rotation obligatoire — credentials dans `.env.local` uniquement.
-> Détails d'implémentation : voir `docs/cdc.md`
+- [0020](adr/0020-fixer-la-session-medecin-a-2h-d-inactivite-et-le-token-patient-a-un-an.md) — session médecin 2h d'inactivité, token patient un an
+- [0021](adr/0021-limiter-les-tentatives-d-authentification-a-3-par-15-minutes-et-par-ip.md) — 3 tentatives par 15 minutes et par IP
+- [0022](adr/0022-faire-tourner-les-secrets-de-production-tous-les-90-jours.md) — rotation des secrets de production tous les 90 jours
 
 ### Audit OWASP Top 10 (2026-07-23)
 
