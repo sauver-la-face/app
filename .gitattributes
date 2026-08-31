@@ -13,3 +13,4 @@
 *.otf binary
 *.zip binary
 *.apk binary
+CHANGELOG.md merge=union
