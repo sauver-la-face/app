@@ -1,5 +1,5 @@
 {
-  "id": "1109776a-1b61-4557-9543-8b8d9d1e701b",
+  "id": "62e8e7fe-3385-4c31-908a-308b27f81bd1",
   "prevId": "4f439308-b1bb-4fc5-a13b-0d7a63222dba",
   "version": "7",
   "dialect": "postgresql",
@@ -93,7 +93,29 @@
           "notNull": true
         }
       },
-      "indexes": {},
+      "indexes": {
+        "account_issuer_account_id_unique": {
+          "name": "account_issuer_account_id_unique",
+          "columns": [
+            {
+              "expression": "issuer",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "account_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": true,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
       "foreignKeys": {},
       "compositePrimaryKeys": {},
       "uniqueConstraints": {},
