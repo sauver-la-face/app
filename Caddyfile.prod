@@ -6,28 +6,28 @@
 # obligatoire (RGPD + HDS), certificats Let's Encrypt automatiques ».
 #
 # Caddy ne provisionne un certificat que pour un nom d'hote : une adresse de la
-# forme `:80` ne declenche jamais l'obtention automatique. D'ou la variable
-# ci-dessous, a fournir dans .env.production.
+# forme `:80` ne declenche jamais l'obtention automatique.
 #
-# CADDY_DOMAIN : domaine public de l'API, par exemple api.sauverlaface.org
-# ACME_EMAIL   : adresse de contact Let's Encrypt (avis d'expiration)
+# DEVOPS-12 : deux domaines plutot qu'un routage par chemin. Les routes du
+# backend sont a la racine (/patients, /alerts, /auth, /sync) et non sous un
+# prefixe /api : les separer par chemin obligerait a enumerer chaque prefixe
+# ici, et toute route ajoutee sans y penser partirait vers le mauvais service.
+#
+# CADDY_DOMAIN_API : domaine de l'API, ex. api.sauverlaface.org
+# CADDY_DOMAIN_WEB : domaine du dashboard, ex. app.sauverlaface.org
+# ACME_EMAIL       : adresse de contact Let's Encrypt (avis d'expiration)
 {
 	email {$ACME_EMAIL}
 }
 
-{$CADDY_DOMAIN} {
-	# TLS 1.3 minimum, comme l'exige DEVOPS-02 : TLS 1.2 et inferieurs sont
-	# refuses. Sans cette directive Caddy accepterait TLS 1.2, qu'il negocie
-	# par defaut pour compatibilite.
+# Blocs communs : TLS 1.3 minimum, comme l'exige DEVOPS-02. Sans cette
+# directive Caddy accepte TLS 1.2, qu'il negocie par defaut pour compatibilite.
+(tls_et_entetes) {
 	tls {
 		protocols tls1.3
 	}
 
 	encode zstd gzip
-
-	# Caddy est la seule porte d'entree exposee a Internet : le backend
-	# n'ecoute que sur le reseau interne Docker, jamais sur un port publie.
-	reverse_proxy backend:3001
 
 	header {
 		# HSTS : un an, sous-domaines inclus. A n'activer qu'une fois le
@@ -35,7 +35,6 @@
 		# cet en-tete refusera tout retour en HTTP jusqu'a expiration.
 		Strict-Transport-Security "max-age=31536000; includeSubDomains"
 		X-Content-Type-Options "nosniff"
-		X-Frame-Options "DENY"
 		Referrer-Policy "no-referrer"
 		-Server
 	}
@@ -43,5 +42,28 @@
 	log {
 		output stdout
 		format json
+	}
+}
+
+{$CADDY_DOMAIN_API} {
+	import tls_et_entetes
+
+	# Caddy est la seule porte d'entree exposee a Internet : le backend
+	# n'ecoute que sur le reseau interne Docker, jamais sur un port publie.
+	reverse_proxy backend:3001
+
+	header {
+		# L'API ne s'affiche jamais dans un cadre.
+		X-Frame-Options "DENY"
+	}
+}
+
+{$CADDY_DOMAIN_WEB} {
+	import tls_et_entetes
+
+	reverse_proxy web:3000
+
+	header {
+		X-Frame-Options "SAMEORIGIN"
 	}
 }
