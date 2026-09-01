@@ -18,6 +18,10 @@ import { SyncVersionError } from '../domain/syncDomain';
 const syncRoute = createRoute({
   method: 'post',
   path: '/sync',
+  summary: 'Remonter les donnees collectees hors ligne par le mobile',
+  description:
+    "Resolution des conflits en server-wins. Met a jour la date de derniere synchronisation du patient, dont depend l'alerte d'inactivite de sept jours.",
+  security: [{ jetonPatient: [] }],
   request: {
     body: {
       content: {

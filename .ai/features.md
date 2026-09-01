@@ -371,6 +371,34 @@ Le seuil actuel (ALERT-01) est fixe à 7 jours, identique pour tous les patients
 
 ---
 
+### API-02 — Conformité et sécurité du document OpenAPI
+
+`[ ]` 🟡 Majeur · `apps/backend/src/index.ts` · `apps/backend/src/shared/openapi.ts` · `apps/backend/src/features/*/presentation/`
+
+**Contexte :**
+
+Le document produit par API-01 était structurellement chargeable — Swagger UI l'affichait — mais le validateur Redocly y relevait 38 erreurs. La plus grave : `security-defined`, quinze fois. Le document ne déclarait aucun schéma d'authentification, ni à la racine ni par opération. Un lecteur y voyait treize chemins qui semblaient tous ouverts, `/patients` et `/alerts` compris, alors que SEC-01 et SEC-04 les protègent. La documentation affirmait l'inverse du code — et c'est ce document qui est servi publiquement en production, `/openapi.json` n'étant pas conditionné par `NODE_ENV`.
+
+Trois autres familles : `operation-summary` (quinze opérations sans résumé), `nullable-type-sibling` (sept schémas avec `nullable: true` sans `type`, invalide en OpenAPI 3.0, issus de `z.any()` et `z.unknown()`), et `no-empty-servers` (aucune URL de base, donc aucun client générable).
+
+**Comportement attendu :**
+
+- Les deux authentifications du projet sont déclarées : session Better Auth par cookie pour le médecin, jeton porteur JWT pour le patient
+- Chaque opération déclare celle qui la protège ; `/auth/patient/validate`, seule route métier publique, déclare `security: []` explicitement
+- Le document passe le validateur Redocly sans erreur
+- Un `servers` reflète l'URL publique du backend
+
+**Règles de code :**
+
+- Les schémas de sécurité sont enregistrés une fois dans `index.ts` via `openAPIRegistry.registerComponent`, jamais redéclarés par routeur
+- Un `security` explicite sur chaque opération, y compris `[]` pour les routes publiques : l'absence de déclaration ne doit jamais servir à signifier « publique »
+- Les réponses décrivent la forme réellement sérialisée — `details` porte un `error.flatten()` de Zod, pas une valeur libre ; `code` porte un Value Object dont le champ `value` sort tel quel faute de `toJSON`
+- Ne jamais réintroduire `z.any()` ni `z.unknown()` dans une réponse documentée : les deux produisent `nullable` sans `type`
+- **Limite connue** : `photosRouter` et `exportsRouter` n'utilisent pas `createRoute` — leurs routes n'apparaissent pas dans le document, qui décrit donc quinze opérations sur un total plus élevé. À traiter séparément.
+- Tester : `bunx @redocly/cli lint` sur le document généré → zéro erreur
+
+---
+
 ### PATIENT-01 — CRUD patients et gestion utilisateurs
 
 `[x]` 🟡 Majeur · `apps/backend/src/features/patients/`

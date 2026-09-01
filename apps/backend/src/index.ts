@@ -145,12 +145,43 @@ export function createApp(): OpenAPIHono<{ Variables: SessionVariables }> {
   );
 
   // --- Documentation OpenAPI ---
+  //
+  // Les deux authentifications du projet sont declarees ici, puis referencees
+  // operation par operation dans chaque routeur. Sans cette declaration, le
+  // document publie ne dit nulle part qu'une route exige une authentification :
+  // un lecteur voit treize chemins qui semblent tous ouverts, `/patients` et
+  // `/alerts` compris, alors que SEC-01 et SEC-04 les protegent. La
+  // documentation affirmait donc l'inverse du code.
+  app.openAPIRegistry.registerComponent('securitySchemes', 'sessionMedecin', {
+    type: 'apiKey',
+    in: 'cookie',
+    name: 'better-auth.session_token',
+    description:
+      "Session Better Auth posee a la connexion du dashboard. Cookie par defaut de Better Auth, aucun prefixe n'etant configure.",
+  });
+
+  app.openAPIRegistry.registerComponent('securitySchemes', 'jetonPatient', {
+    type: 'http',
+    scheme: 'bearer',
+    bearerFormat: 'JWT',
+    description:
+      "Jeton emis a la validation du code a six chiffres, transmis en en-tete Authorization. SEC-03 : sa revocation se lit a chaque requete sur le code d'acces consomme.",
+  });
+
   app.doc('/openapi.json', {
     info: {
       title: 'Sauver la Face API',
       version: '1.0.0',
       description: 'Documentation OpenAPI du backend Sauver la Face',
     },
+    // Sans `servers`, le document ne porte aucune URL de base : un client
+    // genere depuis la specification ne sait pas ou envoyer ses requetes.
+    servers: [
+      {
+        url: process.env.BETTER_AUTH_URL ?? 'http://localhost:3001',
+        description: "Instance courante, deduite de l'URL publique du backend",
+      },
+    ],
     openapi: '3.0.0',
   });
 

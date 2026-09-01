@@ -9,6 +9,10 @@ import type { AlertUsecase } from '../application/alertUsecase';
 const listAlertsRoute = createRoute({
   method: 'get',
   path: '/alerts',
+  summary: 'Lister les alertes actives',
+  description:
+    'Symptomes declencheurs signales par les patients, et absences de synchronisation depuis sept jours. La reponse porte un ETag : le dashboard interroge la route toutes les trente secondes et recoit 304 tant que rien ne change.',
+  security: [{ sessionMedecin: [] }],
   responses: {
     200: {
       content: {

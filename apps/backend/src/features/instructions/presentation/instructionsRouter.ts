@@ -47,6 +47,9 @@ const medicalProcedureNotFoundErrorSchema = z.object({
 const createInstructionRoute = createRoute({
   method: 'post',
   path: '/instructions',
+  summary: 'Envoyer une consigne post-operatoire a un patient',
+  description: 'Redigee par le medecin depuis le dashboard, lue par le patient sur son telephone.',
+  security: [{ sessionMedecin: [] }],
   request: {
     body: {
       content: {
@@ -90,6 +93,10 @@ const createInstructionRoute = createRoute({
 const listPatientInstructionsRoute = createRoute({
   method: 'get',
   path: '/me/instructions',
+  summary: 'Lister ses propres consignes post-operatoires',
+  description:
+    "SEC-03 : servie sous `/me` plutot que sous `/patients/{id}`. Le patient est deduit de son jeton, jamais d'un identifiant fourni dans l'URL.",
+  security: [{ jetonPatient: [] }],
   responses: {
     200: {
       content: { 'application/json': { schema: instructionListResponseSchema } },
@@ -102,6 +109,10 @@ const listPatientInstructionsRoute = createRoute({
 const acknowledgeInstructionRoute = createRoute({
   method: 'post',
   path: '/instructions/{instructionId}/acknowledge',
+  summary: 'Accuser reception d une consigne',
+  description:
+    "Marque la consigne comme lue par le patient et remonte l'information au dashboard du medecin.",
+  security: [{ jetonPatient: [] }],
   request: { params: instructionIdParamSchema },
   responses: {
     200: {
