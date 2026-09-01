@@ -1106,6 +1106,34 @@ Audit de sécurité (revue OWASP A06, 2026-07-23) : aucun outil de suivi des vul
 
 ---
 
+### DEVOPS-13 — Job CI de construction des images Docker
+
+`[ ]` 🟡 Majeur · `.github/workflows/ci.yml`
+
+**Contexte :**
+
+Les cinq jobs existants valident le code source, jamais les images livrées. Les cibles `prod` des deux `Dockerfile` n'étaient construites que sur le poste de la personne qui les écrivait — celle du backend ne l'avait jamais été du tout, `docker-compose.yml` construisant `target: dev` jusqu'à DEVOPS-02. Une image qui ne démarre pas ne se découvre alors qu'au déploiement.
+
+Ce job était volontairement différé jusqu'à la séparation des fichiers Compose (DEVOPS-02), pour ne pas valider une structure sur le point d'être remplacée.
+
+**Comportement attendu :**
+
+- Construction des deux images en cible `prod` à chaque pull request et à chaque push sur `dev`
+- Chaque image est **démarrée** et interrogée : `/health` pour le backend, `/fr` pour le dashboard
+- Les fichiers statiques du dashboard sont vérifiés séparément — une page peut répondre 200 avec tous ses assets en 404
+- `docker-compose.prod.yml` est validé par `docker compose config`
+
+**Règles de code :**
+
+- Les secrets de démarrage sont générés à la volée (`openssl rand`) — jamais de valeur en dur dans le workflow, même jetable
+- `DATABASE_URL` pointe volontairement dans le vide : `/health` ne touche pas la base, et exiger un Postgres ferait échouer le job pour une raison étrangère à ce qu'il vérifie
+- Vérifier les fichiers statiques, pas seulement le code HTTP de la page : c'est le seul moyen de détecter un `.next/static` non recopié en mode `standalone`
+- Les conteneurs sont supprimés dans une étape `if: always()`
+- Dépend de **DEVOPS-02** (séparation des Compose) et **DEVOPS-12** (Dockerfile web)
+- Tester : image backend qui ne démarre pas → job rouge, `.next/static` absent → job rouge, chemin invalide dans le Compose de production → job rouge
+
+---
+
 ### NOTIF-01 — Notification push patient en cas de retard de suivi
 
 `[ ]` 🟡 Majeur · `apps/backend/src/features/notifications/`

@@ -16,6 +16,7 @@ Chaque version est marquée par un tag Git annoté (`vX.Y.Z`).
 - **AUTH-02** — le formulaire de connexion signale désormais le blocage après trois tentatives échouées et indique le délai de quinze minutes. Le message est traduit en français, anglais et khmer, là où le backend renvoyait un texte codé en dur en français. Un message générique de repli évite de laisser le formulaire muet lorsqu'aucun texte n'accompagne l'erreur
 - **DOCS-02** — structure documentaire : `docs/adr/` avec les 13 décisions techniques consignées une par fichier, `docs/security/owasp.md`, template d'architecture des six piliers, `docs/README.md`, dossiers `design/` et `brief/`
 - **DOCS-02** — template de pull request et job CI `changelog` vérifiant qu'une entrée accompagne chaque PR
+- **DEVOPS-13** — job CI `docker` : les cinq jobs existants validaient le code, jamais les images livrées. Les cibles `prod` des deux `Dockerfile` n'étaient construites que sur le poste de la personne qui les écrivait, celle du backend jamais — `docker-compose.yml` construisait `target: dev` jusqu'à DEVOPS-02. Les deux images sont maintenant construites, **démarrées et interrogées** à chaque PR (`/health` côté backend, `/fr` côté dashboard), et `docker-compose.prod.yml` est validé par `docker compose config`. Les fichiers statiques sont vérifiés séparément : en mode `standalone`, une page répond 200 avec tous ses assets en 404 si `.next/static` n'a pas été recopié
 
 ### Modifié
 
