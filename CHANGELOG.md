@@ -104,6 +104,7 @@ déployée** — elle marque l'état du code à l'issue de la phase de développ
 
 ### Corrigé
 
+- **AUTH-03** — la montée de Better Auth en 1.7 a introduit une rupture non reprise dans le schéma : l'identité d'un compte y est désormais cadrée par un champ `issuer` sur la table `account`. Sans lui, l'adaptateur Drizzle rejetait toute inscription (`BetterAuthError`, HTTP 500) après avoir créé la ligne `physician` — le médecin existait sans compte et ne pouvait pas se connecter. Champ ajouté au schéma et migration `0006` correspondante.
 - **DEVOPS-04** — Réparation du système de migrations Drizzle (table de suivi absente)
 - Dockerfile backend corrigé pour le contexte monorepo (`bun.lockb` → `bun.lock`)
 - Chargement de `.env.local` par `drizzle-kit` via `dotenv-cli`

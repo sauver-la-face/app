@@ -217,6 +217,10 @@ export const account = pgTable('account', {
   id: text('id').primaryKey(),
   accountId: text('account_id').notNull(),
   providerId: text('provider_id').notNull(),
+  // Better Auth 1.7 : l'identite d'un compte est desormais cadree par l'emetteur.
+  // Champ requis par l'adaptateur Drizzle depuis cette version.
+  // https://better-auth.com/docs/guides/1-7-upgrade-guide#account-identity-is-scoped-by-issuer
+  issuer: text('issuer').notNull(),
   userId: text('user_id').notNull(),
   accessToken: text('access_token'),
   refreshToken: text('refresh_token'),
