@@ -5,12 +5,8 @@ import { notFound } from 'next/navigation';
 import { UserGreeting } from '@/features/auth/components/UserGreeting';
 import { LocaleSwitcher } from '@/features/i18n/components/LocaleSwitcher';
 import { SearchBar } from '@/features/layout/components/SearchBar';
-import { isLocale, type Locale, locales } from '@/i18n/config';
+import { isLocale, type Locale } from '@/i18n/config';
 import { getDictionary } from '@/i18n/dictionaries';
-
-export function generateStaticParams() {
-  return locales.map((locale) => ({ locale }));
-}
 
 export async function generateMetadata(props: {
   params: Promise<{ locale: string }>;
@@ -65,7 +61,7 @@ export default async function LocaleLayout(props: {
           </div>
           {/* Greeting + LocaleSwitcher */}
           <div className="flex shrink-0 items-center gap-6">
-            <LocaleSwitcher currentLocale={locale} />
+            <LocaleSwitcher currentLocale={locale} label={dictionary.languageSwitcher.label} />
             <UserGreeting />
           </div>
         </div>

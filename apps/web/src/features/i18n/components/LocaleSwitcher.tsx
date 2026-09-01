@@ -12,7 +12,7 @@ function localizePathname(pathname: string, locale: Locale): string {
   return segments.join('/') || `/${locale}`;
 }
 
-export function LocaleSwitcher({ currentLocale }: { currentLocale: Locale }) {
+export function LocaleSwitcher({ currentLocale, label }: { currentLocale: Locale; label: string }) {
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const query = searchParams.toString();
@@ -26,7 +26,7 @@ export function LocaleSwitcher({ currentLocale }: { currentLocale: Locale }) {
         type="button"
         onClick={() => setOpen((v) => !v)}
         className="flex items-center gap-2 rounded-lg border border-black/20 bg-white px-3 py-2 shadow-xs transition-shadow hover:shadow-md"
-        aria-label={`Langue : ${current.label}`}
+        aria-label={`${label}: ${current.label}`}
         aria-expanded={open}
       >
         <Image
@@ -42,7 +42,6 @@ export function LocaleSwitcher({ currentLocale }: { currentLocale: Locale }) {
           fill="currentColor"
           aria-hidden
         >
-          <title>Sélecteur de langue</title>
           <path d="M6 8L1 3h10L6 8z" />
         </svg>
       </button>

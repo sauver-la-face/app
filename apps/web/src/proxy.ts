@@ -27,6 +27,23 @@ function getPreferredLocale(request: NextRequest): Locale {
   return defaultLocale;
 }
 
+function isSecureRequest(request: NextRequest): boolean {
+  // Derriere Caddy, la requete arrive en clair : c'est x-forwarded-proto qui
+  // porte le schema d'origine. Poser `secure` inconditionnellement ferait
+  // refuser le cookie par le navigateur sur toute origine HTTP simple.
+  const forwarded = request.headers.get('x-forwarded-proto');
+
+  if (forwarded) {
+    return forwarded.split(',')[0]?.trim() === 'https';
+  }
+
+  return request.nextUrl.protocol === 'https:';
+}
+
+function localeCookieOptions(request: NextRequest) {
+  return { path: '/', sameSite: 'lax' as const, secure: isSecureRequest(request) };
+}
+
 function extractLocale(pathname: string): Locale | null {
   const segment = pathname.split('/')[1];
   return isLocale(segment) ? segment : null;
@@ -47,11 +64,7 @@ export default function proxy(request: NextRequest) {
     url.pathname = `/${redirectLocale}${pathname}`;
 
     const response = NextResponse.redirect(url);
-    response.cookies.set(LOCALE_COOKIE, redirectLocale, {
-      path: '/',
-      sameSite: 'lax',
-      secure: true,
-    });
+    response.cookies.set(LOCALE_COOKIE, redirectLocale, localeCookieOptions(request));
     return response;
   }
 
@@ -64,7 +77,7 @@ export default function proxy(request: NextRequest) {
     },
   });
 
-  response.cookies.set(LOCALE_COOKIE, locale, { path: '/', sameSite: 'lax', secure: true });
+  response.cookies.set(LOCALE_COOKIE, locale, localeCookieOptions(request));
   return response;
 }
 
