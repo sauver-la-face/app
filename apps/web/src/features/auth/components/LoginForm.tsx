@@ -1,10 +1,10 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import type { Locale } from '@/i18n/config';
 import type { Dictionary } from '@/i18n/dictionaries';
-import { signIn } from '@/lib/authClient';
+import { signIn, useSession } from '@/lib/authClient';
 
 function UserIcon() {
   return (
@@ -112,10 +112,19 @@ function messageDErreur(
 
 export function LoginForm({ locale, dictionary }: { locale: Locale; dictionary: Dictionary }) {
   const router = useRouter();
+  const { data: session, isPending: sessionPending } = useSession();
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const { login } = dictionary;
+
+  // Arriver sur la connexion avec une session valide n'a pas de sens : on renvoie
+  // vers le tableau de bord, qui appliquera lui-meme la garde du second facteur.
+  useEffect(() => {
+    if (!sessionPending && session) {
+      router.replace(`/${locale}/dashboard`);
+    }
+  }, [sessionPending, session, router, locale]);
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
