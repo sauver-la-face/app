@@ -16,8 +16,15 @@ Chaque version est marquée par un tag Git annoté (`vX.Y.Z`).
 
 ### Ajouté
 
+- **WEB-03** — page de création d'un patient dans le dashboard : formulaire d'identité, barre latérale de navigation, résumé mis à jour pendant la saisie et calcul automatique de l'âge. Le header accueille une barre de recherche et l'identité du médecin connecté
+- **AUTH-02** — le formulaire de connexion signale désormais le blocage après trois tentatives échouées et indique le délai de quinze minutes. Le message est traduit en français, anglais et khmer, là où le backend renvoyait un texte codé en dur en français. Un message générique de repli évite de laisser le formulaire muet lorsqu'aucun texte n'accompagne l'erreur
 - **DOCS-02** — structure documentaire : `docs/adr/` avec les 13 décisions techniques consignées une par fichier, `docs/security/owasp.md`, template d'architecture des six piliers, `docs/README.md`, dossiers `design/` et `brief/`
 - **DOCS-02** — template de pull request et job CI `changelog` vérifiant qu'une entrée accompagne chaque PR
+
+### Corrigé
+
+- **WEB-03** — la page nouveau patient utilisait la signature Next 14 (`params` synchrone). Depuis Next 15 `params` est une Promise : la locale valait `undefined` et le dictionnaire était résolu à vide. Le typecheck ne pouvait pas le détecter, le type restant valide bien que faux
+- **WEB-03** — `UserGreeting` provoquait une erreur d'hydratation : sans session au rendu serveur il produisait du vide, tandis que le client affichait le bloc complet. L'état `isPending` est désormais pris en compte, comme dans le reste du dashboard
 
 ### Modifié
 
