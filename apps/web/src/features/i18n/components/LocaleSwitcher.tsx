@@ -25,7 +25,7 @@ export function LocaleSwitcher({ currentLocale }: { currentLocale: Locale }) {
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
-        className="flex items-center gap-2 rounded-lg border border-black/20 bg-white px-3 py-2 shadow-sm transition-shadow hover:shadow-md"
+        className="flex items-center gap-2 rounded-lg border border-black/20 bg-white px-3 py-2 shadow-xs transition-shadow hover:shadow-md"
         aria-label={`Langue : ${current.label}`}
         aria-expanded={open}
       >
@@ -34,7 +34,7 @@ export function LocaleSwitcher({ currentLocale }: { currentLocale: Locale }) {
           alt={current.label}
           width={28}
           height={20}
-          className="rounded-sm object-cover"
+          className="rounded-xs object-cover"
         />
         <svg
           className={`h-3 w-3 text-black/60 transition-transform ${open ? 'rotate-180' : ''}`}
@@ -69,7 +69,7 @@ export function LocaleSwitcher({ currentLocale }: { currentLocale: Locale }) {
                       alt={localeConfig[locale].label}
                       width={28}
                       height={20}
-                      className="rounded-sm object-cover"
+                      className="rounded-xs object-cover"
                     />
                   </Link>
                 </li>
