@@ -85,6 +85,13 @@ export const patientCode = pgTable(
       .where(
         sql`is_active = true AND used_at IS NULL AND deleted_at IS NULL AND revoked_at IS NULL`,
       ),
+    // DEVOPS-10 : cet index existe en base depuis la migration 0000 mais
+    // n'avait jamais ete declare ici. Drizzle le voyait donc comme supprime du
+    // schema et proposait un DROP a chaque generation. Il sert : getLatestCodes,
+    // revokeActiveCodes et revokeSession filtrent tous sur uuid_patient, et
+    // l'index partiel `patient_code_patient_active_unique` ci-dessus ne couvre
+    // que les codes actifs non consommes.
+    index('patient_code_uuid_patient_idx').on(t.uuid_patient),
     // Accelere la recherche de tous les codes d'un patient (actifs + historique)
     // Optimise le cron de soft delete apres 48h (WHERE created_at < now() - 48h AND used_at IS NULL AND deleted_at IS NULL)
     // Index partiel : couvre uniquement les codes non consommes et non supprimes - seuls candidats du cron

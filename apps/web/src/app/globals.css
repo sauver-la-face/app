@@ -1,6 +1,22 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
+
+/*
+  Tailwind v4 fait passer la couleur de bordure par defaut de `gray-200` a
+  `currentcolor`. Ce bloc restaure le comportement de la v3, pour que le rendu
+  reste identique sans avoir a annoter chaque element.
+
+  Pour le retirer un jour, il faudra ajouter une classe de couleur de bordure
+  explicite partout ou le defaut est utilise.
+*/
+@layer base {
+  *,
+  ::after,
+  ::before,
+  ::backdrop,
+  ::file-selector-button {
+    border-color: var(--color-gray-200, currentcolor);
+  }
+}
 
 *,
 *::before,

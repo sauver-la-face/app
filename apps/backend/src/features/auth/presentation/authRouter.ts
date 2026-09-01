@@ -2,6 +2,7 @@ import { createRoute, OpenAPIHono, z } from '@hono/zod-openapi';
 import { patientCodeSchema } from '@sauver-la-face/shared';
 import { logger } from '@shared/logger';
 import { rateLimiter } from '@shared/middleware/rateLimiter';
+import type { MiddlewareHandler } from 'hono';
 import { Hono } from 'hono';
 import type { AuthUsecase } from '../application/authUsecase';
 import { auth } from '../infrastructure/authConfig';
@@ -112,8 +113,27 @@ const renewSchema = z.object({
 });
 
 // Export de la factory du routeur patient (qui nécessite l'injection du usecase)
-export const createAuthRouter = (authUsecase: AuthUsecase) => {
-  const app = new OpenAPIHono();
+//
+// SEC-04/A01 : `generate` et `renew` fabriquaient un code d'acces a six
+// chiffres pour n'importe quel `uuid_patient` fourni dans le corps, et le
+// renvoyaient en clair, sans aucune authentification. Combine a `GET /alerts`
+// qui livrait les UUID, cela formait une chaine complete de prise de controle
+// d'un compte patient. Emettre un code est une action de medecin.
+//
+// `validate` reste public : c'est le login patient, il ne peut pas exiger
+// d'etre deja authentifie. Il est protege par le rate limiting ci-dessous.
+// Le garde est un parametre obligatoire, sans valeur par defaut : importer
+// `requirePhysicianAuth` ici creerait un cycle, ce module etant celui dont
+// physicianAuthMiddleware tire `sessionMiddleware`. C'est donc `index.ts` qui
+// l'injecte — et le compilateur interdit de l'oublier.
+export const createAuthRouter = (
+  authUsecase: AuthUsecase,
+  authMiddleware: MiddlewareHandler<{ Variables: SessionVariables }>,
+) => {
+  const app = new OpenAPIHono<{ Variables: SessionVariables }>();
+
+  app.use('/patient/generate', authMiddleware);
+  app.use('/patient/renew', authMiddleware);
 
   app.post(
     '/patient/validate',

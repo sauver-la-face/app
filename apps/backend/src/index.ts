@@ -53,6 +53,7 @@ import { scheduleJobs } from './infrastructure/jobs';
 import { db } from './shared/db'; // Maintenu pour la compatibilité avec DrizzlePatientCodeRepository
 import { startAuditExportScheduler } from './shared/jobs/auditExportCron';
 import { createAuditMiddleware } from './shared/middleware/auditMiddleware';
+import { requirePhysicianAuth } from './shared/middleware/physicianAuthMiddleware';
 import { createS3LogsStorageFromEnv } from './shared/storage/logsStorage';
 import { buildPhotoPublicBaseUrl, createPhotoS3Client } from './shared/storage/s3Client';
 
@@ -158,7 +159,7 @@ export function createApp(): OpenAPIHono<{ Variables: SessionVariables }> {
 
   // Routes Auth (classiques + patients)
   app.route('/', authRouter);
-  app.route('/auth', createAuthRouter(patientAuthUsecase));
+  app.route('/auth', createAuthRouter(patientAuthUsecase, requirePhysicianAuth));
 
   // Routes métier
   app.route('/', createAlertRouter(alertUsecase));

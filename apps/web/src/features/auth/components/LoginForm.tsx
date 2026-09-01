@@ -133,7 +133,7 @@ export function LoginForm({ locale, dictionary }: { locale: Locale; dictionary: 
             type="email"
             required
             autoComplete="email"
-            className="h-14 w-full rounded-[5px] border border-black/30 pl-12 pr-4 text-sm shadow-[0px_4px_4px_rgba(0,0,0,0.25)] focus:border-[#178064] focus:outline-none focus:ring-1 focus:ring-[#178064]"
+            className="h-14 w-full rounded-[5px] border border-black/30 pl-12 pr-4 text-sm shadow-[0px_4px_4px_rgba(0,0,0,0.25)] focus:border-[#178064] focus:outline-hidden focus:ring-1 focus:ring-[#178064]"
             placeholder={login.emailPlaceholder}
           />
         </div>
@@ -153,7 +153,7 @@ export function LoginForm({ locale, dictionary }: { locale: Locale; dictionary: 
             type={showPassword ? 'text' : 'password'}
             required
             autoComplete="current-password"
-            className="h-14 w-full rounded-[5px] border border-black/30 pl-12 pr-12 text-sm shadow-[0px_4px_4px_rgba(0,0,0,0.25)] focus:border-[#178064] focus:outline-none focus:ring-1 focus:ring-[#178064]"
+            className="h-14 w-full rounded-[5px] border border-black/30 pl-12 pr-12 text-sm shadow-[0px_4px_4px_rgba(0,0,0,0.25)] focus:border-[#178064] focus:outline-hidden focus:ring-1 focus:ring-[#178064]"
             placeholder={login.passwordPlaceholder}
           />
           <button
@@ -177,7 +177,7 @@ export function LoginForm({ locale, dictionary }: { locale: Locale; dictionary: 
         <button
           type="submit"
           disabled={loading}
-          className="h-14 w-full rounded-[10px] bg-[#178064] text-base font-medium text-white shadow-sm transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
+          className="h-14 w-full rounded-[10px] bg-[#178064] text-base font-medium text-white shadow-xs transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
         >
           {loading ? login.submitting : login.submit}
         </button>

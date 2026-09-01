@@ -12,7 +12,7 @@ Créé le 2026-08-31 · Dernière revue : -
 
 | # | Point | État | Où c'est traité |
 |---|---|---|---|
-| A01 | Broken Access Control (inclut SSRF) | à faire | |
+| A01 | Broken Access Control (inclut SSRF) | fait | Vérifié par `apps/backend/tests/routesProtegees.test.ts`, qui parcourt la table de routage réelle de l'application montée en entier : toute route répond 401 sans identifiants, ou figure dans une liste explicite de routes publiques. Une route non déclarée fait échouer la suite (SEC-01, SEC-02, SEC-04) |
 | A02 | Security Misconfiguration | à faire | |
 | A03 | Software Supply Chain Failures | à faire | |
 | A04 | Cryptographic Failures | à faire | |

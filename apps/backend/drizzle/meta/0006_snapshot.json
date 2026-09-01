@@ -1,5 +1,5 @@
 {
-  "id": "9e1b51fd-6835-4179-9cbf-e38f201816ec",
+  "id": "4f439308-b1bb-4fc5-a13b-0d7a63222dba",
   "prevId": "0407139a-6de9-4e6a-9867-02307c957162",
   "version": "7",
   "dialect": "postgresql",
@@ -22,12 +22,6 @@
         },
         "provider_id": {
           "name": "provider_id",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "issuer": {
-          "name": "issuer",
           "type": "text",
           "primaryKey": false,
           "notNull": true
@@ -718,6 +712,21 @@
           ],
           "isUnique": true,
           "where": "is_active = true AND used_at IS NULL AND deleted_at IS NULL AND revoked_at IS NULL",
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "patient_code_uuid_patient_idx": {
+          "name": "patient_code_uuid_patient_idx",
+          "columns": [
+            {
+              "expression": "uuid_patient",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
           "concurrently": false,
           "method": "btree",
           "with": {}

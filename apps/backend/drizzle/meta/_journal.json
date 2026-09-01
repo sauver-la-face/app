@@ -47,15 +47,15 @@
     {
       "idx": 6,
       "version": "7",
-      "when": 1788288012329,
-      "tag": "0006_yielding_fallen_one",
+      "when": 1788287842755,
+      "tag": "0006_resynchroniser_snapshot",
       "breakpoints": true
     },
     {
       "idx": 7,
       "version": "7",
-      "when": 1788293908003,
-      "tag": "0007_lonely_medusa",
+      "when": 1788299500260,
+      "tag": "0007_auth_03_better_auth_1_7",
       "breakpoints": true
     }
   ]

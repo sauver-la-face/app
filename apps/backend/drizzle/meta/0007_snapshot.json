@@ -1,6 +1,6 @@
 {
-  "id": "5dda2eb2-df4f-4011-ad25-421b1878b33f",
-  "prevId": "9e1b51fd-6835-4179-9cbf-e38f201816ec",
+  "id": "1109776a-1b61-4557-9543-8b8d9d1e701b",
+  "prevId": "4f439308-b1bb-4fc5-a13b-0d7a63222dba",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
@@ -718,6 +718,21 @@
           ],
           "isUnique": true,
           "where": "is_active = true AND used_at IS NULL AND deleted_at IS NULL AND revoked_at IS NULL",
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "patient_code_uuid_patient_idx": {
+          "name": "patient_code_uuid_patient_idx",
+          "columns": [
+            {
+              "expression": "uuid_patient",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
           "concurrently": false,
           "method": "btree",
           "with": {}

@@ -18,8 +18,31 @@ export const requirePhysicianAuth: MiddlewareHandler<{ Variables: SessionVariabl
 ) => {
   await sessionMiddleware(c, async () => {});
 
-  if (!c.get('user')) {
+  const user = c.get('user');
+
+  if (!user) {
     return c.json({ code: 'UNAUTHORIZED', message: 'Authentification medecin requise' }, 401);
+  }
+
+  // AUTH-02 : le second facteur est obligatoire pour acceder aux donnees de
+  // sante. Le controle vit ici et non dans le dashboard : une garde posee
+  // uniquement cote navigateur se contourne en appelant l'API directement,
+  // exactement le defaut corrige par SEC-01.
+  //
+  // 403 et non 401 : la session est valide, c'est le compte qui n'est pas
+  // conforme. Le client doit orienter vers l'enrolement, pas vers la connexion.
+  //
+  // Les routes d'enrolement (/api/auth/two-factor/*) sont servies par
+  // authRouter, qui ne monte pas ce gardien : un medecin non enrole peut donc
+  // toujours s'enroler.
+  if (!user.twoFactorEnabled) {
+    return c.json(
+      {
+        code: 'MFA_REQUIRED',
+        message: 'Authentification a deux facteurs requise pour acceder aux donnees patient',
+      },
+      403,
+    );
   }
 
   await next();
