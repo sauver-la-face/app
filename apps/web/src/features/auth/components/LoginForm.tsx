@@ -107,9 +107,7 @@ function messageDErreur(
     return login.tooManyAttempts;
   }
 
-  return erreur.message && erreur.message.trim().length > 0
-    ? erreur.message
-    : login.genericError;
+  return erreur.message && erreur.message.trim().length > 0 ? erreur.message : login.genericError;
 }
 
 export function LoginForm({ locale, dictionary }: { locale: Locale; dictionary: Dictionary }) {
@@ -131,7 +129,12 @@ export function LoginForm({ locale, dictionary }: { locale: Locale; dictionary: 
         password: data.get('password') as string,
       },
       {
-        onSuccess: () => router.push(`/${locale}/dashboard`),
+        onSuccess: (ctx) => {
+          // Better Auth ne delivre pas de session quand un second facteur est
+          // actif : il repond twoFactorRedirect et attend la verification TOTP.
+          const suite = ctx.data as { twoFactorRedirect?: boolean } | undefined;
+          router.push(suite?.twoFactorRedirect ? `/${locale}/mfa/verify` : `/${locale}/dashboard`);
+        },
         onError: (ctx) => setError(messageDErreur(ctx.error, login)),
       },
     );
