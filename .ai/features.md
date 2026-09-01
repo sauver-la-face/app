@@ -146,6 +146,52 @@ déjà `uuid_patient_code`, la vérification est donc possible sans changer le f
 - Tester : token valide avant révocation → 200, même token après révocation → 401, révocation d'un patient sans session active, non-régression de `issueAccessCode()` qui ne doit toujours révoquer que les codes en attente
 
 ---
+### SEC-04 — Routes non protégées : alertes et génération de codes (A01)
+
+`[x]` 🔴 Critique · `apps/backend/src/features/alerts/` · `apps/backend/src/features/auth/` · `apps/backend/tests/`
+
+**Contexte :**
+
+Un audit complet des routes, mené après SEC-03, a révélé une chaîne d'accès
+complète aux données médicales **sans aucune authentification** :
+
+1. `GET /alerts` n'a aucun garde — `alertRouter` ne contient pas une seule ligne
+   d'authentification. La réponse expose `patientDisplayName` (le nom du patient),
+   `patientId`, `symptomCode` et `symptomLabelFr` : donnée de santé nominative,
+   soit une donnée sensible au sens de l'article 9 du RGPD.
+2. `POST /auth/patient/generate` fabrique un code d'accès à six chiffres pour
+   n'importe quel `uuid_patient` fourni dans le corps, et le renvoie en clair.
+   `createAuthRouter` est monté sans garde médecin. `POST /auth/patient/renew`
+   présente le même défaut.
+3. `POST /auth/patient/validate` échange ce code contre un JWT valable un an.
+
+Les UUID nécessaires à l'étape 2 s'obtiennent à l'étape 1. Le rate limiting ne
+protège pas : il compte les tentatives *échouées*, or ici rien n'est deviné.
+
+SEC-01 avait bien imposé la session médecin, mais sur un périmètre énuméré à la
+main — `patientRouter`, `photosRouter`, `exportsRouter`, `instructions` —, et
+`alertRouter` comme `authRouter` n'y figuraient pas. L'audit OWASP a ensuite
+classé A01 « Corrigé » en reprenant cette liste. Rien ne vérifiait qu'elle était
+complète.
+
+**Comportement attendu :**
+
+- `GET /alerts` exige une session médecin
+- `POST /auth/patient/generate` et `POST /auth/patient/renew` exigent une session médecin
+- `POST /auth/patient/validate` reste public : c'est le login patient lui-même
+- Un test monte l'**application complète** et parcourt la table de routage réelle : toute route est soit protégée, soit inscrite dans une liste explicite de routes publiques
+- La ligne A01 de `docs/security/owasp.md` renvoie à ce test, pas à une affirmation en prose
+
+**Règles de code :**
+
+- Le test d'inventaire lit `app.routes`, jamais une liste écrite à la main : une liste se périme, la table de routage est la réalité
+- Une route inconnue du test le fait **échouer** — le défaut est le refus, pas l'oubli. C'est ce qui manquait à SEC-01
+- Ne pas remplacer un garde à joker (`/patients/*`) par une énumération de chemins : le joker protège toute route future par défaut, une liste l'oublie par défaut et le trou est silencieux
+- Ce test doit monter l'app entière : c'est le seul niveau où les recouvrements entre routeurs sont visibles, celui qui avait masqué `GET /patients/{id}/instructions` jusqu'à SEC-03
+- Tester : chaque route protégée renvoie 401 sans identifiants, `validate` reste accessible, et l'ajout d'une route non déclarée casse la suite
+
+---
+
 
 ### SYNC-01 — Réception et résolution des conflits (server-wins)
 
@@ -817,28 +863,78 @@ Une GitHub App n'appartient à aucune personne — elle est rattachée au repo. 
 
 ### DEVOPS-02 — Reverse proxy Caddy avec TLS 1.3
 
-`[~]` 🟡 Majeur · `Caddyfile` · `docker-compose.yml`
+`[x]` 🟡 Majeur · `Caddyfile.prod` · `docker-compose.yml` · `docker-compose.override.yml` · `docker-compose.prod.yml`
+
+**Contexte :**
+
+Le service Caddy existait, mais sa configuration tenait en trois lignes servant
+`:80` en HTTP simple. Caddy ne provisionne un certificat que pour un **nom
+d'hôte** : une adresse de la forme `:80` ne déclenche jamais l'obtention
+automatique. Le TLS annoncé par l'ADR 0009, par le tableau Sécurité de
+`architectureAdr.md` et par le rapport de certification n'existait donc nulle
+part, alors qu'il porte sur le transport de données de santé.
+
+La séparation des fichiers Compose fait partie de cette feature et non d'une
+autre : le certificat de production est inatteignable sans un environnement de
+production réel. Or `docker-compose.prod.yml` n'existait pas — la séquence de
+déploiement documentée au rapport (C2.1.1, critère 4) échouait sur un fichier
+introuvable —, aucun profil `prod` n'était déclaré, et le backend construisait
+`target: dev` en dur.
 
 **Comportement attendu :**
 
 - Caddy termine le TLS en entrée et proxifie vers le backend Hono (`backend:3001`)
 - TLS 1.3 obligatoire — TLS 1.2 et inférieurs rejetés
-- En développement : certificat auto-signé généré automatiquement (`tls internal`)
-- En production : certificat Let's Encrypt automatique via le domaine OVH
+- En développement : HTTP simple sur la boucle locale, aucune donnée réelle n'y transite
+- En production : certificat Let's Encrypt automatique via `CADDY_DOMAIN`
+- La séquence de déploiement du rapport fonctionne telle qu'elle est écrite
+- L'image de production ne contient aucun montage de code de l'hôte
 
 **Fichiers à créer/modifier :**
 
-- `Caddyfile` à la racine — configuration du reverse proxy
-- `docker-compose.yml` — ajouter le service `caddy` avec les ports 80 et 443
+- `Caddyfile.prod` — configuration de production, TLS et en-têtes de sécurité
+- `docker-compose.yml` — base commune, sans rien de spécifique au développement
+- `docker-compose.override.yml` — développement, chargé automatiquement
+- `docker-compose.prod.yml` — production, profil `prod` et `target: prod`
 
 **Règles de code :**
 
 - Le backend Hono n'expose jamais directement le port 3001 hors du réseau Docker — tout le trafic passe par Caddy
 - `CADDY_DOMAIN` en variable d'environnement pour switcher entre dev (`localhost`) et prod (domaine réel)
 - Le `Caddyfile` est monté en volume dans le service Docker — pas de rebuild image pour changer la config
-- Ajouter `CADDY_DOMAIN` dans `.env.example` et `.env.local`
+- Ajouter `CADDY_DOMAIN` et `ACME_EMAIL` dans `.env.example` et `.env.production`
+- Rien de spécifique au développement dans `docker-compose.yml` : un `volumes: []` posé dans un fichier de surcharge **ne supprime pas** les montages du fichier de base, ils fusionnent par chemin cible. La séparation se fait donc en amont, pas par annulation
+- `docker-compose.override.yml` n'est chargé que par un `docker compose` sans `-f` — c'est ce qui garantit qu'aucun montage de code ni cible `dev` ne parte en production
+- Un script nommé `prod` ne lit jamais `.env.local` : mieux vaut un échec bruyant sur un fichier absent qu'un démarrage silencieux avec les identifiants de développement
+- Tester : `docker compose -f docker-compose.yml -f docker-compose.prod.yml --profile prod config` résout `target: prod` sans montage de code, et `caddy validate` accepte le `Caddyfile.prod`
 
 ---
+### DEVOPS-12 — Conteneuriser le dashboard web
+
+`[ ]` 🟡 Majeur · `apps/web/Dockerfile` · `docker-compose.prod.yml` · `Caddyfile.prod`
+
+**Contexte :**
+
+Le rapport de certification annonce quatre services en production, dont
+Next.js. Or `apps/web` n'avait aucun `Dockerfile` et n'apparaissait dans aucun
+fichier Compose : le dashboard n'était pas déployable.
+
+**Comportement attendu :**
+
+- L'image de production se construit et sert le dashboard
+- Caddy route deux domaines : l'API vers `backend:3001`, le dashboard vers `web:3000`
+- Le dashboard n'est conteneurisé qu'en production — en développement il tourne sur l'hôte, où le rechargement à chaud est plus rapide
+
+**Règles de code :**
+
+- **La base de l'image est Node, pas `oven/bun`.** `next build` (Next 16, Turbopack) charge un runtime CommonJS compilé que Bun ne sait pas évaluer : la construction échoue sur « Expected CommonJS module to have a function wrapper ». La CI n'y est pas confrontée parce qu'elle installe Node **et** Bun sur le runner. L'image reproduit cet environnement ; Bun y reste, c'est lui qui gère le lockfile et les dépendances workspace
+- La version de Bun installée est épinglée, jamais `latest` : sinon l'image n'est pas reproductible d'une construction à l'autre
+- `NEXT_PUBLIC_API_URL` est un **argument de build**, pas une variable d'exécution : Next l'inscrit dans le bundle client à la compilation. Changer de domaine impose de reconstruire l'image
+- Routage Caddy par domaine et non par chemin : les routes du backend sont à la racine (`/patients`, `/alerts`, `/auth`), sans préfixe `/api`. Une séparation par chemin obligerait à les énumérer, et toute route ajoutée sans y penser partirait vers le mauvais service
+- Tester : l'image se construit, le conteneur démarre et sert une page en HTTP 200
+
+---
+
 
 ### DEVOPS-04 — Réparation du système de migrations Drizzle
 

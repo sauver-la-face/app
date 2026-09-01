@@ -32,7 +32,7 @@ export function AlertBanner({ alerts, dictionary }: AlertBannerProps) {
             // la cle se dedoublait — React omettait silencieusement une alerte.
             // symptomCode les distingue.
             key={`${alert.patientId}-${alert.occurredAt}-${alert.type}-${alert.symptomCode ?? ''}`}
-            className="flex items-start gap-3 px-4 py-3 [&:not(:last-child)]:border-b [&:not(:last-child)]:border-red-100"
+            className="flex items-start gap-3 px-4 py-3 not-last:border-b not-last:border-red-100"
           >
             <span
               className={`mt-1 h-2 w-2 shrink-0 rounded-full ${alert.severity === 'critical' ? 'bg-red-500' : 'bg-orange-400'}`}
