@@ -103,11 +103,18 @@ interface DemoPatient {
     content: string;
     acknowledgedDaysAgo: number | null;
   } | null;
+  /**
+   * null = aucun code jamais émis (badge « aucun »). Un code jamais utilisé et
+   * créé il y a plus de 48 h bascule seul en « expiré » — c'est la TTL de
+   * `resolvePatientCodeStatus`, pas un champ à renseigner.
+   */
   code: {
     uuid: string;
     value: string;
     createdDaysAgo: number;
     usedDaysAgo: number | null;
+    /** SEC-03 — session coupée à la main : appareil perdu ou volé. */
+    revokedDaysAgo?: number | null;
   } | null;
   /** Ce que ce patient démontre à l'écran — repris dans le récapitulatif de fin. */
   demonstrates: string;
@@ -300,6 +307,86 @@ const DEMO_PATIENTS: readonly DemoPatient[] = [
       usedDaysAgo: null,
     },
     demonstrates: 'accès créé, code actif jamais utilisé — statut « jamais synchronisé »',
+  },
+  {
+    fallbackUuid: 'aaaaaaa5-0000-4000-8000-000000000005',
+    firstName: 'Rithy',
+    lastName: 'Pich',
+    sex: 'M',
+    birthdate: '2013-08-19',
+    region: 'Kampot',
+    lastSyncedDaysAgo: null,
+    procedure: {
+      uuid: 'aaaaaaa5-1000-4000-8000-000000000005',
+      type: 'cleft_palate_repair',
+      daysAgo: 4,
+      hospital: 'Kampot Provincial Hospital',
+    },
+    events: [],
+    instruction: null,
+    code: {
+      uuid: 'aaaaaaa5-4000-4000-8000-000000000005',
+      value: '386201',
+      createdDaysAgo: 4,
+      usedDaysAgo: null,
+    },
+    demonstrates: 'code expiré — remis il y a 4 jours, jamais saisi, à réémettre',
+  },
+  {
+    fallbackUuid: 'aaaaaaa6-0000-4000-8000-000000000006',
+    firstName: 'Malis',
+    lastName: 'Keo',
+    sex: 'F',
+    birthdate: '2011-01-27',
+    region: 'Takéo',
+    lastSyncedDaysAgo: 3,
+    procedure: {
+      uuid: 'aaaaaaa6-1000-4000-8000-000000000006',
+      type: 'cleft_lip_repair',
+      daysAgo: 9,
+      hospital: 'Takéo Provincial Hospital',
+    },
+    events: [
+      {
+        uuid: 'aaaaaaa6-2000-4000-8000-000000000001',
+        daysAgo: 8,
+        type: 'post_op_follow_up',
+        title: 'Contrôle J+1',
+        description: 'Suites simples. Téléphone déclaré perdu depuis, session coupée.',
+        symptomCodes: ['swelling'],
+        photos: [
+          { uuid: 'aaaaaaa6-5000-4000-8000-000000000001', label: 'Face — J+1', view: 'face' },
+        ],
+      },
+    ],
+    instruction: null,
+    code: {
+      uuid: 'aaaaaaa6-4000-4000-8000-000000000006',
+      value: '472930',
+      createdDaysAgo: 9,
+      usedDaysAgo: 8,
+      revokedDaysAgo: 2,
+    },
+    demonstrates: 'code révoqué (SEC-03) — appareil perdu, session coupée, dossier conservé',
+  },
+  {
+    fallbackUuid: 'aaaaaaa7-0000-4000-8000-000000000007',
+    firstName: 'Vibol',
+    lastName: 'Ny',
+    sex: 'M',
+    birthdate: '2015-06-04',
+    region: 'Kandal',
+    lastSyncedDaysAgo: null,
+    procedure: {
+      uuid: 'aaaaaaa7-1000-4000-8000-000000000007',
+      type: 'cleft_lip_repair',
+      daysAgo: 0,
+      hospital: 'Kandal Provincial Hospital',
+    },
+    events: [],
+    instruction: null,
+    code: null,
+    demonstrates: 'aucun code émis — fiche créée au bloc, accès pas encore ouvert',
   },
 ];
 
@@ -749,6 +836,10 @@ async function seedPatient(
       created_at: daysAgo(demo.code.createdDaysAgo),
       used_at: demo.code.usedDaysAgo === null ? null : daysAgo(demo.code.usedDaysAgo),
       is_active: true,
+      revoked_at:
+        demo.code.revokedDaysAgo === null || demo.code.revokedDaysAgo === undefined
+          ? null
+          : daysAgo(demo.code.revokedDaysAgo),
     });
   }
 
@@ -849,7 +940,10 @@ async function main(): Promise<void> {
     `DEMO-01 seed : ${DEMO_PATIENTS.length} patients rattaches au medecin ${physicianId}`,
   );
   console.log(`Photos : ${photoSource}`);
-  console.log('Attendu au tableau de bord : 4 patients, 3 alertes (2 critiques, 1 inactivite).');
+  console.log(
+    `Attendu au tableau de bord : ${DEMO_PATIENTS.length} patients, 3 alertes (2 critiques, 1 inactivite).`,
+  );
+  console.log('Les 4 badges de statut (alerte incluse) et les 5 etats de code sont representes.');
 }
 
 main()

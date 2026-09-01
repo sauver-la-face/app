@@ -1270,8 +1270,10 @@ Le dossier patient (WEB-03) souffre du même vide : `seedSync01` insère une lig
 
 **Comportement attendu :**
 
-- Quatre patients couvrant les quatre états du parcours de suivi : alerte critique (symptôme déclencheur récent), alerte d'inactivité (dernière synchronisation à J-11), suivi normal (synchronisation du jour), accès créé avec code actif jamais utilisé
-- Après exécution, `GET /alerts` renvoie 3 alertes (2 critiques sur le même signalement, 1 d'inactivité) et `GET /patients` en renvoie 4, avec les quatre statuts distincts
+- Sept patients couvrant tous les états lisibles à l'écran : alerte critique (symptôme déclencheur récent), alerte d'inactivité (dernière synchronisation à J-11), suivi normal (synchronisation du jour), accès créé avec code actif jamais utilisé, code expiré faute de saisie, code révoqué après perte de l'appareil, fiche sans aucun code émis
+- Après exécution, `GET /alerts` renvoie 3 alertes (2 critiques sur le même signalement, 1 d'inactivité) et `GET /patients` en renvoie 7
+- **Les 9 badges de la liste sont représentés** : les 4 badges de statut (alerte, hors-ligne, jamais synchronisé, OK — l'alerte venant de `hasAlert`, pas de `syncStatus`) et les 5 états de code (actif, utilisé, expiré, révoqué, aucun). Un badge qu'aucun patient ne déclenche est un pan de l'interface que personne ne voit jamais, en démonstration comme en recette
+- Les trois patients ajoutés pour les états de code ne créent aucune alerte supplémentaire : symptômes non déclencheurs, et `last_synced_at` soit récent soit nul — le compte reste à 3
 - Trois de ces patients portent une chronologie photo réellement servie par `GET /photos/:mediaId` : les fichiers sont déposés dans le bucket MinIO, pas seulement référencés en base
 - Rejouable sans produire de doublon ni casser les contraintes d'unicité
 
