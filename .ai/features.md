@@ -109,7 +109,7 @@ Suite à SEC-01 : le JWT patient est signé (`jwtTokenProvider.ts`) mais aucune 
 
 ### SEC-03 — Révocation de session patient (A07)
 
-`[ ]` 🔴 Critique · `apps/backend/src/shared/middleware/` · `apps/backend/src/features/patients/` · `apps/backend/src/infrastructure/schema.ts`
+`[x]` 🔴 Critique · `apps/backend/src/shared/middleware/` · `apps/backend/src/features/patients/` · `apps/backend/src/infrastructure/schema.ts`
 
 **Contexte :**
 
