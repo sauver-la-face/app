@@ -16,6 +16,7 @@ Chaque version est marquée par un tag Git annoté (`vX.Y.Z`).
 
 ### Ajouté
 
+- **AUTH-02** — enrôlement et vérification du second facteur TOTP. La feature était annoncée « MFA obligatoire » et marquée terminée, alors que le plugin Better Auth était configuré sans qu'aucun écran ne l'exerce : un médecin se connectait avec un simple mot de passe. Livrés : `/mfa/setup` (QR code, codes de secours, activation), `/mfa/verify` (second facteur à la connexion, repli sur code de secours) et une garde renvoyant tout médecin non enrôlé vers l'enrôlement. QR rendu localement par `qrcode.react` plutôt que par un service distant, qui recevrait le secret TOTP
 - **WEB-03** — page de création d'un patient dans le dashboard : formulaire d'identité, barre latérale de navigation, résumé mis à jour pendant la saisie et calcul automatique de l'âge. Le header accueille une barre de recherche et l'identité du médecin connecté
 - **AUTH-02** — le formulaire de connexion signale désormais le blocage après trois tentatives échouées et indique le délai de quinze minutes. Le message est traduit en français, anglais et khmer, là où le backend renvoyait un texte codé en dur en français. Un message générique de repli évite de laisser le formulaire muet lorsqu'aucun texte n'accompagne l'erreur
 - **DOCS-02** — structure documentaire : `docs/adr/` avec les 13 décisions techniques consignées une par fichier, `docs/security/owasp.md`, template d'architecture des six piliers, `docs/README.md`, dossiers `design/` et `brief/`
