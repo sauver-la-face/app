@@ -1,5 +1,5 @@
 # ── ÉTAPE 1 : base commune ──────────────────────────────────────────────────────
-FROM oven/bun:1.3.12 AS base
+FROM oven/bun:1.4.0 AS base
 
 WORKDIR /app
 
