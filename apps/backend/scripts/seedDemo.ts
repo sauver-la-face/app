@@ -245,46 +245,6 @@ const DEMO_PATIENTS: readonly DemoPatient[] = [
     demonstrates: "alerte d'inactivité — aucun signe de vie depuis 11 jours",
   },
   {
-    fallbackUuid: 'aaaaaaa3-0000-4000-8000-000000000003',
-    firstName: 'Dara',
-    lastName: 'Sok',
-    sex: 'M',
-    birthdate: '2014-11-23',
-    region: 'Phnom Penh',
-    lastSyncedDaysAgo: 0,
-    procedure: {
-      uuid: 'aaaaaaa3-1000-4000-8000-000000000003',
-      type: 'cleft_lip_repair',
-      daysAgo: 5,
-      hospital: 'Phnom Penh Referral Hospital',
-    },
-    events: [
-      {
-        uuid: 'aaaaaaa3-2000-4000-8000-000000000001',
-        daysAgo: 4,
-        type: 'post_op_follow_up',
-        title: 'Contrôle J+1',
-        description: 'Évolution conforme, gonflement modéré attendu.',
-        symptomCodes: ['swelling'],
-        photos: [
-          { uuid: 'aaaaaaa3-5000-4000-8000-000000000001', label: 'Face — J+1', view: 'face' },
-        ],
-      },
-    ],
-    instruction: {
-      uuid: 'aaaaaaa3-3000-4000-8000-000000000003',
-      content: 'Photo de la cicatrice tous les trois jours pendant deux semaines.',
-      acknowledgedDaysAgo: 3,
-    },
-    code: {
-      uuid: 'aaaaaaa3-4000-4000-8000-000000000003',
-      value: '558602',
-      createdDaysAgo: 5,
-      usedDaysAgo: 5,
-    },
-    demonstrates: 'suivi normal — aucune alerte, synchronisation du jour',
-  },
-  {
     fallbackUuid: 'aaaaaaa4-0000-4000-8000-000000000004',
     firstName: 'Chanthou',
     lastName: 'Neang',
