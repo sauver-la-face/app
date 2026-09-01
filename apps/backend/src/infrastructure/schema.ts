@@ -3,6 +3,7 @@ import {
   boolean,
   date,
   index,
+  integer,
   pgTable,
   primaryKey,
   text,
@@ -252,4 +253,10 @@ export const twoFactor = pgTable('two_factor', {
   backupCodes: text('backup_codes').notNull(),
   userId: text('user_id').notNull(),
   verified: boolean('verified').default(false),
+  // Better Auth 1.7 : protection contre le forcage brutal du code TOTP.
+  // Le compteur d'echecs et la date de deverrouillage sont ecrits par le
+  // plugin ; leur absence fait echouer l'enrolement en 500.
+  // https://better-auth.com/docs/guides/1-7-upgrade-guide
+  failedVerificationCount: integer('failed_verification_count').default(0),
+  lockedUntil: timestamp('locked_until', { withTimezone: true }),
 });
