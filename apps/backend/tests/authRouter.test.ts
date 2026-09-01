@@ -9,6 +9,7 @@ import type {
   PatientCodeRepository,
 } from '../src/features/auth/domain/patientCodeRepository';
 import { createAuthRouter } from '../src/features/auth/presentation/authRouter';
+import { medecinAbsent, medecinAuthentifie } from './physicianAuthStub';
 
 const patientId = '11111111-1111-4111-8111-111111111111';
 const validCode = '123456';
@@ -65,13 +66,16 @@ const fakeTokenProvider: TokenProvider = {
   verify: async () => null,
 };
 
-function createTestApp(seed?: PatientCode) {
+function createTestApp(
+  seed?: PatientCode,
+  authMiddleware: ReturnType<typeof medecinAuthentifie> = medecinAuthentifie(),
+) {
   const repository = new InMemoryPatientCodeRepository();
   if (seed) {
     repository.seed(seed);
   }
   const usecase = new AuthUsecase(repository, fakeTokenProvider);
-  const router = createAuthRouter(usecase);
+  const router = createAuthRouter(usecase, authMiddleware);
   const app = new Hono();
   app.route('/', router);
   return app;
@@ -170,6 +174,63 @@ describe('authRouter — patient endpoints', () => {
       });
 
       expect(response.status).toBe(400);
+    });
+  });
+
+  // SEC-04/A01 : ces deux routes fabriquaient un code d'acces pour n'importe
+  // quel uuid_patient, sans authentification, et le renvoyaient en clair.
+  // Combine a GET /alerts qui livrait les UUID, cela permettait de prendre le
+  // controle du compte de n'importe quel patient.
+  describe('SEC-04 — emission de code reservee au medecin', () => {
+    test('POST /patient/generate retourne 401 sans session medecin', async () => {
+      const app = createTestApp(undefined, medecinAbsent());
+
+      const response = await app.request('/patient/generate', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ uuid_patient: patientId }),
+      });
+
+      expect(response.status).toBe(401);
+    });
+
+    test('POST /patient/renew retourne 401 sans session medecin', async () => {
+      const app = createTestApp(undefined, medecinAbsent());
+
+      const response = await app.request('/patient/renew', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ uuid_patient: patientId }),
+      });
+
+      expect(response.status).toBe(401);
+    });
+
+    test('aucun code n est divulgue dans la reponse 401', async () => {
+      const app = createTestApp(undefined, medecinAbsent());
+
+      const response = await app.request('/patient/generate', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ uuid_patient: patientId }),
+      });
+      const corps = await response.text();
+
+      expect(corps).not.toMatch(/\d{6}/);
+    });
+
+    // Le login patient doit rester joignable : il ne peut pas exiger d'etre
+    // deja authentifie. C'est le rate limiting qui le protege.
+    test('POST /patient/validate reste accessible sans session medecin', async () => {
+      const app = createTestApp(makeActiveCode(), medecinAbsent());
+
+      const response = await app.request('/patient/validate', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ code: validCode }),
+      });
+
+      expect(response.status).not.toBe(401);
     });
   });
 

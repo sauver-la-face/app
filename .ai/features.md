@@ -146,6 +146,52 @@ déjà `uuid_patient_code`, la vérification est donc possible sans changer le f
 - Tester : token valide avant révocation → 200, même token après révocation → 401, révocation d'un patient sans session active, non-régression de `issueAccessCode()` qui ne doit toujours révoquer que les codes en attente
 
 ---
+### SEC-04 — Routes non protégées : alertes et génération de codes (A01)
+
+`[ ]` 🔴 Critique · `apps/backend/src/features/alerts/` · `apps/backend/src/features/auth/` · `apps/backend/tests/`
+
+**Contexte :**
+
+Un audit complet des routes, mené après SEC-03, a révélé une chaîne d'accès
+complète aux données médicales **sans aucune authentification** :
+
+1. `GET /alerts` n'a aucun garde — `alertRouter` ne contient pas une seule ligne
+   d'authentification. La réponse expose `patientDisplayName` (le nom du patient),
+   `patientId`, `symptomCode` et `symptomLabelFr` : donnée de santé nominative,
+   soit une donnée sensible au sens de l'article 9 du RGPD.
+2. `POST /auth/patient/generate` fabrique un code d'accès à six chiffres pour
+   n'importe quel `uuid_patient` fourni dans le corps, et le renvoie en clair.
+   `createAuthRouter` est monté sans garde médecin. `POST /auth/patient/renew`
+   présente le même défaut.
+3. `POST /auth/patient/validate` échange ce code contre un JWT valable un an.
+
+Les UUID nécessaires à l'étape 2 s'obtiennent à l'étape 1. Le rate limiting ne
+protège pas : il compte les tentatives *échouées*, or ici rien n'est deviné.
+
+SEC-01 avait bien imposé la session médecin, mais sur un périmètre énuméré à la
+main — `patientRouter`, `photosRouter`, `exportsRouter`, `instructions` —, et
+`alertRouter` comme `authRouter` n'y figuraient pas. L'audit OWASP a ensuite
+classé A01 « Corrigé » en reprenant cette liste. Rien ne vérifiait qu'elle était
+complète.
+
+**Comportement attendu :**
+
+- `GET /alerts` exige une session médecin
+- `POST /auth/patient/generate` et `POST /auth/patient/renew` exigent une session médecin
+- `POST /auth/patient/validate` reste public : c'est le login patient lui-même
+- Un test monte l'**application complète** et parcourt la table de routage réelle : toute route est soit protégée, soit inscrite dans une liste explicite de routes publiques
+- La ligne A01 de `docs/security/owasp.md` renvoie à ce test, pas à une affirmation en prose
+
+**Règles de code :**
+
+- Le test d'inventaire lit `app.routes`, jamais une liste écrite à la main : une liste se périme, la table de routage est la réalité
+- Une route inconnue du test le fait **échouer** — le défaut est le refus, pas l'oubli. C'est ce qui manquait à SEC-01
+- Ne pas remplacer un garde à joker (`/patients/*`) par une énumération de chemins : le joker protège toute route future par défaut, une liste l'oublie par défaut et le trou est silencieux
+- Ce test doit monter l'app entière : c'est le seul niveau où les recouvrements entre routeurs sont visibles, celui qui avait masqué `GET /patients/{id}/instructions` jusqu'à SEC-03
+- Tester : chaque route protégée renvoie 401 sans identifiants, `validate` reste accessible, et l'ajout d'une route non déclarée casse la suite
+
+---
+
 
 ### SYNC-01 — Réception et résolution des conflits (server-wins)
 
