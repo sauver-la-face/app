@@ -601,6 +601,10 @@ async function upsertSymptoms(db: DbClient): Promise<Map<string, string>> {
 async function resolvePatientId(db: DbClient, demo: DemoPatient): Promise<string> {
   const lastSyncedAt = demo.lastSyncedDaysAgo === null ? null : daysAgo(demo.lastSyncedDaysAgo);
 
+  // Tri explicite : une base de developpement peut porter plusieurs homonymes
+  // laisses par un seed anterieur. Sans `orderBy`, Postgres est libre de rendre
+  // une ligne differente a chaque execution, et le seed rattacherait les memes
+  // UUID fixes tantot a l'un tantot a l'autre — collision de cle primaire.
   const existing = await db
     .select({ uuid: patient.uuid_patient })
     .from(patient)
@@ -610,6 +614,7 @@ async function resolvePatientId(db: DbClient, demo: DemoPatient): Promise<string
         sql`lower(${patient.last_name}) = lower(${demo.lastName})`,
       ),
     )
+    .orderBy(patient.uuid_patient)
     .limit(1);
 
   const found = existing[0];
@@ -731,6 +736,12 @@ async function seedPatient(
   await wipePatientClinicalData(db, patientId);
 
   if (demo.code) {
+    // Le nettoyage ci-dessus ne couvre que le patient resolu. Si un homonyme
+    // laisse par un seed anterieur detient encore ce code, la cle primaire
+    // entre en collision : on retire la ligne par son UUID, quel qu'en soit
+    // le porteur.
+    await db.delete(patientCode).where(eq(patientCode.uuid_patient_code, demo.code.uuid));
+
     await db.insert(patientCode).values({
       uuid_patient_code: demo.code.uuid,
       uuid_patient: patientId,
