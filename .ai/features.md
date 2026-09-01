@@ -278,6 +278,31 @@ Le seuil actuel (ALERT-01) est fixe à 7 jours, identique pour tous les patients
 
 ---
 
+### ALERT-03 — Alerte d'inactivité pour un patient enrôlé qui n'a jamais synchronisé
+
+`[ ]` 🟢 Mineur · `apps/backend/src/features/alerts/`
+
+**Contexte :**
+
+`buildSyncOverdueAlerts` ne considère que les patients dont `last_synced_at` est renseigné (`alertsDomain.ts`, filtre `lastSyncedAt !== null`). Un patient qui a consommé son code d'accès — donc qui a l'application en main — mais dont aucune synchronisation n'est jamais remontée reste invisible côté alertes : il n'apparaît qu'en statut « jamais synchronisé » dans le tableau. C'est pourtant le silence le plus inquiétant du parcours.
+
+Le comportement actuel est correct pour le cas inverse — fiche créée, code jamais remis au patient — où alerter n'aurait aucun sens : le patient n'a pas encore de moyen de donner signe de vie.
+
+**Comportement attendu :**
+
+- Le compte à rebours d'inactivité démarre au premier signe de vie possible : `last_synced_at` s'il existe, sinon la date d'utilisation du code d'accès (`patient_code.used_at`)
+- Un patient sans code utilisé ne déclenche aucune alerte — comportement actuel préservé
+- Le message distingue les deux cas : « aucune synchronisation depuis X jours » vs « première connexion il y a X jours, aucune donnée reçue »
+
+**Règles de code :**
+
+- La résolution de la date de départ vit dans `alerts/domain/` — le repository fournit `usedAt` en plus de `lastSyncedAt`, il ne décide pas
+- Se combine avec **ALERT-02** (seuil paramétrable) : même seuil appliqué, seule la date de départ change
+- Dépend de **ALERT-01** (déjà implémenté), extension non bloquante
+- Tester : code utilisé il y a 10 jours sans sync → alerte, code utilisé hier sans sync → pas d'alerte, aucun code utilisé → pas d'alerte, sync récente → pas d'alerte
+
+---
+
 ### PHOTO-01 — Stockage et validation des photos
 
 `[x]` 🟡 Majeur · `apps/backend/src/features/photos/`
@@ -1230,6 +1255,30 @@ Une origine refusée par le CORS se manifeste dans le navigateur par un « Faile
 Exactement le même message apparaît pour une raison sans rapport, côté client cette fois. `authClient.ts` et `useDashboard.ts` retombent tous deux sur `http://localhost:3001` quand `NEXT_PUBLIC_API_URL` est absente. En développement local, ce repli tombe juste et masque le problème. En conteneur il est faux : `NEXT_PUBLIC_API_URL` est un **argument de build**, pas une variable d'exécution — Next l'inscrit dans le JavaScript à la compilation (`apps/web/Dockerfile`, `docker-compose.prod.yml` la passe comme `build.args`). Une image construite sans elle embarque donc `localhost:3001` en dur, et chaque navigateur qui l'ouvre interroge **sa propre machine** au lieu du serveur. Le symptôme est identique, la cause est ailleurs, et elle ne se voit qu'en production.
 
 Deux conséquences pour ce lot : le repli mérite d'être unique et déclaré à un seul endroit plutôt que recopié dans chaque hook, et l'absence de `NEXT_PUBLIC_API_URL` au build de l'image devrait échouer bruyamment plutôt que produire une image silencieusement inutilisable.
+
+---
+
+### DEMO-01 — Jeu de données de démonstration
+
+`[ ]` 🟡 Majeur · `apps/backend/scripts/seedDemo.ts`
+
+**Contexte :**
+
+Les scripts de seed existants ne produisent aucune alerte : `seedMed01` n'insère que le référentiel de symptômes, et `seedSync01` crée un patient dont le symptôme est `triggers_alert: false`, sans `last_synced_at`. Sur une base fraîche, le tableau de bord affiche donc le bandeau vert « aucune alerte » — ce qui contredit la démonstration du parcours médecin, où le premier écran montre « les alertes du jour ».
+
+**Comportement attendu :**
+
+- Quatre patients couvrant les quatre états du parcours de suivi : alerte critique (symptôme déclencheur récent), alerte d'inactivité (dernière synchronisation à J-11), suivi normal (synchronisation du jour), accès créé avec code actif jamais utilisé
+- Après exécution, `GET /alerts` renvoie 3 alertes (2 critiques sur le même signalement, 1 d'inactivité) et `GET /patients` en renvoie 4, avec les quatre statuts distincts
+- Rejouable sans produire de doublon ni casser les contraintes d'unicité
+
+**Règles de code :**
+
+- Les événements sont rattachés au médecin réellement enregistré (`DEMO_PHYSICIAN_EMAIL`, ou le premier médecin en base) — jamais à un médecin fictif créé par le script, sinon la démonstration se fait sous un compte différent de celui de la connexion
+- Les patients sont retrouvés par nom avant insertion : un patient créé à la main depuis le dashboard est enrichi, pas dupliqué
+- Les symptômes déclencheurs viennent de `SYMPTOMS_SEED` — jamais de `triggers_alert` écrit en dur dans le script
+- Refus d'exécution si `NODE_ENV=production` : le script efface les données cliniques des patients qu'il gère
+- Tester : exécution sur base vierge → 3 alertes, seconde exécution → toujours 4 patients et 3 alertes
 
 ---
 

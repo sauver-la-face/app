@@ -12,7 +12,8 @@
     "db:migrate": "dotenv -e .env.local -- bun run scripts/migrate.ts",
     "db:push": "dotenv -e .env.local -- drizzle-kit push",
     "db:seed:sync01": "dotenv -e .env.local -- bun run scripts/seedSync01.ts",
-    "db:seed:med01": "dotenv -e .env.local -- bun run scripts/seedMed01.ts"
+    "db:seed:med01": "dotenv -e .env.local -- bun run scripts/seedMed01.ts",
+    "db:seed:demo": "dotenv -e .env.local -- bun run scripts/seedDemo.ts"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.1117.0",
