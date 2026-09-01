@@ -27,7 +27,11 @@ export function AlertBanner({ alerts, dictionary }: AlertBannerProps) {
       <ul>
         {alerts.map((alert) => (
           <li
-            key={`${alert.patientId}-${alert.occurredAt}-${alert.type}`}
+            // Un patient peut declarer plusieurs symptomes declencheurs dans le
+            // meme releve : patient, horodatage et type sont alors identiques, et
+            // la cle se dedoublait — React omettait silencieusement une alerte.
+            // symptomCode les distingue.
+            key={`${alert.patientId}-${alert.occurredAt}-${alert.type}-${alert.symptomCode ?? ''}`}
             className="flex items-start gap-3 px-4 py-3 [&:not(:last-child)]:border-b [&:not(:last-child)]:border-red-100"
           >
             <span
