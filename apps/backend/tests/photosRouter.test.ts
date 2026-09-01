@@ -12,6 +12,7 @@ import type { PhotoRepository } from '../src/features/photos/domain/photoReposit
 import type { PhotoStorage } from '../src/features/photos/domain/photoStorage';
 import { createPhotosRouter } from '../src/features/photos/presentation/photosRouter';
 import type { PatientSessionVariables } from '../src/shared/middleware/patientAuthMiddleware';
+import { sessionVivante } from './patientSessionStub';
 
 const physicianId = '99999999-9999-4999-8999-999999999999';
 const patientId = '44444444-4444-4444-8444-444444444444';
@@ -78,7 +79,7 @@ function fakeAuthAs(
 async function patientToken(uuid_patient: string): Promise<string> {
   return tokenProvider.sign({
     uuid_patient,
-    uuid_patient_code: 'code-id',
+    uuid_patient_code: `code:${uuid_patient}`,
     role: 'patient',
   });
 }
@@ -128,6 +129,7 @@ function createTestApp(options: TestAppOptions = {}) {
       s3Client,
       bucket,
       tokenProvider,
+      sessionVivante(),
       options.authMiddleware ?? fakeAuthAs(physicianId),
     ),
   );

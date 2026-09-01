@@ -20,6 +20,11 @@ class InMemoryPatientCodeRepository implements PatientCodeRepository {
     this.codes.set(patientCode.uuid_patient_code, { ...patientCode });
   }
 
+  async findById(uuid_patient_code: string): Promise<PatientCode | null> {
+    const entry = this.codes.get(uuid_patient_code);
+    return entry ? { ...entry } : null;
+  }
+
   async findByCode(code: PatientCodeValue): Promise<PatientCode | null> {
     for (const entry of this.codes.values()) {
       if (entry.code.toString() === code.toString()) {

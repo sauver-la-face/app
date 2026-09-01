@@ -5,6 +5,7 @@ import {
   instructionSchema,
 } from '@sauver-la-face/shared';
 import {
+  type PatientSessionLookup,
   type PatientSessionVariables,
   requirePatientAuth,
 } from '@shared/middleware/patientAuthMiddleware';
@@ -22,16 +23,6 @@ import {
 import type { InstructionRepository } from '../domain/instructionRepository';
 
 type Variables = SessionVariables & PatientSessionVariables;
-
-const patientIdParamSchema = z.object({
-  patientId: z
-    .string()
-    .uuid()
-    .openapi({
-      example: '11111111-1111-4111-8111-111111111111',
-      param: { in: 'path', name: 'patientId' },
-    }),
-});
 
 const instructionIdParamSchema = z.object({
   instructionId: z
@@ -83,18 +74,26 @@ const createInstructionRoute = createRoute({
   tags: ['Instructions'],
 });
 
+// SEC-03 : servie sous `/me` et non `/patients/{id}`. Deux raisons.
+//
+// Technique : `patientRouter` pose un garde medecin sur `/patients/*`, et Hono
+// aplatit les sous-routeurs montes sur '/' dans une seule table. Sous l'ancien
+// chemin, le garde medecin repondait 401 avant que le garde patient ne
+// s'execute — la route etait injoignable depuis le mobile.
+//
+// De conception : `/patients/{id}/...` est une vue administrative, ou un tiers
+// designe quelqu'un d'autre par son identifiant. `/me/...` est une vue a la
+// premiere personne, ou le sujet lit ses propres donnees. L'identifiant
+// disparaissant de l'URL, il n'y a plus de correspondance a verifier entre le
+// chemin et le token : la classe de bug IDOR disparait par construction au lieu
+// d'etre rattrapee par un 403.
 const listPatientInstructionsRoute = createRoute({
   method: 'get',
-  path: '/patients/{patientId}/instructions',
-  request: { params: patientIdParamSchema },
+  path: '/me/instructions',
   responses: {
     200: {
       content: { 'application/json': { schema: instructionListResponseSchema } },
-      description: 'Liste des instructions du patient',
-    },
-    403: {
-      content: { 'application/json': { schema: forbiddenErrorSchema } },
-      description: 'Le patient authentifie ne correspond pas au patientId du chemin',
+      description: 'Liste des instructions du patient authentifie',
     },
   },
   tags: ['Instructions'],
@@ -128,6 +127,7 @@ export function createInstructionsRouter(
   instructionsUsecase: InstructionsUsecase,
   instructionRepository: InstructionRepository,
   tokenProvider: TokenProvider,
+  patientCodes: PatientSessionLookup,
   physicianAuthMiddleware: MiddlewareHandler<{
     Variables: Variables;
   }> = requirePhysicianAuth as unknown as MiddlewareHandler<{ Variables: Variables }>,
@@ -135,8 +135,11 @@ export function createInstructionsRouter(
   const router = new OpenAPIHono<{ Variables: Variables }>();
 
   router.use('/instructions', physicianAuthMiddleware);
-  router.use('/patients/:patientId/instructions', requirePatientAuth(tokenProvider));
-  router.use('/instructions/:instructionId/acknowledge', requirePatientAuth(tokenProvider));
+  router.use('/me/instructions', requirePatientAuth(tokenProvider, patientCodes));
+  router.use(
+    '/instructions/:instructionId/acknowledge',
+    requirePatientAuth(tokenProvider, patientCodes),
+  );
 
   router.openapi(createInstructionRoute, async (context) => {
     const body = await context.req.json().catch(() => undefined);
@@ -165,15 +168,9 @@ export function createInstructionsRouter(
   });
 
   router.openapi(listPatientInstructionsRoute, async (context) => {
-    const patientId = context.req.param('patientId');
-
-    if (context.get('patientId') !== patientId) {
-      return context.json(
-        { code: 'FORBIDDEN' as const, message: 'Acces refuse a ce dossier patient' },
-        403,
-      );
-    }
-
+    // Le patient vient du token, jamais du chemin : plus rien a comparer, donc
+    // plus de 403 possible ici. C'est le gain du passage sous `/me`.
+    const patientId = context.get('patientId') as string;
     const response = await instructionsUsecase.listForPatient(patientId);
     return context.json(response, 200);
   });

@@ -82,6 +82,12 @@ export interface PatientRepository {
     patient: Omit<PatientPersistenceRecord, 'patientId'>,
   ): Promise<PatientPersistenceRecord | null>;
   list(): Promise<PatientRepositoryRecord[]>;
+  // Codes EN ATTENTE uniquement (used_at IS NULL) : hygiene d'emission, appelee
+  // quand un nouveau code est genere. Ne coupe aucune session ouverte.
   revokeActiveCodes(patientId: string, revokedAt: Date): Promise<void>;
+  // SEC-03/A07 : codes CONSOMMES (used_at IS NOT NULL), ceux qui portent une
+  // session en cours. Deliberement distincte de revokeActiveCodes - les
+  // confondre deconnecterait un patient a chaque code regenere.
+  revokeSession(patientId: string, revokedAt: Date): Promise<void>;
   createAccessCode(patientId: string, code: string, createdAt: Date): Promise<boolean>;
 }

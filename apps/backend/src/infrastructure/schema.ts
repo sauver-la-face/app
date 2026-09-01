@@ -52,7 +52,9 @@ export const patient = pgTable('patient', {
 });
 
 // Soft delete automatique apres 48h si le code n'a pas ete utilise (job cron)
-// Une fois utilise (used_at NOT NULL), le code est valide pour toujours
+// Une fois utilise (used_at NOT NULL), le code ouvre une session qui n'expire
+// pas d'elle-meme. SEC-03 : cette session se coupe en posant revoked_at sur le
+// code consomme - c'est ce que relit requirePatientAuth a chaque requete.
 export const patientCode = pgTable(
   'patient_code',
   {
@@ -68,9 +70,15 @@ export const patientCode = pgTable(
     revoked_at: timestamp('revoked_at', { withTimezone: true }),
   },
   (t) => [
+    // SEC-03 : `used_at IS NOT NULL OR ...` etend l'unicite aux codes deja
+    // consommes, y compris revoques. Sans cette branche, revoquer une session
+    // sortait le code de l'index et liberait ses six chiffres : reattribues a
+    // un autre patient, deux lignes portaient le meme code et findByCode en
+    // renvoyait une indeterminee - le nouveau patient pouvait etre refuse avec
+    // un code valide. Un code ayant servi reste hors circulation (ADR 0019).
     uniqueIndex('patient_code_code_active_unique')
       .on(t.code)
-      .where(sql`deleted_at IS NULL AND revoked_at IS NULL`),
+      .where(sql`used_at IS NOT NULL OR (deleted_at IS NULL AND revoked_at IS NULL)`),
     uniqueIndex('patient_code_patient_active_unique')
       .on(t.uuid_patient)
       .where(

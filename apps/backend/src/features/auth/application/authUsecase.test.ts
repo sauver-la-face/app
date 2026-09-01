@@ -7,6 +7,7 @@ import type { TokenPayload, TokenProvider } from './tokenProvider';
 class MockPatientCodeRepository implements PatientCodeRepository {
   save = mock(async (_patientCode: PatientCode) => {});
   findByCode = mock(async (_code: PatientCodeValue) => null as PatientCode | null);
+  findById = mock(async (_uuid_patient_code: string) => null as PatientCode | null);
   findActiveByPatient = mock(async (_uuid_patient: string) => null as PatientCode | null);
   softDeleteExpiredUnused = mock(async (_cutoff: Date) => 0);
 }

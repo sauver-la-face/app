@@ -14,6 +14,7 @@ export interface PatientCode {
 export interface PatientCodeRepository {
   save(patientCode: PatientCode): Promise<void>;
   findByCode(code: PatientCodeValue): Promise<PatientCode | null>;
+  findById(uuid_patient_code: string): Promise<PatientCode | null>;
   findActiveByPatient(uuid_patient: string): Promise<PatientCode | null>;
   softDeleteExpiredUnused(cutoff: Date): Promise<number>;
 }

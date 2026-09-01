@@ -152,6 +152,21 @@ export class PatientUsecase {
     };
   }
 
+  // SEC-03/A07 : coupe la session mobile en cours d'un patient — appareil perdu
+  // ou vole. Le token reste cryptographiquement valide jusqu'a un an, mais
+  // requirePatientAuth relit le code porteur a chaque requete et le refusera.
+  // Le patient retrouve l'acces apres emission et saisie d'un nouveau code.
+  async revokeSession(patientId: string): Promise<void> {
+    const patient = await this.patientRepository.findById(patientId);
+
+    if (!patient) {
+      throw new PatientNotFoundError(patientId);
+    }
+
+    await this.patientRepository.revokeSession(patientId, this.nowFactory());
+    this.patientLogger.info({ patientId }, 'Patient session revoked');
+  }
+
   async issueAccessCode(patientId: string): Promise<PatientAccessCode> {
     const patient = await this.patientRepository.findById(patientId);
 
