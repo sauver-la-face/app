@@ -1189,6 +1189,41 @@ Ce job était volontairement différé jusqu'à la séparation des fichiers Comp
 
 ---
 
+### DEVOPS-14 — `WEB_URL` : accorder le format entre CORS et Better Auth
+
+`[ ]` 🟡 Majeur · `apps/backend/src/index.ts` · `apps/backend/src/features/auth/infrastructure/authConfig.ts`
+
+**Contexte :**
+
+La même variable d'environnement est lue à deux endroits, dans deux formats incompatibles :
+
+```ts
+// index.ts — middleware CORS : chaîne simple, une seule origine
+origin: process.env.WEB_URL ?? 'http://localhost:3000'
+
+// authConfig.ts — Better Auth : liste séparée par virgules
+trustedOrigins: (process.env.WEB_URL ?? 'http://localhost:3000').split(',')
+```
+
+Deux conséquences. D'abord, un seul serveur de développement web peut fonctionner à la fois : sur tout autre port que 3000, le préflight est refusé et chaque appel API échoue. Le navigateur affiche « Failed to fetch », symptôme qui ressemble à une panne d'authentification alors que la cause est le CORS — le diagnostic coûte du temps à chaque fois.
+
+Ensuite et surtout, la variable est piégée. Renseigner `WEB_URL="http://localhost:3000,http://localhost:3100"`, ce que la lecture de `authConfig.ts` encourage, fait passer la chaîne entière — virgule comprise — comme origine littérale au middleware CORS. Elle ne correspond alors à aucune origine réelle : on ne gagne pas le second port, on perd le premier.
+
+**Comportement attendu :**
+
+- `WEB_URL` accepte une liste d'origines séparées par des virgules, comprise de la même façon par le middleware CORS et par Better Auth
+- Une valeur unique sans virgule continue de fonctionner à l'identique — aucune configuration existante n'est cassée
+- La valeur par défaut reste `http://localhost:3000` quand la variable est absente
+
+**Règles de code :**
+
+- Le découpage et le nettoyage des espaces se font en un seul endroit, réutilisé par les deux lecteurs — deux `.split(',')` recopiés reproduiraient la divergence qu'il s'agit de supprimer
+- Hono accepte un tableau pour `origin` : la correction ne demande aucune fonction de rappel
+- `.env.example` documente le format liste et la raison — sans quoi le prochain qui posera une seconde origine retombera dans le piège
+- Tester : une origine → comportement inchangé, deux origines → les deux acceptées, variable absente → `http://localhost:3000`, espaces autour des virgules → tolérés
+
+---
+
 ### NOTIF-01 — Notification push patient en cas de retard de suivi
 
 `[ ]` 🟡 Majeur · `apps/backend/src/features/notifications/`
