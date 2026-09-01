@@ -90,6 +90,28 @@ function EyeIcon({ open }: { open: boolean }) {
   );
 }
 
+// Le limiteur de tentatives est un middleware Hono, pas une erreur Better Auth :
+// selon les cas il renvoie un code, un statut 429, ou un message deja formate.
+// On teste les trois, et on retombe sur un message traduit plutot que d'afficher
+// un texte serveur code en dur en francais.
+function messageDErreur(
+  erreur: { message?: string; status?: number; code?: string },
+  login: Dictionary['login'],
+): string {
+  const bloque =
+    erreur.status === 429 ||
+    erreur.code === 'TOO_MANY_ATTEMPTS' ||
+    (erreur.message ?? '').toUpperCase().includes('TOO_MANY_ATTEMPTS');
+
+  if (bloque) {
+    return login.tooManyAttempts;
+  }
+
+  return erreur.message && erreur.message.trim().length > 0
+    ? erreur.message
+    : login.genericError;
+}
+
 export function LoginForm({ locale, dictionary }: { locale: Locale; dictionary: Dictionary }) {
   const router = useRouter();
   const [error, setError] = useState<string | null>(null);
@@ -110,7 +132,7 @@ export function LoginForm({ locale, dictionary }: { locale: Locale; dictionary: 
       },
       {
         onSuccess: () => router.push(`/${locale}/dashboard`),
-        onError: (ctx) => setError(ctx.error.message),
+        onError: (ctx) => setError(messageDErreur(ctx.error, login)),
       },
     );
 

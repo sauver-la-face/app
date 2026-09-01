@@ -33,6 +33,9 @@ const dictionaries = {
       registerPrompt: 'Pas encore de compte ?',
       registerLink: 'Creer un compte',
       forgotPassword: 'Identifiants oublies ?',
+      tooManyAttempts:
+        'Trop de tentatives de connexion. Pour votre securite, l acces est bloque pendant 15 minutes. Reessayez plus tard.',
+      genericError: 'Connexion impossible. Verifiez votre adresse e-mail et votre mot de passe.',
     },
     register: {
       eyebrow: 'Portail medecin - creation de compte',
@@ -257,6 +260,9 @@ const dictionaries = {
       registerPrompt: "Don't have an account yet?",
       registerLink: 'Create an account',
       forgotPassword: 'Forgot your credentials?',
+      tooManyAttempts:
+        'Too many sign-in attempts. For your security, access is blocked for 15 minutes. Please try again later.',
+      genericError: 'Sign in failed. Check your email address and password.',
     },
     register: {
       eyebrow: 'Physician portal - account creation',
@@ -481,6 +487,9 @@ const dictionaries = {
       registerPrompt: 'មិនទាន់មានគណនីទេ?',
       registerLink: 'បង្កើតគណនី',
       forgotPassword: 'ភ្លេចព័ត៌មានចូល?',
+      tooManyAttempts:
+        'ការព្យាយាមចូលច្រើនពេក។ ដើម្បីសុវត្ថិភាព ការចូលត្រូវបានទប់ស្កាត់រយៈពេល ១៥ នាទី។ សូមព្យាយាមម្តងទៀតនៅពេលក្រោយ។',
+      genericError: 'មិនអាចចូលបានទេ។ សូមពិនិត្យអ៊ីម៉ែល និងពាក្យសម្ងាត់របស់អ្នក។',
     },
     register: {
       eyebrow: 'វិបផតថលវេជ្ជបណ្ឌិត - បង្កើតគណនី',
