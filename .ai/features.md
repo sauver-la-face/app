@@ -863,6 +863,32 @@ introuvable —, aucun profil `prod` n'était déclaré, et le backend construis
 - Tester : `docker compose -f docker-compose.yml -f docker-compose.prod.yml --profile prod config` résout `target: prod` sans montage de code, et `caddy validate` accepte le `Caddyfile.prod`
 
 ---
+### DEVOPS-12 — Conteneuriser le dashboard web
+
+`[ ]` 🟡 Majeur · `apps/web/Dockerfile` · `docker-compose.prod.yml` · `Caddyfile.prod`
+
+**Contexte :**
+
+Le rapport de certification annonce quatre services en production, dont
+Next.js. Or `apps/web` n'avait aucun `Dockerfile` et n'apparaissait dans aucun
+fichier Compose : le dashboard n'était pas déployable.
+
+**Comportement attendu :**
+
+- L'image de production se construit et sert le dashboard
+- Caddy route deux domaines : l'API vers `backend:3001`, le dashboard vers `web:3000`
+- Le dashboard n'est conteneurisé qu'en production — en développement il tourne sur l'hôte, où le rechargement à chaud est plus rapide
+
+**Règles de code :**
+
+- **La base de l'image est Node, pas `oven/bun`.** `next build` (Next 16, Turbopack) charge un runtime CommonJS compilé que Bun ne sait pas évaluer : la construction échoue sur « Expected CommonJS module to have a function wrapper ». La CI n'y est pas confrontée parce qu'elle installe Node **et** Bun sur le runner. L'image reproduit cet environnement ; Bun y reste, c'est lui qui gère le lockfile et les dépendances workspace
+- La version de Bun installée est épinglée, jamais `latest` : sinon l'image n'est pas reproductible d'une construction à l'autre
+- `NEXT_PUBLIC_API_URL` est un **argument de build**, pas une variable d'exécution : Next l'inscrit dans le bundle client à la compilation. Changer de domaine impose de reconstruire l'image
+- Routage Caddy par domaine et non par chemin : les routes du backend sont à la racine (`/patients`, `/alerts`, `/auth`), sans préfixe `/api`. Une séparation par chemin obligerait à les énumérer, et toute route ajoutée sans y penser partirait vers le mauvais service
+- Tester : l'image se construit, le conteneur démarre et sert une page en HTTP 200
+
+---
+
 
 ### DEVOPS-04 — Réparation du système de migrations Drizzle
 

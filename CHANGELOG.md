@@ -10,7 +10,11 @@ Chaque version est marquée par un tag Git annoté (`vX.Y.Z`).
 
 ### Sécurité
 
-- **DEVOPS-02** — le TLS de production n'existait pas. Le `Caddyfile` servait `:80` en HTTP simple, alors que l'ADR 0009, le tableau Sécurité de `architectureAdr.md` et le rapport de certification annoncent tous « TLS 1.3 obligatoire (RGPD + HDS), certificats Let's Encrypt automatiques ». Caddy ne provisionne un certificat que pour un nom d'hôte : une adresse `:80` ne déclenche jamais l'obtention automatique. `Caddyfile.prod` impose désormais TLS 1.3 minimum via `CADDY_DOMAIN`, avec HSTS et redirection HTTP → HTTPS
+- **DEVOPS-02** — le TLS de production n'existait pas. Le `Caddyfile` servait `:80` en HTTP simple, alors que l'ADR 0009, le tableau Sécurité de `architectureAdr.md` et le rapport de certification annoncent tous « TLS 1.3 obligatoire (RGPD + HDS), certificats Let's Encrypt automatiques ». Caddy ne provisionne un certificat que pour un nom d'hôte : une adresse `:80` ne déclenche jamais l'obtention automatique. `Caddyfile.prod` impose désormais TLS 1.3 minimum via `CADDY_DOMAIN_API` et `CADDY_DOMAIN_WEB`, avec HSTS et redirection HTTP → HTTPS
+
+### Ajouté
+
+- **DEVOPS-12** — le dashboard web n'était pas déployable : `apps/web` n'avait aucun `Dockerfile` et n'apparaissait dans aucun fichier Compose, alors que le rapport de certification annonce Next.js parmi les quatre services de production. L'image est construite sur une base **Node et non `oven/bun`** — `next build` charge un runtime CommonJS compilé que Bun ne sait pas évaluer, ce que la CI ne rencontre pas puisqu'elle installe Node *et* Bun sur le runner. Caddy route désormais deux domaines : l'API vers `backend:3001`, le dashboard vers `web:3000`. Vérifié en construisant l'image et en interrogeant le conteneur (HTTP 200)
 
 ### Modifié
 

@@ -62,8 +62,16 @@ bun run docker:up:prod
 ```
 
 > La production lit `.env.production`, jamais `.env.local`, et exige d'y trouver
-> `CADDY_DOMAIN` (le domaine public de l’API) et `ACME_EMAIL` (contact
-> Let's Encrypt). Sans domaine, Caddy ne peut obtenir aucun certificat.
+> `CADDY_DOMAIN_API` (domaine de l'API), `CADDY_DOMAIN_WEB` (domaine du
+> dashboard) et `ACME_EMAIL` (contact Let's Encrypt). Sans domaine, Caddy ne
+> peut obtenir aucun certificat.
+>
+> `CADDY_DOMAIN_API` sert aussi à construire `NEXT_PUBLIC_API_URL`, que Next
+> inscrit dans le bundle JavaScript **à la compilation**. Changer de domaine
+> impose donc de reconstruire l'image web, pas seulement de la redémarrer.
+
+Le dashboard n'est conteneurisé qu'en production. En développement il tourne sur
+l'hôte (`bun run dev:web`), où le rechargement à chaud est bien plus rapide.
 
 Cela démarre (en dev) :
 
