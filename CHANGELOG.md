@@ -11,19 +11,6 @@ Chaque version est marquée par un tag Git annoté (`vX.Y.Z`).
 ### Ajouté
 
 - **DEVOPS-12** — le dashboard web n'était pas déployable : `apps/web` n'avait aucun `Dockerfile` et n'apparaissait dans aucun fichier Compose, alors que le rapport de certification annonce Next.js parmi les quatre services de production. L'image est construite sur une base **Node et non `oven/bun`** — `next build` charge un runtime CommonJS compilé que Bun ne sait pas évaluer, ce que la CI ne rencontre pas puisqu'elle installe Node *et* Bun sur le runner. Caddy route désormais deux domaines : l'API vers `backend:3001`, le dashboard vers `web:3000`. Vérifié en construisant l'image et en interrogeant le conteneur (HTTP 200, fichiers statiques compris). L'image **n'embarque pas `node_modules`** : `output: 'standalone'` produit un serveur autonome recopié dans une image Node nue, ce qui la ramène de **1,1 Go à 287 Mo**
-
-### Modifié
-
-- **DEVOPS-02** — séparation des fichiers Compose. `docker-compose.prod.yml` n'existait pas : la séquence de déploiement documentée au rapport de certification échouait sur un fichier introuvable, aucun profil `prod` n'était déclaré, et le backend construisait `target: dev` en dur — la « production » livrait donc l'image de développement, avec le code de l'hôte monté par-dessus. Le développement vit maintenant dans `docker-compose.override.yml`, chargé automatiquement en local et ignoré dès qu'on passe des `-f` explicites
-- **DEVOPS-02** — le script `docker:up:prod` utilisait `--env-file .env.local`, les identifiants de développement dans une commande nommée « prod ». Il lit désormais `.env.production` et échoue si le fichier est absent, plutôt que de démarrer silencieusement avec les mauvaises valeurs
-
-- **SEC-03** (A07) — révocation de session patient. Un token signé pour un an restait accepté indéfiniment : sa vérification ne consultait aucun état serveur, et `revokeActiveCodes()` ne touchait que les codes jamais consommés. Sur un appareil perdu, l'accès aux données médicales restait donc ouvert jusqu'à un an, sans aucun moyen de le couper. `DELETE /patients/{id}/session` révoque désormais le code porteur, que `requirePatientAuth` relit à chaque requête (401 `SESSION_REVOKED`)
-- **SEC-03** — `GET /patients/{id}/instructions` devient `GET /me/instructions` : le garde médecin posé sur `/patients/*` masquait le garde patient, rendant la route injoignable depuis le mobile. L'identifiant disparaissant de l'URL, le contrôle 403 d'appartenance devient inutile — la classe de bug IDOR disparaît par construction
-- **SEC-03** — l’unicité des codes patient est étendue aux codes déjà consommés (migration `0005`) : sans cela, révoquer une session libérait les six chiffres du code, réattribuables à un autre patient qui pouvait alors se voir refuser un code valide
-
-### Ajouté
-
-- **DEVOPS-12** — le dashboard web n'était pas déployable : `apps/web` n'avait aucun `Dockerfile` et n'apparaissait dans aucun fichier Compose, alors que le rapport de certification annonce Next.js parmi les quatre services de production. L'image est construite sur une base **Node et non `oven/bun`** — `next build` charge un runtime CommonJS compilé que Bun ne sait pas évaluer, ce que la CI ne rencontre pas puisqu'elle installe Node *et* Bun sur le runner. Caddy route désormais deux domaines : l'API vers `backend:3001`, le dashboard vers `web:3000`. Vérifié en construisant l'image et en interrogeant le conteneur (HTTP 200)
 - **DOCS-02** — structure documentaire : `docs/adr/` avec les 13 décisions techniques consignées une par fichier, `docs/security/owasp.md`, template d'architecture des six piliers, `docs/README.md`, dossiers `design/` et `brief/`
 - **DOCS-02** — template de pull request et job CI `changelog` vérifiant qu'une entrée accompagne chaque PR
 
