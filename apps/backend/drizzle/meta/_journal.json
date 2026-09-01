@@ -43,6 +43,13 @@
       "when": 1788186931268,
       "tag": "0005_patient_code_session_revocation",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1788287842755,
+      "tag": "0006_resynchroniser_snapshot",
+      "breakpoints": true
     }
   ]
 }

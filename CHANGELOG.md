@@ -8,6 +8,11 @@ Chaque version est marquée par un tag Git annoté (`vX.Y.Z`).
 
 ## [Non publié]
 
+### Corrigé
+
+- **DEVOPS-10** — resynchronisation du snapshot Drizzle. `drizzle-kit generate` ne se connecte jamais à la base : il compare `schema.ts` au dernier snapshot. Or les migrations `0004` et `0005`, écrites à la main, n'en avaient jamais régénéré, laissant cette mémoire figée à l'état `0003`. Toute génération réémettait donc leurs opérations — un `ADD COLUMN last_synced_at` qui aurait échoué sur toute base déjà migrée. La migration `0006` est volontairement vide : elle ne porte que le snapshot à jour. `db:generate` répond désormais « No schema changes »
+- **DEVOPS-10** — `patient_code_uuid_patient_idx` est déclaré dans `schema.ts`. L'index existait en base depuis `0000` sans y figurer, et Drizzle proposait de le supprimer à chaque génération alors que `getLatestCodes`, `revokeActiveCodes` et `revokeSession` s'appuient dessus
+
 ### Sécurité
 
 - **SEC-03** (A07) — révocation de session patient. Un token signé pour un an restait accepté indéfiniment : sa vérification ne consultait aucun état serveur, et `revokeActiveCodes()` ne touchait que les codes jamais consommés. Sur un appareil perdu, l'accès aux données médicales restait donc ouvert jusqu'à un an, sans aucun moyen de le couper. `DELETE /patients/{id}/session` révoque désormais le code porteur, que `requirePatientAuth` relit à chaque requête (401 `SESSION_REVOKED`)
