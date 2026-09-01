@@ -817,26 +817,50 @@ Une GitHub App n'appartient à aucune personne — elle est rattachée au repo. 
 
 ### DEVOPS-02 — Reverse proxy Caddy avec TLS 1.3
 
-`[~]` 🟡 Majeur · `Caddyfile` · `docker-compose.yml`
+`[~]` 🟡 Majeur · `Caddyfile.prod` · `docker-compose.yml` · `docker-compose.override.yml` · `docker-compose.prod.yml`
+
+**Contexte :**
+
+Le service Caddy existait, mais sa configuration tenait en trois lignes servant
+`:80` en HTTP simple. Caddy ne provisionne un certificat que pour un **nom
+d'hôte** : une adresse de la forme `:80` ne déclenche jamais l'obtention
+automatique. Le TLS annoncé par l'ADR 0009, par le tableau Sécurité de
+`architectureAdr.md` et par le rapport de certification n'existait donc nulle
+part, alors qu'il porte sur le transport de données de santé.
+
+La séparation des fichiers Compose fait partie de cette feature et non d'une
+autre : le certificat de production est inatteignable sans un environnement de
+production réel. Or `docker-compose.prod.yml` n'existait pas — la séquence de
+déploiement documentée au rapport (C2.1.1, critère 4) échouait sur un fichier
+introuvable —, aucun profil `prod` n'était déclaré, et le backend construisait
+`target: dev` en dur.
 
 **Comportement attendu :**
 
 - Caddy termine le TLS en entrée et proxifie vers le backend Hono (`backend:3001`)
 - TLS 1.3 obligatoire — TLS 1.2 et inférieurs rejetés
-- En développement : certificat auto-signé généré automatiquement (`tls internal`)
-- En production : certificat Let's Encrypt automatique via le domaine OVH
+- En développement : HTTP simple sur la boucle locale, aucune donnée réelle n'y transite
+- En production : certificat Let's Encrypt automatique via `CADDY_DOMAIN`
+- La séquence de déploiement du rapport fonctionne telle qu'elle est écrite
+- L'image de production ne contient aucun montage de code de l'hôte
 
 **Fichiers à créer/modifier :**
 
-- `Caddyfile` à la racine — configuration du reverse proxy
-- `docker-compose.yml` — ajouter le service `caddy` avec les ports 80 et 443
+- `Caddyfile.prod` — configuration de production, TLS et en-têtes de sécurité
+- `docker-compose.yml` — base commune, sans rien de spécifique au développement
+- `docker-compose.override.yml` — développement, chargé automatiquement
+- `docker-compose.prod.yml` — production, profil `prod` et `target: prod`
 
 **Règles de code :**
 
 - Le backend Hono n'expose jamais directement le port 3001 hors du réseau Docker — tout le trafic passe par Caddy
 - `CADDY_DOMAIN` en variable d'environnement pour switcher entre dev (`localhost`) et prod (domaine réel)
 - Le `Caddyfile` est monté en volume dans le service Docker — pas de rebuild image pour changer la config
-- Ajouter `CADDY_DOMAIN` dans `.env.example` et `.env.local`
+- Ajouter `CADDY_DOMAIN` et `ACME_EMAIL` dans `.env.example` et `.env.production`
+- Rien de spécifique au développement dans `docker-compose.yml` : un `volumes: []` posé dans un fichier de surcharge **ne supprime pas** les montages du fichier de base, ils fusionnent par chemin cible. La séparation se fait donc en amont, pas par annulation
+- `docker-compose.override.yml` n'est chargé que par un `docker compose` sans `-f` — c'est ce qui garantit qu'aucun montage de code ni cible `dev` ne parte en production
+- Un script nommé `prod` ne lit jamais `.env.local` : mieux vaut un échec bruyant sur un fichier absent qu'un démarrage silencieux avec les identifiants de développement
+- Tester : `docker compose -f docker-compose.yml -f docker-compose.prod.yml --profile prod config` résout `target: prod` sans montage de code, et `caddy validate` accepte le `Caddyfile.prod`
 
 ---
 

@@ -57,8 +57,13 @@ cp apps/backend/.env.example apps/backend/.env.local
 bun run docker:up:dev
 
 # Production (postgres + backend + caddy uniquement)
+bun run docker:build:prod
 bun run docker:up:prod
 ```
+
+> La production lit `.env.production`, jamais `.env.local`, et exige d'y trouver
+> `CADDY_DOMAIN` (le domaine public de l’API) et `ACME_EMAIL` (contact
+> Let's Encrypt). Sans domaine, Caddy ne peut obtenir aucun certificat.
 
 Cela démarre (en dev) :
 

@@ -1,3 +1,18 @@
+# Base commune aux deux environnements.
+#
+# DEVOPS-11 : ce fichier ne contient plus rien de specifique au developpement.
+# Les montages de code, la cible `dev` du Dockerfile et l'exposition du port
+# backend vivent desormais dans docker-compose.override.yml, charge
+# automatiquement par `docker compose up` en local et ignore des que l'on passe
+# des `-f` explicites — ce que fait la commande de deploiement.
+#
+#   dev  : docker compose --profile dev up
+#   prod : docker compose -f docker-compose.yml -f docker-compose.prod.yml \
+#            --profile prod --env-file .env.production up
+#
+# Un `volumes: []` dans un fichier de surcharge ne supprime pas les montages du
+# fichier de base : ils fusionnent par chemin cible. C'est pourquoi la
+# separation se fait ici, et non par annulation cote production.
 services:
   postgres:
     image: postgres:16-alpine
@@ -31,6 +46,8 @@ services:
       postgres:
         condition: service_healthy
 
+  # MinIO ne tourne qu'en developpement : la production utilise OVH Object
+  # Storage, certifie HDS (ADR 0011).
   minio:
     image: minio/minio:latest
     restart: unless-stopped
@@ -50,18 +67,13 @@ services:
       timeout: 5s
       retries: 5
 
+  # Sans `target`, Docker construit la derniere etape du Dockerfile, soit
+  # `prod`. Le developpement demande explicitement `dev` dans l'override.
   backend:
     build:
       context: .
       dockerfile: apps/backend/Dockerfile
-      target: dev
     restart: unless-stopped
-    env_file:
-      - ./apps/backend/.env.local
-    volumes:
-      - ./apps/backend/src:/app/apps/backend/src
-      - ./apps/backend/scripts:/app/apps/backend/scripts
-      - ./packages:/app/packages
     depends_on:
       postgres:
         condition: service_healthy
@@ -73,8 +85,8 @@ services:
       - "80:80"
       - "443:443"
     volumes:
-      - ./Caddyfile:/etc/caddy/Caddyfile
       - caddy_data:/data
+      - caddy_config:/config
     depends_on:
       - backend
 
@@ -82,4 +94,5 @@ volumes:
   postgres_data:
   minio_data:
   caddy_data:
+  caddy_config:
   pgadmin_data:

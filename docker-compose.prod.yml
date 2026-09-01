@@ -1,0 +1,30 @@
+# Production.
+#
+#   docker compose -f docker-compose.yml -f docker-compose.prod.yml \
+#     --profile prod --env-file .env.production build
+#   docker compose -f docker-compose.yml -f docker-compose.prod.yml \
+#     --profile prod --env-file .env.production up -d
+#
+# DEVOPS-11 : cette commande est celle documentee dans le rapport de
+# certification (C2.1.1, critere 4). Elle echouait jusqu'ici — le fichier
+# n'existait pas, aucun profil `prod` n'etait declare, et le backend
+# construisait `target: dev`.
+#
+# Le service `web` (Next.js) annonce en production n'est pas encore
+# conteneurise : `apps/web` n'a pas de Dockerfile. Il arrive au lot suivant,
+# avec le routage Caddy correspondant.
+services:
+  postgres:
+    profiles: ["prod"]
+
+  backend:
+    profiles: ["prod"]
+    build:
+      target: prod
+    environment:
+      NODE_ENV: production
+
+  caddy:
+    profiles: ["prod"]
+    volumes:
+      - ./Caddyfile.prod:/etc/caddy/Caddyfile

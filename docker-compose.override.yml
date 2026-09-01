@@ -1,4 +1,26 @@
+# Developpement local.
+#
+# Charge automatiquement par `docker compose up` sans `-f`. Des que la commande
+# de deploiement passe ses fichiers explicitement, ce fichier n'est pas lu — ce
+# qui garantit qu'aucun montage de code ni cible `dev` ne parte en production.
 services:
   backend:
+    build:
+      target: dev
+    env_file:
+      - ./apps/backend/.env.local
+    # Le code est monte depuis l'hote pour le rechargement a chaud. C'est
+    # precisement ce qui n'a rien a faire dans une image de production.
+    volumes:
+      - ./apps/backend/src:/app/apps/backend/src
+      - ./apps/backend/scripts:/app/apps/backend/scripts
+      - ./packages:/app/packages
     ports:
       - "127.0.0.1:3001:3001"
+
+  # En local, Caddy sert en HTTP simple sur la boucle locale : aucune donnee
+  # reelle n'y transite et aucun nom de domaine n'est resolvable. La production
+  # utilise Caddyfile.prod, qui active le TLS automatique (ADR 0009).
+  caddy:
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile
