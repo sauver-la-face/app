@@ -8,10 +8,6 @@ Chaque version est marquée par un tag Git annoté (`vX.Y.Z`).
 
 ## [Non publié]
 
-### Sécurité
-
-- **DEVOPS-02** — le TLS de production n'existait pas. Le `Caddyfile` servait `:80` en HTTP simple, alors que l'ADR 0009, le tableau Sécurité de `architectureAdr.md` et le rapport de certification annoncent tous « TLS 1.3 obligatoire (RGPD + HDS), certificats Let's Encrypt automatiques ». Caddy ne provisionne un certificat que pour un nom d'hôte : une adresse `:80` ne déclenche jamais l'obtention automatique. `Caddyfile.prod` impose désormais TLS 1.3 minimum via `CADDY_DOMAIN_API` et `CADDY_DOMAIN_WEB`, avec HSTS et redirection HTTP → HTTPS
-
 ### Ajouté
 
 - **DEVOPS-12** — le dashboard web n'était pas déployable : `apps/web` n'avait aucun `Dockerfile` et n'apparaissait dans aucun fichier Compose, alors que le rapport de certification annonce Next.js parmi les quatre services de production. L'image est construite sur une base **Node et non `oven/bun`** — `next build` charge un runtime CommonJS compilé que Bun ne sait pas évaluer, ce que la CI ne rencontre pas puisqu'elle installe Node *et* Bun sur le runner. Caddy route désormais deux domaines : l'API vers `backend:3001`, le dashboard vers `web:3000`. Vérifié en construisant l'image et en interrogeant le conteneur (HTTP 200, fichiers statiques compris). L'image **n'embarque pas `node_modules`** : `output: 'standalone'` produit un serveur autonome recopié dans une image Node nue, ce qui la ramène de **1,1 Go à 287 Mo**
@@ -27,13 +23,30 @@ Chaque version est marquée par un tag Git annoté (`vX.Y.Z`).
 
 ### Ajouté
 
+- **DEVOPS-12** — le dashboard web n'était pas déployable : `apps/web` n'avait aucun `Dockerfile` et n'apparaissait dans aucun fichier Compose, alors que le rapport de certification annonce Next.js parmi les quatre services de production. L'image est construite sur une base **Node et non `oven/bun`** — `next build` charge un runtime CommonJS compilé que Bun ne sait pas évaluer, ce que la CI ne rencontre pas puisqu'elle installe Node *et* Bun sur le runner. Caddy route désormais deux domaines : l'API vers `backend:3001`, le dashboard vers `web:3000`. Vérifié en construisant l'image et en interrogeant le conteneur (HTTP 200)
 - **DOCS-02** — structure documentaire : `docs/adr/` avec les 13 décisions techniques consignées une par fichier, `docs/security/owasp.md`, template d'architecture des six piliers, `docs/README.md`, dossiers `design/` et `brief/`
 - **DOCS-02** — template de pull request et job CI `changelog` vérifiant qu'une entrée accompagne chaque PR
 
 ### Modifié
 
+- **DEVOPS-02** — séparation des fichiers Compose. `docker-compose.prod.yml` n'existait pas : la séquence de déploiement documentée au rapport de certification échouait sur un fichier introuvable, aucun profil `prod` n'était déclaré, et le backend construisait `target: dev` en dur — la « production » livrait donc l'image de développement, avec le code de l'hôte monté par-dessus. Le développement vit maintenant dans `docker-compose.override.yml`, chargé automatiquement en local et ignoré dès qu'on passe des `-f` explicites
+- **DEVOPS-02** — le script `docker:up:prod` utilisait `--env-file .env.local`, les identifiants de développement dans une commande nommée « prod ». Il lit désormais `.env.production` et échoue si le fichier est absent, plutôt que de démarrer silencieusement avec les mauvaises valeurs
 - **DOCS-02** — accessibilité extraite dans `docs/accessibilite.md` ; décisions de schéma et de sécurité migrées en ADR 0015 à 0022
 - **DOCS-02** — `docs/architecture.md` renommé en `docs/architectureAdr.md` pour libérer le chemin ; sa section « Décisions d'architecture » renvoie désormais vers `docs/adr/` au lieu de la dupliquer
+
+### Corrigé
+
+- **DEVOPS-10** — resynchronisation du snapshot Drizzle. `drizzle-kit generate` ne se connecte jamais à la base : il compare `schema.ts` au dernier snapshot. Or les migrations `0004` et `0005`, écrites à la main, n'en avaient jamais régénéré, laissant cette mémoire figée à l'état `0003`. Toute génération réémettait donc leurs opérations — un `ADD COLUMN last_synced_at` qui aurait échoué sur toute base déjà migrée. La migration `0006` est volontairement vide : elle ne porte que le snapshot à jour. `db:generate` répond désormais « No schema changes »
+- **DEVOPS-10** — `patient_code_uuid_patient_idx` est déclaré dans `schema.ts`. L'index existait en base depuis `0000` sans y figurer, et Drizzle proposait de le supprimer à chaque génération alors que `getLatestCodes`, `revokeActiveCodes` et `revokeSession` s'appuient dessus
+
+### Sécurité
+
+- **SEC-04** (A01) — trois routes n'exigeaient aucune authentification. `GET /alerts` renvoyait le nom des patients associé à leurs symptômes — donnée de santé nominative — et fournissait les `patientId` ; `POST /auth/patient/generate` et `POST /auth/patient/renew` fabriquaient un code d'accès à six chiffres pour n'importe quel UUID et le renvoyaient en clair. Enchaînées, ces routes donnaient le contrôle du compte de n'importe quel patient, sans deviner quoi que ce soit — le rate limiting ne compte que les tentatives échouées. Les trois exigent désormais une session médecin
+- **SEC-04** — `apps/backend/tests/routesProtegees.test.ts` parcourt la table de routage réelle de l'application montée en entier et impose que chaque route soit protégée ou explicitement déclarée publique. Une route non déclarée fait échouer la suite. C'est ce qui manquait à SEC-01, dont le périmètre était une liste écrite à la main où `alertRouter` et `authRouter` ne figuraient pas
+- **DEVOPS-02** — le TLS de production n'existait pas. Le `Caddyfile` servait `:80` en HTTP simple, alors que l'ADR 0009, le tableau Sécurité de `architectureAdr.md` et le rapport de certification annoncent tous « TLS 1.3 obligatoire (RGPD + HDS), certificats Let's Encrypt automatiques ». Caddy ne provisionne un certificat que pour un nom d'hôte : une adresse `:80` ne déclenche jamais l'obtention automatique. `Caddyfile.prod` impose désormais TLS 1.3 minimum via `CADDY_DOMAIN_API` et `CADDY_DOMAIN_WEB`, avec HSTS et redirection HTTP → HTTPS
+- **SEC-03** (A07) — révocation de session patient. Un token signé pour un an restait accepté indéfiniment : sa vérification ne consultait aucun état serveur, et `revokeActiveCodes()` ne touchait que les codes jamais consommés. Sur un appareil perdu, l'accès aux données médicales restait donc ouvert jusqu'à un an, sans aucun moyen de le couper. `DELETE /patients/{id}/session` révoque désormais le code porteur, que `requirePatientAuth` relit à chaque requête (401 `SESSION_REVOKED`)
+- **SEC-03** — `GET /patients/{id}/instructions` devient `GET /me/instructions` : le garde médecin posé sur `/patients/*` masquait le garde patient, rendant la route injoignable depuis le mobile. L'identifiant disparaissant de l'URL, le contrôle 403 d'appartenance devient inutile — la classe de bug IDOR disparaît par construction
+- **SEC-03** — l’unicité des codes patient est étendue aux codes déjà consommés (migration `0005`) : sans cela, révoquer une session libérait les six chiffres du code, réattribuables à un autre patient qui pouvait alors se voir refuser un code valide
 
 Travaux en cours ou non démarrés :
 
