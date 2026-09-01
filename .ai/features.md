@@ -148,7 +148,7 @@ déjà `uuid_patient_code`, la vérification est donc possible sans changer le f
 ---
 ### SEC-04 — Routes non protégées : alertes et génération de codes (A01)
 
-`[ ]` 🔴 Critique · `apps/backend/src/features/alerts/` · `apps/backend/src/features/auth/` · `apps/backend/tests/`
+`[x]` 🔴 Critique · `apps/backend/src/features/alerts/` · `apps/backend/src/features/auth/` · `apps/backend/tests/`
 
 **Contexte :**
 
