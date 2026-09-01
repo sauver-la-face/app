@@ -14,7 +14,7 @@ Chaque version est marquée par un tag Git annoté (`vX.Y.Z`).
 
 ### Ajouté
 
-- **DEVOPS-12** — le dashboard web n'était pas déployable : `apps/web` n'avait aucun `Dockerfile` et n'apparaissait dans aucun fichier Compose, alors que le rapport de certification annonce Next.js parmi les quatre services de production. L'image est construite sur une base **Node et non `oven/bun`** — `next build` charge un runtime CommonJS compilé que Bun ne sait pas évaluer, ce que la CI ne rencontre pas puisqu'elle installe Node *et* Bun sur le runner. Caddy route désormais deux domaines : l'API vers `backend:3001`, le dashboard vers `web:3000`. Vérifié en construisant l'image et en interrogeant le conteneur (HTTP 200)
+- **DEVOPS-12** — le dashboard web n'était pas déployable : `apps/web` n'avait aucun `Dockerfile` et n'apparaissait dans aucun fichier Compose, alors que le rapport de certification annonce Next.js parmi les quatre services de production. L'image est construite sur une base **Node et non `oven/bun`** — `next build` charge un runtime CommonJS compilé que Bun ne sait pas évaluer, ce que la CI ne rencontre pas puisqu'elle installe Node *et* Bun sur le runner. Caddy route désormais deux domaines : l'API vers `backend:3001`, le dashboard vers `web:3000`. Vérifié en construisant l'image et en interrogeant le conteneur (HTTP 200, fichiers statiques compris). L'image **n'embarque pas `node_modules`** : `output: 'standalone'` produit un serveur autonome recopié dans une image Node nue, ce qui la ramène de **1,1 Go à 287 Mo**
 
 ### Modifié
 
