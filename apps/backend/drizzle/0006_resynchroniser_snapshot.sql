@@ -1,0 +1,24 @@
+-- DEVOPS-10 — migration volontairement vide.
+--
+-- Son unique role est de porter le snapshot `meta/0006_snapshot.json`, qui
+-- resynchronise la memoire de drizzle-kit avec le schema reel.
+--
+-- Contexte : `drizzle-kit generate` ne se connecte jamais a la base. Il compare
+-- `schema.ts` au dernier snapshot. Or 0004 et 0005 ont ete ecrites a la main
+-- sans regenerer de snapshot, laissant cette memoire figee a l'etat 0003. Toute
+-- generation reemettait donc les operations de 0004 et 0005 :
+--
+--   ALTER TABLE "patient" ADD COLUMN "last_synced_at" ...        (fait par 0004)
+--   DROP INDEX / CREATE UNIQUE INDEX "patient_code_code_active_unique"  (fait par 0005)
+--
+-- Ces commandes auraient echoue sur toute base deja migree. Le snapshot joint
+-- les enregistre comme appliquees ; il n'y a donc rien a executer ici.
+--
+-- Sur une base neuve, les migrations 0000 a 0005 produisent l'etat attendu et
+-- celle-ci ne fait rien. Sur une base existante, `db:migrate` enregistre 0006
+-- sans rien executer. Dans les deux cas la generation suivante partira d'une
+-- memoire exacte.
+--
+-- Au passage, `patient_code_uuid_patient_idx` est desormais declare dans
+-- `schema.ts` : il existait en base depuis 0000 sans y figurer, et Drizzle
+-- proposait de le supprimer a chaque generation.
