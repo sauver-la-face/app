@@ -1266,10 +1266,13 @@ Deux conséquences pour ce lot : le repli mérite d'être unique et déclaré à
 
 Les scripts de seed existants ne produisent aucune alerte : `seedMed01` n'insère que le référentiel de symptômes, et `seedSync01` crée un patient dont le symptôme est `triggers_alert: false`, sans `last_synced_at`. Sur une base fraîche, le tableau de bord affiche donc le bandeau vert « aucune alerte » — ce qui contredit la démonstration du parcours médecin, où le premier écran montre « les alertes du jour ».
 
+Le dossier patient (WEB-03) souffre du même vide : `seedSync01` insère une ligne `media` dont le `file_url` pointe sur `https://server.example/existing-media.jpg`, une URL fictive. `GET /photos/:mediaId` en extrait une clé S3 qui n'existe dans aucun bucket, et la vignette s'affiche cassée — alors que « toute la chronologie, photos comprises » est le point d'orgue du parcours de démonstration.
+
 **Comportement attendu :**
 
 - Quatre patients couvrant les quatre états du parcours de suivi : alerte critique (symptôme déclencheur récent), alerte d'inactivité (dernière synchronisation à J-11), suivi normal (synchronisation du jour), accès créé avec code actif jamais utilisé
 - Après exécution, `GET /alerts` renvoie 3 alertes (2 critiques sur le même signalement, 1 d'inactivité) et `GET /patients` en renvoie 4, avec les quatre statuts distincts
+- Trois de ces patients portent une chronologie photo réellement servie par `GET /photos/:mediaId` : les fichiers sont déposés dans le bucket MinIO, pas seulement référencés en base
 - Rejouable sans produire de doublon ni casser les contraintes d'unicité
 
 **Règles de code :**
@@ -1278,6 +1281,9 @@ Les scripts de seed existants ne produisent aucune alerte : `seedMed01` n'insèr
 - Les patients sont retrouvés par nom avant insertion : un patient créé à la main depuis le dashboard est enrichi, pas dupliqué
 - Les symptômes déclencheurs viennent de `SYMPTOMS_SEED` — jamais de `triggers_alert` écrit en dur dans le script
 - Refus d'exécution si `NODE_ENV=production` : le script efface les données cliniques des patients qu'il gère
+- Les clés S3 suivent la convention de `S3PhotoStorage` (`{eventId}/{mediaId}`) — le seed ne définit pas son propre format, sinon la route de lecture ne sait plus reconstruire la clé
+- MinIO injoignable n'interrompt pas le seed : le jeu de données du tableau de bord ne dépend pas du stockage objet, seules les photos sont omises, avec un avertissement
+- **Aucune photo médicale réelle n'est versionnée** : ce sont des données de santé, et les clichés disponibles en ligne montrent des enfants identifiables qu'on n'attribue pas à un dossier fabriqué. Le script génère des illustrations schématiques filigranées, dont l'aspect dérive du jour post-opératoire et des symptômes de l'événement. `scripts/demoAssets/` accueille de vraies images si besoin, et son `.gitignore` les exclut du dépôt
 - Tester : exécution sur base vierge → 3 alertes, seconde exécution → toujours 4 patients et 3 alertes
 
 ---
