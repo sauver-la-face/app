@@ -57,7 +57,10 @@ export function NewPatientForm({ locale, dictionary }: NewPatientFormProps) {
       },
       {
         onSuccess: () => {
-          router.push(`/${locale}`);
+          // Vers la liste, pas vers la racine : c'est l'ecran qui porte le bouton
+          // « Generer le code », et un patient sans code ne sert a rien. Le
+          // marqueur declenche le bandeau de confirmation a l'arrivee.
+          router.push(`/${locale}/patients?cree=1`);
         },
       },
     );
