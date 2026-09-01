@@ -71,9 +71,19 @@ export function createApp(): OpenAPIHono<{ Variables: SessionVariables }> {
   const dynamicDb = databaseUrl ? createDb(databaseUrl) : null;
 
   if (!databaseUrl) {
+    // La liste ne contient que ce qui fonctionne reellement. `photos` et
+    // `exports` n'ont aucun depot en memoire : sans base, leurs routeurs ne
+    // sont pas montes du tout. `sync` et la lecture patient des instructions
+    // ont bien un depot en memoire, mais restent inatteignables : le code
+    // d'acces patient passe par Postgres en toutes circonstances, donc aucun
+    // token ne peut etre obtenu dans ce mode.
     logger.warn(
-      { features: ['alerts', 'sync', 'patients', 'photos', 'exports', 'instructions'] },
-      'DATABASE_URL is not set, falling back to in-memory repositories where supported',
+      {
+        enMemoire: ['alerts', 'patients', 'instructions'],
+        indisponibles: ['photos', 'exports'],
+        authPatientRequiertPostgres: true,
+      },
+      'DATABASE_URL is not set: only physician-side features work, patient authentication requires a database',
     );
   }
 

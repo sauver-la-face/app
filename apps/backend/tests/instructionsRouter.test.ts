@@ -128,26 +128,43 @@ describe('instructions.router', () => {
     expect(body.code).toBe('MEDICAL_PROCEDURE_NOT_FOUND');
   });
 
-  test('GET /patients/:patientId/instructions retourne 401 sans token patient', async () => {
+  test('GET /me/instructions retourne 401 sans token patient', async () => {
     const { app } = createTestApp();
 
-    const response = await app.request(`/patients/${patientId}/instructions`);
+    const response = await app.request('/me/instructions');
 
     expect(response.status).toBe(401);
   });
 
-  test('GET /patients/:patientId/instructions retourne 403 si le token appartient a un autre patient', async () => {
-    const { app } = createTestApp();
+  // SEC-03 : le chemin ne porte plus d'identifiant, il n'y a donc plus de 403
+  // possible. L'isolation entre patients repose desormais sur le token seul —
+  // ce test verifie qu'un autre porteur ne voit pas les instructions du
+  // premier, la ou l'ancienne version verifiait une egalite de chaines.
+  test('GET /me/instructions ne renvoie que les instructions du porteur du token', async () => {
+    const { app } = createTestApp({
+      instructions: [
+        {
+          instructionId: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
+          medicalProcedureId,
+          physicianId,
+          content: 'Premiere consigne',
+          createdAt: new Date('2026-04-01T10:00:00Z'),
+          acknowledgedAt: null,
+        },
+      ],
+    });
     const token = await patientToken(otherPatientId);
 
-    const response = await app.request(`/patients/${patientId}/instructions`, {
+    const response = await app.request('/me/instructions', {
       headers: { authorization: `Bearer ${token}` },
     });
 
-    expect(response.status).toBe(403);
+    expect(response.status).toBe(200);
+    const body = (await response.json()) as { instructions: unknown[] };
+    expect(body.instructions).toHaveLength(0);
   });
 
-  test('GET /patients/:patientId/instructions retourne 200 avec la liste pour le bon patient', async () => {
+  test('GET /me/instructions retourne 200 avec la liste pour le porteur du token', async () => {
     const { app } = createTestApp({
       instructions: [
         {
@@ -162,7 +179,7 @@ describe('instructions.router', () => {
     });
     const token = await patientToken(patientId);
 
-    const response = await app.request(`/patients/${patientId}/instructions`, {
+    const response = await app.request('/me/instructions', {
       headers: { authorization: `Bearer ${token}` },
     });
 
