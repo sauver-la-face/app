@@ -14,6 +14,10 @@ Chaque version est marquée par un tag Git annoté (`vX.Y.Z`).
 - **DOCS-02** — structure documentaire : `docs/adr/` avec les 13 décisions techniques consignées une par fichier, `docs/security/owasp.md`, template d'architecture des six piliers, `docs/README.md`, dossiers `design/` et `brief/`
 - **DOCS-02** — template de pull request et job CI `changelog` vérifiant qu'une entrée accompagne chaque PR
 
+### Corrigé
+
+- **DOCKER-01** — `bun.lock` était listé dans `.dockerignore` : le `COPY package.json bun.lock* ./` du Dockerfile backend ne trouvait aucun verrou et, le glob tolérant l'absence, le build se poursuivait en silence. `bun install` résolvait alors chaque plage `^x.y.z` vers la dernière version publiée au lieu des versions verrouillées — l'image embarquait par exemple zod 4.5.4 quand le verrou fixe 4.4.3. Le glob est retiré pour que l'absence du verrou fasse échouer le build au lieu de le laisser dériver.
+
 ### Modifié
 
 - **DEVOPS-02** — séparation des fichiers Compose. `docker-compose.prod.yml` n'existait pas : la séquence de déploiement documentée au rapport de certification échouait sur un fichier introuvable, aucun profil `prod` n'était déclaré, et le backend construisait `target: dev` en dur — la « production » livrait donc l'image de développement, avec le code de l'hôte monté par-dessus. Le développement vit maintenant dans `docker-compose.override.yml`, chargé automatiquement en local et ignoré dès qu'on passe des `-f` explicites
