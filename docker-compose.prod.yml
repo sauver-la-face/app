@@ -1,0 +1,49 @@
+# Production.
+#
+#   docker compose -f docker-compose.yml -f docker-compose.prod.yml \
+#     --profile prod --env-file .env.production build
+#   docker compose -f docker-compose.yml -f docker-compose.prod.yml \
+#     --profile prod --env-file .env.production up -d
+#
+# DEVOPS-02 : cette commande est celle documentee dans le rapport de
+# certification (C2.1.1, critere 4). Elle echouait jusqu'ici — le fichier
+# n'existait pas, aucun profil `prod` n'etait declare, et le backend
+# construisait `target: dev`.
+services:
+  postgres:
+    profiles: ["prod"]
+
+  backend:
+    profiles: ["prod"]
+    build:
+      target: prod
+    environment:
+      NODE_ENV: production
+
+  # DEVOPS-12 : le dashboard n'est conteneurise qu'en production. En
+  # developpement il tourne sur l'hote (`bun run dev:web`), ou le rechargement a
+  # chaud de Next est bien plus rapide qu'a travers un volume monte.
+  web:
+    profiles: ["prod"]
+    build:
+      context: .
+      dockerfile: apps/web/Dockerfile
+      target: prod
+      args:
+        # Lue dans des hooks client, donc inscrite par Next dans le bundle
+        # JavaScript a la compilation : c'est un argument de build, pas une
+        # variable d'execution. La changer impose de reconstruire l'image.
+        NEXT_PUBLIC_API_URL: https://${CADDY_DOMAIN_API}
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+    depends_on:
+      - backend
+
+  caddy:
+    profiles: ["prod"]
+    volumes:
+      - ./Caddyfile.prod:/etc/caddy/Caddyfile
+    depends_on:
+      - backend
+      - web
