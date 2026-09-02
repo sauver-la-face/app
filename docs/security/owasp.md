@@ -1,6 +1,6 @@
 # Sécurité - OWASP
 
-Créé le 2026-08-31 · Dernière revue : 2026-09-02 (A07 revue après le merge d'AUTH-02)
+Créé le 2026-08-31 · Dernière revue : 2026-09-02 (revue apres les merges API-02, API-03, AUTH-02 et WEB-I18N-01)
 
 > Se remplit **feature par feature**, pas au démarrage.
 > États : `fait` · `partiel` · `non applicable` · `à faire`
@@ -22,7 +22,7 @@ Créé le 2026-08-31 · Dernière revue : 2026-09-02 (A07 revue après le merge 
 | # | Point | État | Où c'est traité |
 |---|---|---|---|
 | A01 | Broken Access Control (inclut SSRF) | fait | Vérifié par `apps/backend/tests/routesProtegees.test.ts`, qui parcourt la table de routage réelle de l'application montée en entier : toute route répond 401 sans identifiants, ou figure dans une liste explicite de routes publiques. Une route non déclarée fait échouer la suite (SEC-01, SEC-02, SEC-04). Les quatre routes publiques assumées sont `POST /auth/patient/validate`, `GET /health`, `GET /docs` et `GET /openapi.json` · au-delà du 401, l'appartenance est vérifiée côté serveur : `patientId` du token comparé au corps de `/sync` (403 `PATIENT_MISMATCH`), `photoRepository.findEventOwnerPatientId` avant tout upload, instructions patient servies sous `/me` pour qu'il n'y ait plus d'identifiant à comparer · équipe soignante partagée, donc pas de scoping par médecin, décision assumée en A06 · volet SSRF : aucun appel sortant n'est construit à partir d'une entrée utilisateur, les endpoints S3 et MinIO étant lus dans l'environnement (`shared/storage/s3Client.ts`, `shared/storage/logsStorage.ts`) et jamais dans une requête — conclusion de l'audit du 2026-07-23, revérifiée le 2026-09-02 |
-| A02 | Security Misconfiguration | partiel | En production, `Caddyfile.prod` est la seule porte d'entrée : TLS 1.3 minimum, HSTS un an sous-domaines inclus, `X-Content-Type-Options: nosniff`, `Referrer-Policy: no-referrer`, suppression de l'en-tête `Server`, `X-Frame-Options` à `DENY` sur l'API et `SAMEORIGIN` sur le dashboard, le backend n'écoutant que sur le réseau Docker interne (DEVOPS-02, DEVOPS-12) · CORS restreint à `WEB_URL` (`index.ts`) · Swagger `/docs` et le logger HTTP désactivés hors développement · `JWT_SECRET` et `BETTER_AUTH_SECRET` obligatoires en production, l'application refuse de démarrer sinon (`index.ts`, `auth/infrastructure/authConfig.ts`) · Postgres, MinIO et pgAdmin publiés sur `127.0.0.1` uniquement, pgAdmin et MinIO derrière le profil `dev` (`docker-compose.yml`). **Reste :** `/openapi.json` est servi sans condition sur `NODE_ENV`, contrairement à `/docs`, et ne déclare aucun schéma de sécurité — le document présente donc des chemins protégés comme ouverts (traité sur la branche API-02, non mergée). La liste des routes publiques de `tests/routesProtegees.test.ts` les commente pourtant ensemble comme « servie uniquement hors production » : c'est vrai de `/docs`, que `tests/apiDocs.test.ts` vérifie bien en 404 en production, et faux de `/openapi.json`, qu'aucun test ne conditionne — `app.doc()` est appelé hors de toute garde dans `index.ts` · `poweredBy()` expose `X-Powered-By` · le `Caddyfile` de développement reste en `:80` en clair, ce qui est voulu, mais rien n'empêche de le lancer par erreur en production à la place de `Caddyfile.prod` |
+| A02 | Security Misconfiguration | partiel | En production, `Caddyfile.prod` est la seule porte d'entrée : TLS 1.3 minimum, HSTS un an sous-domaines inclus, `X-Content-Type-Options: nosniff`, `Referrer-Policy: no-referrer`, suppression de l'en-tête `Server`, `X-Frame-Options` à `DENY` sur l'API et `SAMEORIGIN` sur le dashboard, le backend n'écoutant que sur le réseau Docker interne (DEVOPS-02, DEVOPS-12) · CORS restreint à `WEB_URL` (`index.ts`) · Swagger `/docs` et le logger HTTP désactivés hors développement · `JWT_SECRET` et `BETTER_AUTH_SECRET` obligatoires en production, l'application refuse de démarrer sinon (`index.ts`, `auth/infrastructure/authConfig.ts`) · Postgres, MinIO et pgAdmin publiés sur `127.0.0.1` uniquement, pgAdmin et MinIO derrière le profil `dev` (`docker-compose.yml`) · `/openapi.json` n'est plus servi en production, `app.doc()` étant désormais appelé sous la même garde `NODE_ENV` que `/docs` (API-03) — le commentaire de `tests/routesProtegees.test.ts` qui les décrivait ensemble comme « servie uniquement hors production » est donc redevenu exact pour les deux · le document déclare ses schémas de sécurité, `sessionMedecin` et `jetonPatient` enregistrés par `app.openAPIRegistry.registerComponent()` et référencés opération par opération (API-02) : il ne présente plus de chemin protégé comme ouvert · le cookie de langue `slf-locale` suit `x-forwarded-proto` au lieu de porter `secure` inconditionnellement, ce qui le faisait refuser en silence hors HTTPS (`apps/web/src/proxy.ts`, WEB-I18N-01). **Reste :** `poweredBy()` expose `X-Powered-By` · le `Caddyfile` de développement reste en `:80` en clair, ce qui est voulu, mais rien n'empêche de le lancer par erreur en production à la place de `Caddyfile.prod` |
 | A03 | Software Supply Chain Failures | partiel | Dependabot sur trois écosystèmes, hebdomadaire (`.github/dependabot.yml`) : `bun` à la racine (couvre `apps/*` et `packages/*` via le `bun.lock` unique), `docker` pour l'image backend, `github-actions` pour les workflows · majeures d'`expo-*`, `react` et `react-native` volontairement retenues, raison écrite dans le fichier · `bun.lock` versionné · DEVOPS-06. **Reste :** aucune étape `bun audit` en CI (`.github/workflows/ci.yml`), la détection repose entièrement sur l'ouverture de PR par Dependabot · actions GitHub épinglées par tag majeur et non par SHA |
 | A04 | Cryptographic Failures | partiel | TLS 1.3 en transit en production, imposé par `Caddyfile.prod` et non simplement négocié — sans la directive `protocols tls1.3`, Caddy accepte TLS 1.2 (DEVOPS-02) · mots de passe médecin hashés par Better Auth (`auth/infrastructure/authConfig.ts`) · JWT patient signé HS256 (`auth/infrastructure/jwtTokenProvider.ts`) · empreinte SHA-256 des photos (`packages/shared/src/domain/checksumSHA256.ts`) · rotation des clés JWT et des identifiants OVH tous les 90 jours ([ADR 0022](../adr/0022-faire-tourner-les-secrets-de-production-tous-les-90-jours.md)) · aucun secret en dur, tout passe par l'environnement. **Reste :** S3 et MinIO en HTTP par défaut, `S3_USE_SSL` et `MINIO_USE_SSL` doivent être posés explicitement (`shared/storage/s3Client.ts`, `shared/storage/logsStorage.ts`) — c'est le trajet backend → stockage d'objets, hors du périmètre de Caddy · chiffrement au repos ni configuré ni documenté |
 | A05 | Injection | fait | Accès base exclusivement via Drizzle ORM, donc requêtes paramétrées — aucune concaténation de chaîne. Le template `sql` n'apparaît que dans `infrastructure/schema.ts`, sur des prédicats d'index constants sans donnée utilisateur · validation Zod à l'entrée de chaque route (`@hono/zod-openapi`, schémas de `packages/shared/src/`) et Value Objects validants `PatientCodeValue` et `ChecksumSHA256`, dont le constructeur privé rend impossible la construction d'une valeur non validée · rendu React échappé par défaut, aucun `dangerouslySetInnerHTML` dans `apps/web/src` |
@@ -104,28 +104,16 @@ Deux conséquences, l'une pour la lecture, l'autre pour le code :
 
 ### À revoir avant prod
 
-- **La garde d'enrôlement existe sur le dashboard et manque sur les deux pages
-  patient.** Depuis qu'AUTH-02 exige le second facteur, un médecin non enrôlé
-  reçoit `403 MFA_REQUIRED` sur toutes les routes de données. Le parcours
-  nominal le prend en charge : `DashboardPage.tsx` teste
-  `session.user.twoFactorEnabled` et redirige vers `/[locale]/mfa/setup`, si
-  bien qu'un compte fraîchement inscrit arrive bien sur l'enrôlement.
-  `PatientManagementPage.tsx` et `PatientHistoryPage.tsx` ne testent en revanche
-  que la présence de session (`!sessionPending && !session` → `/login`) : un
-  médecin non enrôlé qui ouvre directement `/[locale]/patients` ou une fiche
-  patient obtient une page rendue dont tous les appels renvoient 403, sans
-  jamais être orienté vers l'enrôlement. Trois lignes à recopier depuis
-  `DashboardPage.tsx`, pas un défaut d'architecture.
-  Le fond reste néanmoins vrai et déborde ces deux pages : **le serveur
-  distingue 401 et 403, le client non.** Aucun hook ne lit ce statut —
-  `useDashboard` lève `PATIENTS_FETCH_FAILED` et `ALERTS_FETCH_FAILED` sur un
-  simple `!res.ok`, `usePatientHistory` ne distingue que le 404, aucun ne lit le
-  corps de la réponse. Toute cause future de 403 produira donc le même message
-  d'échec indifférencié, quelle que soit la garde posée en amont.
-- **`/openapi.json` public et muet sur l'authentification.** La route est servie
-  sans condition sur `NODE_ENV`, contrairement à `/docs`, et ne déclare aucun
-  schéma de sécurité : le document publié présente des chemins protégés comme
-  ouverts. Les gardes existent, c'est leur documentation qui ment.
+- **Contraste sous le seuil AA sur l'action principale.** `docs/accessibilite.md`
+  mesure le texte blanc sur `#2EAC8E` à **2,83:1**, là où le critère WCAG 2.2
+  1.4.3 en exige 4,5:1 — et le projet revendique explicitement le niveau AA.
+  Trois éléments sont concernés : le bouton de connexion, la soumission du
+  formulaire patient et le lien « Nouveau patient » de la barre latérale. Le
+  défaut est mesuré et consigné depuis l'audit Lighthouse, mais non corrigé.
+  `#178064`, déjà présent dans le produit, atteint 4,87:1 et sert de fond aux
+  boutons ajoutés par WEB-03 : la correction est donc connue et faisable, il
+  reste à l'appliquer partout plutôt qu'écran par écran — un vert d'action
+  principale qui varie selon la page est une incohérence visible.
 - **Limitation de tentatives en mémoire.** `ipFailures` dans `authRouter.ts` et
   `rateLimitStores` dans `rateLimiter.ts` sont des `Map` de processus : le
   compteur repart à zéro à chaque redémarrage et n'est pas partagé entre
