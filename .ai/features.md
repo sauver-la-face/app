@@ -911,7 +911,7 @@ introuvable —, aucun profil `prod` n'était déclaré, et le backend construis
 ---
 ### DEVOPS-12 — Conteneuriser le dashboard web
 
-`[ ]` 🟡 Majeur · `apps/web/Dockerfile` · `docker-compose.prod.yml` · `Caddyfile.prod`
+`[x]` 🟡 Majeur · `apps/web/Dockerfile` · `docker-compose.prod.yml` · `Caddyfile.prod`
 
 **Contexte :**
 
