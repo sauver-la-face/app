@@ -8,6 +8,11 @@ Chaque version est marquée par un tag Git annoté (`vX.Y.Z`).
 
 ## [Non publié]
 
+### Corrigé
+
+- **DEVENV-01** — le seed MED-01 ne pouvait pas s'exécuter sur une base neuve. L'unicité de `symptom.code` est portée par un index fonctionnel sur `lower(code)` (ADR 0016), or le script visait la colonne nue dans son `ON CONFLICT` : PostgreSQL exige une correspondance exacte avec l'index et rejetait la requête (`no unique or exclusion constraint matching the ON CONFLICT specification`). L'API Drizzle n'acceptant qu'une colonne et non une expression, l'upsert est remplacé par une lecture insensible à la casse suivie d'une insertion ou d'une mise à jour. Vérifié sur base vierge : 8 insertions au premier passage, 8 mises à jour au second, aucun doublon
+- **DEVENV-01** — `pgadmin` redémarrait indéfiniment lorsque `PGADMIN_EMAIL` et `PGADMIN_PASSWORD` manquent dans `.env.local`, noyant la cause réelle dans les journaux. La politique passe de `unless-stopped` à `on-failure:3` : trois tentatives, puis arrêt, sans gêner le reste de la pile
+
 ### Ajouté
 
 - **DEVOPS-12** — le dashboard web n'était pas déployable : `apps/web` n'avait aucun `Dockerfile` et n'apparaissait dans aucun fichier Compose, alors que le rapport de certification annonce Next.js parmi les quatre services de production. L'image est construite sur une base **Node et non `oven/bun`** — `next build` charge un runtime CommonJS compilé que Bun ne sait pas évaluer, ce que la CI ne rencontre pas puisqu'elle installe Node *et* Bun sur le runner. Caddy route désormais deux domaines : l'API vers `backend:3001`, le dashboard vers `web:3000`. Vérifié en construisant l'image et en interrogeant le conteneur (HTTP 200, fichiers statiques compris). L'image **n'embarque pas `node_modules`** : `output: 'standalone'` produit un serveur autonome recopié dans une image Node nue, ce qui la ramène de **1,1 Go à 287 Mo**
