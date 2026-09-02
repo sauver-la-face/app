@@ -1,0 +1,4 @@
+# Les photos de demonstration ne sont jamais versionnees (donnees de sante, RGPD).
+*
+!.gitignore
+!README.md

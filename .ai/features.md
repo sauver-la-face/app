@@ -278,6 +278,31 @@ Le seuil actuel (ALERT-01) est fixe à 7 jours, identique pour tous les patients
 
 ---
 
+### ALERT-03 — Alerte d'inactivité pour un patient enrôlé qui n'a jamais synchronisé
+
+`[ ]` 🟢 Mineur · `apps/backend/src/features/alerts/`
+
+**Contexte :**
+
+`buildSyncOverdueAlerts` ne considère que les patients dont `last_synced_at` est renseigné (`alertsDomain.ts`, filtre `lastSyncedAt !== null`). Un patient qui a consommé son code d'accès — donc qui a l'application en main — mais dont aucune synchronisation n'est jamais remontée reste invisible côté alertes : il n'apparaît qu'en statut « jamais synchronisé » dans le tableau. C'est pourtant le silence le plus inquiétant du parcours.
+
+Le comportement actuel est correct pour le cas inverse — fiche créée, code jamais remis au patient — où alerter n'aurait aucun sens : le patient n'a pas encore de moyen de donner signe de vie.
+
+**Comportement attendu :**
+
+- Le compte à rebours d'inactivité démarre au premier signe de vie possible : `last_synced_at` s'il existe, sinon la date d'utilisation du code d'accès (`patient_code.used_at`)
+- Un patient sans code utilisé ne déclenche aucune alerte — comportement actuel préservé
+- Le message distingue les deux cas : « aucune synchronisation depuis X jours » vs « première connexion il y a X jours, aucune donnée reçue »
+
+**Règles de code :**
+
+- La résolution de la date de départ vit dans `alerts/domain/` — le repository fournit `usedAt` en plus de `lastSyncedAt`, il ne décide pas
+- Se combine avec **ALERT-02** (seuil paramétrable) : même seuil appliqué, seule la date de départ change
+- Dépend de **ALERT-01** (déjà implémenté), extension non bloquante
+- Tester : code utilisé il y a 10 jours sans sync → alerte, code utilisé hier sans sync → pas d'alerte, aucun code utilisé → pas d'alerte, sync récente → pas d'alerte
+
+---
+
 ### PHOTO-01 — Stockage et validation des photos
 
 `[x]` 🟡 Majeur · `apps/backend/src/features/photos/`
@@ -1230,6 +1255,39 @@ Une origine refusée par le CORS se manifeste dans le navigateur par un « Faile
 Exactement le même message apparaît pour une raison sans rapport, côté client cette fois. `authClient.ts` et `useDashboard.ts` retombent tous deux sur `http://localhost:3001` quand `NEXT_PUBLIC_API_URL` est absente. En développement local, ce repli tombe juste et masque le problème. En conteneur il est faux : `NEXT_PUBLIC_API_URL` est un **argument de build**, pas une variable d'exécution — Next l'inscrit dans le JavaScript à la compilation (`apps/web/Dockerfile`, `docker-compose.prod.yml` la passe comme `build.args`). Une image construite sans elle embarque donc `localhost:3001` en dur, et chaque navigateur qui l'ouvre interroge **sa propre machine** au lieu du serveur. Le symptôme est identique, la cause est ailleurs, et elle ne se voit qu'en production.
 
 Deux conséquences pour ce lot : le repli mérite d'être unique et déclaré à un seul endroit plutôt que recopié dans chaque hook, et l'absence de `NEXT_PUBLIC_API_URL` au build de l'image devrait échouer bruyamment plutôt que produire une image silencieusement inutilisable.
+
+---
+
+### DEMO-01 — Jeu de données de démonstration
+
+`[ ]` 🟡 Majeur · `apps/backend/scripts/seedDemo.ts`
+
+**Contexte :**
+
+Les scripts de seed existants ne produisent aucune alerte : `seedMed01` n'insère que le référentiel de symptômes, et `seedSync01` crée un patient dont le symptôme est `triggers_alert: false`, sans `last_synced_at`. Sur une base fraîche, le tableau de bord affiche donc le bandeau vert « aucune alerte » — ce qui contredit la démonstration du parcours médecin, où le premier écran montre « les alertes du jour ».
+
+Le dossier patient (WEB-03) souffre du même vide : `seedSync01` insère une ligne `media` dont le `file_url` pointe sur `https://server.example/existing-media.jpg`, une URL fictive. `GET /photos/:mediaId` en extrait une clé S3 qui n'existe dans aucun bucket, et la vignette s'affiche cassée — alors que « toute la chronologie, photos comprises » est le point d'orgue du parcours de démonstration.
+
+**Comportement attendu :**
+
+- Six patients couvrant tous les états lisibles à l'écran : alerte critique (symptôme déclencheur récent), alerte d'inactivité (dernière synchronisation à J-11), accès créé avec code actif jamais utilisé, code expiré faute de saisie, code révoqué après perte de l'appareil (suivi normal par ailleurs), fiche sans aucun code émis
+- Aucun patient ne fait doublon : chacun est le seul à produire au moins un badge. Un septième patient en « suivi normal » a été retiré pour cette raison — son couple OK / code utilisé était déjà porté par deux autres
+- Après exécution, `GET /alerts` renvoie 3 alertes (2 critiques sur le même signalement, 1 d'inactivité) et `GET /patients` en renvoie 6
+- **Les 9 badges de la liste sont représentés** : les 4 badges de statut (alerte, hors-ligne, jamais synchronisé, OK — l'alerte venant de `hasAlert`, pas de `syncStatus`) et les 5 états de code (actif, utilisé, expiré, révoqué, aucun). Un badge qu'aucun patient ne déclenche est un pan de l'interface que personne ne voit jamais, en démonstration comme en recette
+- Les trois patients ajoutés pour les états de code ne créent aucune alerte supplémentaire : symptômes non déclencheurs, et `last_synced_at` soit récent soit nul — le compte reste à 3
+- Trois de ces patients portent une chronologie photo réellement servie par `GET /photos/:mediaId` : les fichiers sont déposés dans le bucket MinIO, pas seulement référencés en base
+- Rejouable sans produire de doublon ni casser les contraintes d'unicité
+
+**Règles de code :**
+
+- Les événements sont rattachés au médecin réellement enregistré (`DEMO_PHYSICIAN_EMAIL`, ou le premier médecin en base) — jamais à un médecin fictif créé par le script, sinon la démonstration se fait sous un compte différent de celui de la connexion
+- Les patients sont retrouvés par nom avant insertion : un patient créé à la main depuis le dashboard est enrichi, pas dupliqué
+- Les symptômes déclencheurs viennent de `SYMPTOMS_SEED` — jamais de `triggers_alert` écrit en dur dans le script
+- Refus d'exécution si `NODE_ENV=production` : le script efface les données cliniques des patients qu'il gère
+- Les clés S3 suivent la convention de `S3PhotoStorage` (`{eventId}/{mediaId}`) — le seed ne définit pas son propre format, sinon la route de lecture ne sait plus reconstruire la clé
+- MinIO injoignable n'interrompt pas le seed : le jeu de données du tableau de bord ne dépend pas du stockage objet, seules les photos sont omises, avec un avertissement
+- **Aucune photo médicale réelle n'est versionnée** : ce sont des données de santé, et les clichés disponibles en ligne montrent des enfants identifiables qu'on n'attribue pas à un dossier fabriqué. Le script génère des illustrations schématiques filigranées, dont l'aspect dérive du jour post-opératoire et des symptômes de l'événement. `scripts/demoAssets/` accueille de vraies images si besoin, et son `.gitignore` les exclut du dépôt
+- Tester : exécution sur base vierge → 3 alertes, seconde exécution → toujours 4 patients et 3 alertes
 
 ---
 
