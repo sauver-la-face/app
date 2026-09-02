@@ -1,5 +1,5 @@
 import type {
-  CreateInstructionInput,
+  CreateInstructionCommand,
   Instruction as InstructionDto,
   InstructionListResponse,
 } from '@sauver-la-face/shared';
@@ -37,7 +37,7 @@ export class InstructionsUsecase {
     private readonly nowFactory: () => Date = () => new Date(),
   ) {}
 
-  async createInstruction(command: CreateInstructionInput): Promise<InstructionDto> {
+  async createInstruction(command: CreateInstructionCommand): Promise<InstructionDto> {
     const draft = Instruction.create(command);
 
     const exists = await this.instructionRepository.procedureExists(draft.medicalProcedureId);
