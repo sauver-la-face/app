@@ -29,7 +29,7 @@ Une décision = un fichier. Voir `0000-template.md` pour le format.
 | [0023](0023-couper-une-session-patient-en-revoquant-le-code-porteur.md) | Couper une session patient en révoquant le code porteur | Accepté | 2026-08-31 |
 
 Les ADR 0002 à 0022 consignent des décisions prises avant la mise en place de ce
-dossier. Elles ont été reprises depuis `../architectureAdr.md` — sections
+dossier. Elles ont été reprises depuis `../architecture-systeme.md` — sections
 « Décisions d'architecture » (0002 à 0014), « Décisions de schéma » (0015 à 0019)
 et « Sécurité » (0020 à 0022). La date est celle de leur consignation, pas celle
 de l'arbitrage d'origine.

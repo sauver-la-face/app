@@ -1,4 +1,4 @@
-[← README](../README.md) · [Architecture](architectureAdr.md) · [Schéma BDD](schema.dbml) · [Lexique](lexique.md) · [CDC](cdc.md)
+[← README](../README.md) · [Architecture](architecture-systeme.md) · [Schéma BDD](schema.dbml) · [Lexique](lexique.md) · [CDC](cdc.md)
 
 # Onboarding — Sauver la Face
 
@@ -20,7 +20,7 @@ Application mobile offline-first pour des patients cambodgiens opérés lors de 
 2. `docs/lexique.md` — comprendre le rôle de chaque technologie
 3. `.ai/context.md` — stack, architecture, règles critiques
 4. `.ai/features.md` — ce qui est à faire et ce qui est terminé
-5. `docs/architectureAdr.md` — décisions techniques et pourquoi elles ont été prises
+5. `docs/architecture-systeme.md` — décisions techniques et pourquoi elles ont été prises
 
 ### 2. Installer l'environnement
 

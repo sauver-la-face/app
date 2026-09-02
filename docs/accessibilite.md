@@ -1,15 +1,15 @@
-[← README](../README.md) · [Architecture](architectureAdr.md) · [ADR](adr/README.md) · [Onboarding](onboarding.md) · [CDC](cdc.md)
+[← README](../README.md) · [Architecture](architecture-systeme.md) · [ADR](adr/README.md) · [Onboarding](onboarding.md) · [CDC](cdc.md)
 
 # Accessibilité — Sauver la Face
 
 > Référentiel retenu, périmètre de vérification, conformité mesurée et standard
 > des cibles tactiles. Les décisions techniques sont dans [`docs/adr/`](adr/README.md),
-> la description du système dans [architectureAdr.md](architectureAdr.md).
+> la description du système dans [architecture-systeme.md](architecture-systeme.md).
 
 ---
 
 > Compétence **C2.2.3** — critères 2 (référentiel choisi et justifié) et 3 (conformité mesurée).
-> À rapprocher du critère 1 (OWASP Top 10), traité dans la section [Sécurité](architectureAdr.md#sécurité) de la doc d'architecture.
+> À rapprocher du critère 1 (OWASP Top 10), traité dans la section [Sécurité](architecture-systeme.md#sécurité) de la doc d'architecture.
 
 ## Référentiel choisi : WCAG 2.2, niveau AA
 

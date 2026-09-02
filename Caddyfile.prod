@@ -2,7 +2,7 @@
 #
 # DEVOPS-02 : le Caddyfile de production n'existait pas. Le seul present servait
 # `:80` en HTTP simple, alors que l'ADR 0009, le tableau Securite de
-# architectureAdr.md et le rapport de certification affirment tous « TLS 1.3
+# architecture-systeme.md et le rapport de certification affirment tous « TLS 1.3
 # obligatoire (RGPD + HDS), certificats Let's Encrypt automatiques ».
 #
 # Caddy ne provisionne un certificat que pour un nom d'hote : une adresse de la

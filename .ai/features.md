@@ -1,4 +1,4 @@
-[← README](../README.md) · [Contexte IA](context.md) · [Onboarding](../docs/onboarding.md) · [Architecture](../docs/architectureAdr.md) · [CDC](../docs/cdc.md)
+[← README](../README.md) · [Contexte IA](context.md) · [Onboarding](../docs/onboarding.md) · [Architecture](../docs/architecture-systeme.md) · [CDC](../docs/cdc.md)
 
 # Fonctionnalités à implémenter — Sauver la Face
 

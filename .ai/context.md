@@ -1,4 +1,4 @@
-[← README](../README.md) · [Features](features.md) · [Onboarding](../docs/onboarding.md) · [Architecture](../docs/architectureAdr.md) · [CDC](../docs/cdc.md)
+[← README](../README.md) · [Features](features.md) · [Onboarding](../docs/onboarding.md) · [Architecture](../docs/architecture-systeme.md) · [CDC](../docs/cdc.md)
 
 # Contexte projet — Sauver la Face
 

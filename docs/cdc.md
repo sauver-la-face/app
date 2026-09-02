@@ -1,4 +1,4 @@
-[← README](../README.md) · [Onboarding](onboarding.md) · [Architecture](architectureAdr.md) · [Schéma BDD](schema.dbml) · [Lexique](lexique.md)
+[← README](../README.md) · [Onboarding](onboarding.md) · [Architecture](architecture-systeme.md) · [Schéma BDD](schema.dbml) · [Lexique](lexique.md)
 
 # Analyse Architecte — Sauver la Face
 > Version 4 — Choix révisés et alignés
