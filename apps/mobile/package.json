@@ -10,7 +10,7 @@
     "test": "bun test"
   },
   "dependencies": {
-    "expo": "~57.0.17",
+    "expo": "~57.0.18",
     "react": "^19.2.8",
     "react-native": "0.86.3",
     "expo-sqlite": "~57.0.2",
