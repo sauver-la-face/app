@@ -485,8 +485,8 @@ Le seuil actuel (ALERT-01) est fixe à 7 jours, identique pour tous les patients
 **Comportement attendu :**
 
 - Historique des photos de cicatrices par date
-- Graphique d'évolution de la sévérité des symptômes
 - Timeline des événements médicaux
+- Graphique d'évolution de la sévérité des symptômes — **reporté, voir WEB-08**. Un panneau « Évolution des symptômes » avait été livré à sa place : il comptait les symptômes par événement, ce que la timeline dit déjà en les nommant, et un décompte ne mesure aucune sévérité. Retiré plutôt que laissé comme réponse approximative à une exigence qui demandait autre chose
 
 **Règles de code :**
 
@@ -561,6 +561,33 @@ qui faisait échouer `next build` — sans que la CI le détecte, aucun job ne l
 
 - Toute route publique du dashboard vit sous `app/[locale]/` — pas de page à la racine de
   `app/` en dehors du layout et de `globals.css`
+
+---
+
+### WEB-08 — Graphique d'évolution de la sévérité des symptômes
+
+`[ ]` 🟢 Mineur · `apps/backend/src/infrastructure/schema.ts` · `apps/web/src/features/patients/components/`
+
+**Contexte :**
+
+WEB-02 demandait un graphique d'évolution de la **sévérité**. Le panneau livré comptait les symptômes par événement — deux symptômes n'y paraissaient pas moins graves qu'une suppuration isolée — et répétait la timeline voisine avec moins d'information, puisqu'elle les nomme. Il a été retiré.
+
+La cause n'est pas la mise en œuvre mais le modèle de données : la table `symptom` porte `code`, `label_fr`, `label_km` et `triggers_alert`. Ce booléen distingue les symptômes qui déclenchent une alerte, il ne gradue rien. Aucune sévérité n'est représentable aujourd'hui.
+
+**Comportement attendu :**
+
+- Chaque symptôme du référentiel porte un niveau de gravité (`leger` · `modere` · `severe`)
+- La fiche patient trace ce niveau dans le temps : la courbe monte quand l'état se dégrade, descend quand il s'améliore
+- Les dates sont espacées selon leur écart réel, un patient silencieux laissant un intervalle visible
+
+**Règles de code :**
+
+- Migration additive sur `symptom` avec une valeur par défaut : les lignes existantes restent valides, aucun symptôme ne devient nul
+- Le niveau est une donnée du référentiel, pas une valeur calculée — il se décide avec les chirurgiens, comme la liste elle-même (MED-01)
+- `triggers_alert` reste indépendant : un symptôme sévère ne déclenche pas forcément une alerte, et inversement
+- Ne pas réintroduire un décompte comme substitut : c'est ce qui a été retiré
+- Dépend de **MED-01** pour l'attribution des niveaux
+- Tester : aggravation → courbe montante, amélioration → descendante, patient sans signalement → aucun point
 
 ---
 
