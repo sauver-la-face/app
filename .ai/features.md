@@ -1260,7 +1260,7 @@ Deux conséquences pour ce lot : le repli mérite d'être unique et déclaré à
 
 ### DEMO-01 — Jeu de données de démonstration
 
-`[ ]` 🟡 Majeur · `apps/backend/scripts/seedDemo.ts`
+`[x]` 🟡 Majeur · `apps/backend/scripts/seedDemo.ts`
 
 **Contexte :**
 
