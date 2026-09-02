@@ -72,7 +72,11 @@ export function NewPatientForm({ locale, dictionary }: NewPatientFormProps) {
         <div className="flex gap-3">
           <button
             type="button"
-            onClick={() => router.push(`/${locale}`)}
+            // Vers le tableau de bord, pas vers /[locale] : cette racine n'est pas
+            // une destination mais une page de transit qui redirige vers la
+            // connexion. Annuler une creation ramenait donc l'utilisateur sur un
+            // ecran vide au lieu de son point de depart.
+            onClick={() => router.push(`/${locale}/dashboard`)}
             className="rounded-md border border-gray-300 bg-white px-5 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
           >
             {labels.cancelButton}
