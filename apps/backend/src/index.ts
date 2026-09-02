@@ -168,22 +168,31 @@ export function createApp(): OpenAPIHono<{ Variables: SessionVariables }> {
       "Jeton emis a la validation du code a six chiffres, transmis en en-tete Authorization. SEC-03 : sa revocation se lit a chaque requete sur le code d'acces consomme.",
   });
 
-  app.doc('/openapi.json', {
-    info: {
-      title: 'Sauver la Face API',
-      version: '1.0.0',
-      description: 'Documentation OpenAPI du backend Sauver la Face',
-    },
-    // Sans `servers`, le document ne porte aucune URL de base : un client
-    // genere depuis la specification ne sait pas ou envoyer ses requetes.
-    servers: [
-      {
-        url: process.env.BETTER_AUTH_URL ?? 'http://localhost:3001',
-        description: "Instance courante, deduite de l'URL publique du backend",
+  // Servie hors production uniquement, au meme titre que /docs. Masquer
+  // l'interface Swagger sans masquer la specification qu'elle affiche ne
+  // protege rien : /openapi.json est le contenu, /docs n'en est que la vue.
+  // Les schemas de securite ci-dessus restent enregistres dans tous les cas :
+  // ils ne sont pas servis, seulement declares dans le registre.
+  // Seuls les tests et les scripts generate:api-types la consomment, tous
+  // en developpement.
+  if (process.env.NODE_ENV !== 'production') {
+    app.doc('/openapi.json', {
+      info: {
+        title: 'Sauver la Face API',
+        version: '1.0.0',
+        description: 'Documentation OpenAPI du backend Sauver la Face',
       },
-    ],
-    openapi: '3.0.0',
-  });
+      // Sans `servers`, le document ne porte aucune URL de base : un client
+      // genere depuis la specification ne sait pas ou envoyer ses requetes.
+      servers: [
+        {
+          url: process.env.BETTER_AUTH_URL ?? 'http://localhost:3001',
+          description: "Instance courante, deduite de l'URL publique du backend",
+        },
+      ],
+      openapi: '3.0.0',
+    });
+  }
 
   // --- Enregistrement des Routes ---
   app.get('/health', (c) => c.json({ status: 'ok' }));
