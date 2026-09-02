@@ -12,6 +12,11 @@ Chaque version est marquée par un tag Git annoté (`vX.Y.Z`).
 
 - **WEB-03** (nettoyage) — les 48 entrées de dictionnaire laissées orphelines par le retrait des six champs non enregistrés sont supprimées : `civiliteLabel`, `phoneLabel`, `addressLabel`, `countryLabel`, leurs libellés d'option et leurs placeholders, dans les trois langues. Plus aucun composant ne les référençait. Une clé de traduction orpheline ne casse rien à l'exécution, mais elle documente une saisie que le formulaire ne propose plus — le prochain lecteur du dictionnaire y verrait un champ à rétablir plutôt qu'un résidu
 - **WEB-03** (RGPD, minimisation) — le formulaire de création d'un patient collectait six champs qu'aucune colonne n'accueille : civilité, téléphone, réseau social, adresse, code postal et pays. Ils étaient saisis puis jetés au moment de l'envoi. Au-delà de la collecte sans finalité sur une application de données de santé, le risque était clinique : le formulaire donnait au médecin la conviction d'avoir enregistré un numéro de téléphone. S'il comptait dessus pour joindre la famille d'un patient en alerte, il aurait cherché une donnée qui n'a jamais existé. Le formulaire ne présente plus que ce qui est réellement enregistré
+
+### Modifié
+
+- **DOCS-04** — `docs/architectureAdr.md` est renommé `docs/architecture-systeme.md`. Son nom annonçait des ADR qu il ne contient pas — ceux-ci vivent dans `docs/adr/` — alors qu il décrit l architecture du système : couches back, web et mobile, schéma de données, sécurité, volumes. Le renommage figurait déjà en « hors périmètre » de DOCS-02 et DOCS-03, identifié comme nécessaire et reporté deux fois. Les neuf fichiers qui y renvoient sont mis à jour ; les mentions historiques du CHANGELOG et de `features.md` gardent l ancien nom, puisqu elles décrivent un état passé
+
 ### Corrigé
 
 - **WEB-06** — le bouton « Annuler » du formulaire de création d'un patient renvoyait vers `/[locale]`, qui n'est pas une destination mais une page de transit redirigeant vers la connexion. Renoncer à une création menait donc à un écran vide au lieu du point de départ. Il ramène désormais au tableau de bord
