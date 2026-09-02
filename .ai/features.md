@@ -373,7 +373,7 @@ Le seuil actuel (ALERT-01) est fixe à 7 jours, identique pour tous les patients
 
 ### API-02 — Conformité et sécurité du document OpenAPI
 
-`[ ]` 🟡 Majeur · `apps/backend/src/index.ts` · `apps/backend/src/shared/openapi.ts` · `apps/backend/src/features/*/presentation/`
+`[x]` 🟡 Majeur · `apps/backend/src/index.ts` · `apps/backend/src/shared/openapi.ts` · `apps/backend/src/features/*/presentation/`
 
 **Contexte :**
 
