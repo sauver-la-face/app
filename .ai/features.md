@@ -1135,7 +1135,7 @@ Audit de sécurité (revue OWASP A06, 2026-07-23) : aucun outil de suivi des vul
 
 ### DEVOPS-13 — Job CI de construction des images Docker
 
-`[ ]` 🟡 Majeur · `.github/workflows/ci.yml`
+`[x]` 🟡 Majeur · `.github/workflows/ci.yml`
 
 **Contexte :**
 
