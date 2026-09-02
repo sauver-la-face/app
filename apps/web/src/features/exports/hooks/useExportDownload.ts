@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { assertOk } from '@/lib/apiError';
 
 const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001';
 
@@ -33,9 +34,7 @@ export function useExportDownload() {
     try {
       const response = await fetch(`${apiBaseUrl}${path}`, { credentials: 'include' });
 
-      if (!response.ok) {
-        throw new Error('EXPORT_FAILED');
-      }
+      await assertOk(response, 'EXPORT_FAILED');
 
       const blob = await response.blob();
       const name = filenameFromDisposition(response.headers.get('Content-Disposition'));
