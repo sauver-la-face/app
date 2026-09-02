@@ -620,7 +620,7 @@ qui faisait échouer `next build` — sans que la CI le détecte, aucun job ne l
 
 ### WEB-07 — Pages légales
 
-`[ ]` 🟡 Majeur · `apps/web/src/app/[locale]/mentions-legales/` · `apps/web/src/app/[locale]/confidentialite/` · `apps/web/src/app/[locale]/plan-du-site/`
+`[x]` 🟡 Majeur · `apps/web/src/app/[locale]/mentions-legales/` · `apps/web/src/app/[locale]/confidentialite/` · `apps/web/src/app/[locale]/plan-du-site/`
 
 **Contexte :**
 
