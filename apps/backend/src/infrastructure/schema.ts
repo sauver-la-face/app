@@ -3,6 +3,7 @@ import {
   boolean,
   date,
   index,
+  integer,
   pgTable,
   primaryKey,
   text,
@@ -220,25 +221,37 @@ export const session = pgTable('session', {
   userId: text('user_id').notNull(),
 });
 
-export const account = pgTable('account', {
-  id: text('id').primaryKey(),
-  accountId: text('account_id').notNull(),
-  providerId: text('provider_id').notNull(),
-  userId: text('user_id').notNull(),
-  accessToken: text('access_token'),
-  refreshToken: text('refresh_token'),
-  idToken: text('id_token'),
-  accessTokenExpiresAt: timestamp('access_token_expires_at', {
-    withTimezone: true,
-  }),
-  refreshTokenExpiresAt: timestamp('refresh_token_expires_at', {
-    withTimezone: true,
-  }),
-  scope: text('scope'),
-  password: text('password'),
-  createdAt: timestamp('created_at', { withTimezone: true }).notNull(),
-  updatedAt: timestamp('updated_at', { withTimezone: true }).notNull(),
-});
+export const account = pgTable(
+  'account',
+  {
+    id: text('id').primaryKey(),
+    accountId: text('account_id').notNull(),
+    providerId: text('provider_id').notNull(),
+    // Better Auth 1.7 : l'identite d'un compte est desormais cadree par l'emetteur.
+    // Champ requis par l'adaptateur Drizzle depuis cette version.
+    // https://better-auth.com/docs/guides/1-7-upgrade-guide#account-identity-is-scoped-by-issuer
+    issuer: text('issuer').notNull(),
+    userId: text('user_id').notNull(),
+    accessToken: text('access_token'),
+    refreshToken: text('refresh_token'),
+    idToken: text('id_token'),
+    accessTokenExpiresAt: timestamp('access_token_expires_at', {
+      withTimezone: true,
+    }),
+    refreshTokenExpiresAt: timestamp('refresh_token_expires_at', {
+      withTimezone: true,
+    }),
+    scope: text('scope'),
+    password: text('password'),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull(),
+    updatedAt: timestamp('updated_at', { withTimezone: true }).notNull(),
+  },
+  // Better Auth 1.7 : l'identite d'un compte est le couple (issuer, accountId).
+  // L'unicite est ce qui donne son sens au cadrage par emetteur : sans elle,
+  // deux lignes pourraient revendiquer la meme identite chez le meme emetteur.
+  // https://better-auth.com/docs/guides/1-7-upgrade-guide#collisions-and-constraints
+  (t) => [uniqueIndex('account_issuer_account_id_unique').on(t.issuer, t.accountId)],
+);
 
 export const verification = pgTable('verification', {
   id: text('id').primaryKey(),
@@ -255,4 +268,10 @@ export const twoFactor = pgTable('two_factor', {
   backupCodes: text('backup_codes').notNull(),
   userId: text('user_id').notNull(),
   verified: boolean('verified').default(false),
+  // Better Auth 1.7 : protection contre le forcage brutal du code TOTP.
+  // Le compteur d'echecs et la date de deverrouillage sont ecrits par le
+  // plugin ; leur absence fait echouer l'enrolement en 500.
+  // https://better-auth.com/docs/guides/1-7-upgrade-guide
+  failedVerificationCount: integer('failed_verification_count').default(0),
+  lockedUntil: timestamp('locked_until', { withTimezone: true }),
 });
