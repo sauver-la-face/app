@@ -21,6 +21,18 @@ describe('api.docs', () => {
     expect(body.paths['/alerts']).toBeTruthy();
   });
 
+  test('masque le schema OpenAPI en production', async () => {
+    // Masquer /docs sans masquer /openapi.json ne protege rien : la
+    // specification est le contenu, l'interface Swagger n'en est que la vue.
+    process.env.NODE_ENV = 'production';
+    process.env.JWT_SECRET = 'test-secret-at-least-32-chars-long-123';
+    const prodApp = createApp();
+
+    const response = await prodApp.request('/openapi.json');
+
+    expect(response.status).toBe(404);
+  });
+
   test('expose /docs uniquement en developpement', async () => {
     process.env.NODE_ENV = 'development';
     const devApp = createApp();

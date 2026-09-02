@@ -145,14 +145,21 @@ export function createApp(): OpenAPIHono<{ Variables: SessionVariables }> {
   );
 
   // --- Documentation OpenAPI ---
-  app.doc('/openapi.json', {
-    info: {
-      title: 'Sauver la Face API',
-      version: '1.0.0',
-      description: 'Documentation OpenAPI du backend Sauver la Face',
-    },
-    openapi: '3.0.0',
-  });
+  // Servie hors production uniquement, au meme titre que /docs. Masquer
+  // l'interface Swagger sans masquer la specification qu'elle affiche ne
+  // protege rien : /openapi.json est le contenu, /docs n'en est que la vue.
+  // Seuls les tests et les scripts generate:api-types la consomment, tous
+  // en developpement.
+  if (process.env.NODE_ENV !== 'production') {
+    app.doc('/openapi.json', {
+      info: {
+        title: 'Sauver la Face API',
+        version: '1.0.0',
+        description: 'Documentation OpenAPI du backend Sauver la Face',
+      },
+      openapi: '3.0.0',
+    });
+  }
 
   // --- Enregistrement des Routes ---
   app.get('/health', (c) => c.json({ status: 'ok' }));

@@ -8,6 +8,10 @@ Chaque version est marquée par un tag Git annoté (`vX.Y.Z`).
 
 ## [Non publié]
 
+### Sécurité
+
+- **API-03** (A02) — `GET /openapi.json` était servi sans condition, y compris en production, alors que `/docs` est masqué hors développement depuis toujours. Masquer l'interface Swagger sans masquer la spécification qu'elle affiche ne protégeait rien : le document décrit les 13 chemins de l'API, leurs schémas et leurs codes d'erreur. L'écart était d'autant plus discret que le commentaire de `tests/routesProtegees.test.ts` déclarait les deux routes « servies uniquement hors production » — vrai pour l'une, faux pour l'autre. `app.doc()` est désormais conditionné comme `/docs`, et un test vérifie le 404 en production. Aucun consommateur en production : seuls les tests et les scripts `generate:api-types` l'utilisent, en développement
+
 ### Ajouté
 
 - **DEVOPS-12** — le dashboard web n'était pas déployable : `apps/web` n'avait aucun `Dockerfile` et n'apparaissait dans aucun fichier Compose, alors que le rapport de certification annonce Next.js parmi les quatre services de production. L'image est construite sur une base **Node et non `oven/bun`** — `next build` charge un runtime CommonJS compilé que Bun ne sait pas évaluer, ce que la CI ne rencontre pas puisqu'elle installe Node *et* Bun sur le runner. Caddy route désormais deux domaines : l'API vers `backend:3001`, le dashboard vers `web:3000`. Vérifié en construisant l'image et en interrogeant le conteneur (HTTP 200, fichiers statiques compris). L'image **n'embarque pas `node_modules`** : `output: 'standalone'` produit un serveur autonome recopié dans une image Node nue, ce qui la ramène de **1,1 Go à 287 Mo**
