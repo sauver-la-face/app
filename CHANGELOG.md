@@ -8,6 +8,11 @@ Chaque version est marquée par un tag Git annoté (`vX.Y.Z`).
 
 ## [Non publié]
 
+### Corrigé
+
+- **DEVENV-01** — le seed MED-01 ne pouvait pas s'exécuter sur une base neuve. L'unicité de `symptom.code` est portée par un index fonctionnel sur `lower(code)` (ADR 0016), or le script visait la colonne nue dans son `ON CONFLICT` : PostgreSQL exige une correspondance exacte avec l'index et rejetait la requête (`no unique or exclusion constraint matching the ON CONFLICT specification`). L'API Drizzle n'acceptant qu'une colonne et non une expression, l'upsert est remplacé par une lecture insensible à la casse suivie d'une insertion ou d'une mise à jour. Vérifié sur base vierge : 8 insertions au premier passage, 8 mises à jour au second, aucun doublon
+- **DEVENV-01** — `pgadmin` redémarrait indéfiniment lorsque `PGADMIN_EMAIL` et `PGADMIN_PASSWORD` manquent dans `.env.local`, noyant la cause réelle dans les journaux. La politique passe de `unless-stopped` à `on-failure:3` : trois tentatives, puis arrêt, sans gêner le reste de la pile
+
 ### Ajouté
 
 - **DEVOPS-12** — le dashboard web n'était pas déployable : `apps/web` n'avait aucun `Dockerfile` et n'apparaissait dans aucun fichier Compose, alors que le rapport de certification annonce Next.js parmi les quatre services de production. L'image est construite sur une base **Node et non `oven/bun`** — `next build` charge un runtime CommonJS compilé que Bun ne sait pas évaluer, ce que la CI ne rencontre pas puisqu'elle installe Node *et* Bun sur le runner. Caddy route désormais deux domaines : l'API vers `backend:3001`, le dashboard vers `web:3000`. Vérifié en construisant l'image et en interrogeant le conteneur (HTTP 200, fichiers statiques compris). L'image **n'embarque pas `node_modules`** : `output: 'standalone'` produit un serveur autonome recopié dans une image Node nue, ce qui la ramène de **1,1 Go à 287 Mo**
@@ -34,6 +39,8 @@ Chaque version est marquée par un tag Git annoté (`vX.Y.Z`).
 - **DOCKER-01** — `apps/web/Dockerfile`, arrivé depuis avec DEVOPS-12, reprenait le même `COPY package.json bun.lock* ./`. Retirer `bun.lock` du `.dockerignore` suffisait à remettre le verrou dans son contexte de build, mais le glob y tolérait toujours l'absence : les deux images sont désormais alignées et échouent au build si le verrou manque, au lieu de résoudre les plages vers la dernière version publiée
 - **WEB-03** — la page nouveau patient utilisait la signature Next 14 (`params` synchrone). Depuis Next 15 `params` est une Promise : la locale valait `undefined` et le dictionnaire était résolu à vide. Le typecheck ne pouvait pas le détecter, le type restant valide bien que faux
 - **WEB-03** — `UserGreeting` provoquait une erreur d'hydratation : sans session au rendu serveur il produisait du vide, tandis que le client affichait le bloc complet. L'état `isPending` est désormais pris en compte, comme dans le reste du dashboard
+- **AUTH-02** — le serveur distingue 401 et 403, le client non. Depuis qu'`AUTH-02` exige le second facteur, les routes patient répondent `403 MFA_REQUIRED` à un compte non enrôlé — un 403 délibérément distinct du 401, pour que le client oriente vers l'enrôlement et non vers la connexion. Seul le dashboard vérifiait `twoFactorEnabled` ; `/patients`, `/patients/[id]` et `/patients/new` ne contrôlaient que la présence d'une session et affichaient donc une erreur générique, sans lien vers `/[locale]/mfa/setup` alors que la page existe et fonctionne. Le garde du dashboard devient `usePhysicianGuard`, partagé par les quatre écrans
+- **AUTH-02** — aucun des hooks de données ne lisait le corps de la réponse : un `!response.ok` indifférencié transformait une consigne actionnable en panne. `assertOk` lit désormais le `code` sur un 403 et propage `MFA_REQUIRED` au lieu de `PATIENTS_FETCH_FAILED` et consorts, sur les cinq appels concernés
 
 ### Sécurité
 
