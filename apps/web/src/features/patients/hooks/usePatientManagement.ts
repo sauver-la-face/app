@@ -1,26 +1,15 @@
 'use client';
 
-import type { CreatePatientInput, PatientAccessCode, PatientDetails } from '@sauver-la-face/shared';
+import type { PatientAccessCode } from '@sauver-la-face/shared';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { assertOk } from '@/lib/apiError';
 
 const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001';
 
-async function createPatient(input: CreatePatientInput): Promise<PatientDetails> {
-  const response = await fetch(`${apiBaseUrl}/patients`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    credentials: 'include',
-    body: JSON.stringify(input),
-  });
-
-  await assertOk(response, 'PATIENT_CREATE_FAILED');
-
-  return response.json() as Promise<PatientDetails>;
-}
-
+// La creation de patient vit dans `useCreatePatient.ts`, appelee par la page
+// dediee /patients/new. Un second hook du meme nom existait ici, pour le
+// formulaire de la page liste : deux chemins pour une meme action, qui
+// divergent tot ou tard. Le formulaire ayant ete retire, ce hook l'a suivi.
 async function issuePatientAccessCode(patientId: string): Promise<PatientAccessCode> {
   const response = await fetch(`${apiBaseUrl}/patients/${patientId}/access-code`, {
     method: 'POST',
@@ -30,17 +19,6 @@ async function issuePatientAccessCode(patientId: string): Promise<PatientAccessC
   await assertOk(response, 'PATIENT_CODE_ISSUE_FAILED');
 
   return response.json() as Promise<PatientAccessCode>;
-}
-
-export function useCreatePatient() {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: createPatient,
-    onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: ['patients'] });
-    },
-  });
 }
 
 export function useIssuePatientAccessCode() {

@@ -529,7 +529,7 @@ Trois autres familles : `operation-summary` (quinze opérations sans résumé), 
 
 **Comportement attendu :**
 
-- Création d'un compte patient
+- Création d'un compte patient — sur sa page dédiée `/patients/new`, jamais depuis la liste
 - Génération / renouvellement d'un code 6 chiffres
 - Affichage du statut du code (actif / expiré / supprimé)
 
@@ -537,6 +537,7 @@ Trois autres familles : `operation-summary` (quinze opérations sans résumé), 
 
 - La génération du code est toujours côté backend (PATIENT-01 / AUTH-01)
 - Le frontend affiche uniquement, ne génère jamais le code lui-même
+- **Un seul chemin de création.** La page liste a porté un temps son propre formulaire, en plus de la page dédiée : deux formulaires pour une même action, adossés à deux hooks `useCreatePatient` homonymes dans deux fichiers. Ils divergent tôt ou tard — validation corrigée d'un côté seulement, champ ajouté à un seul endroit. La liste renvoie vers `/patients/new` et affiche le bandeau de confirmation au retour (`?cree=1`)
 
 ---
 
