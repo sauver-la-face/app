@@ -3,7 +3,7 @@
 import type { CreatePatientInput, PatientAccessCode } from '@sauver-la-face/shared';
 import { createPatientSchema } from '@sauver-la-face/shared';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useEffect, useMemo, useState } from 'react';
 import { usePatients } from '@/features/dashboard/hooks/useDashboard';
 import type { Locale } from '@/i18n/config';
@@ -25,6 +25,14 @@ export function PatientManagementPage({
   const createPatientMutation = useCreatePatient();
   const issueCodeMutation = useIssuePatientAccessCode();
   const labels = dictionary.patientManagement;
+
+  const searchParams = useSearchParams();
+  // Bandeau de confirmation apres une creation venue de /patients/new.
+  // Volontairement sans minuterie : un message qui s'efface tout seul penalise
+  // qui lit lentement, detourne le regard ou utilise un lecteur d'ecran
+  // (voir docs/accessibilite.md). Il ne porte aucune information exclusive —
+  // le patient reste visible dans la liste avec son statut « sans code actif ».
+  const [confirmationVisible, setConfirmationVisible] = useState(searchParams.get('cree') === '1');
 
   const [formError, setFormError] = useState<string | null>(null);
   const [generatedCode, setGeneratedCode] = useState<PatientAccessCode | null>(null);
@@ -69,6 +77,23 @@ export function PatientManagementPage({
           {labels.backToDashboard}
         </Link>
       </div>
+
+      {confirmationVisible && (
+        <div
+          role="status"
+          className="mb-6 flex items-start justify-between gap-4 rounded-lg border border-emerald-300 bg-emerald-50 px-4 py-3"
+        >
+          <p className="text-sm text-emerald-900">{labels.createdBanner}</p>
+          <button
+            type="button"
+            onClick={() => setConfirmationVisible(false)}
+            aria-label={labels.dismissBanner}
+            className="shrink-0 rounded px-2 text-lg leading-none text-emerald-800 hover:text-emerald-950 focus:outline-none focus:ring-2 focus:ring-emerald-600"
+          >
+            &times;
+          </button>
+        </div>
+      )}
 
       <section className="grid gap-4 md:grid-cols-3">
         <SummaryCard label={labels.totalPatients} value={String(patients.length)} tone="mint" />
