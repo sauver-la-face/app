@@ -931,7 +931,10 @@ fichier Compose : le dashboard n'était pas déployable.
 - La version de Bun installée est épinglée, jamais `latest` : sinon l'image n'est pas reproductible d'une construction à l'autre
 - `NEXT_PUBLIC_API_URL` est un **argument de build**, pas une variable d'exécution : Next l'inscrit dans le bundle client à la compilation. Changer de domaine impose de reconstruire l'image
 - Routage Caddy par domaine et non par chemin : les routes du backend sont à la racine (`/patients`, `/alerts`, `/auth`), sans préfixe `/api`. Une séparation par chemin obligerait à les énumérer, et toute route ajoutée sans y penser partirait vers le mauvais service
-- Tester : l'image se construit, le conteneur démarre et sert une page en HTTP 200
+- L'image de production **n'embarque pas `node_modules`**. `output: 'standalone'` produit un serveur autonome accompagné des seules dépendances réellement atteintes par le code, recopié dans une image Node nue — sans Bun ni outils de construction
+- `outputFileTracingRoot` doit pointer sur la racine du monorepo : sans cela le traçage s'arrête au dossier de l'app et manque les dépendances hissées ainsi que `@sauver-la-face/shared`, et le serveur autonome démarre sur un module introuvable
+- Les fichiers de `.next/static` et `public/` **ne sont pas tracés** par Next : les oublier donne une page qui répond 200 mais dont le CSS et le JavaScript tombent en 404
+- Tester : l'image se construit, le conteneur démarre, sert une page en HTTP 200 **et ses fichiers statiques** en 200 également
 
 ---
 
