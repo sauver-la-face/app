@@ -1,7 +1,6 @@
 'use client';
 
-import type { CreatePatientInput, PatientAccessCode } from '@sauver-la-face/shared';
-import { createPatientSchema } from '@sauver-la-face/shared';
+import type { PatientAccessCode } from '@sauver-la-face/shared';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { useMemo, useState } from 'react';
@@ -9,7 +8,7 @@ import { usePhysicianGuard } from '@/features/auth/hooks/usePhysicianGuard';
 import { usePatients } from '@/features/dashboard/hooks/useDashboard';
 import type { Locale } from '@/i18n/config';
 import type { Dictionary } from '@/i18n/dictionaries';
-import { useCreatePatient, useIssuePatientAccessCode } from '../hooks/usePatientManagement';
+import { useIssuePatientAccessCode } from '../hooks/usePatientManagement';
 import { PatientCodeBadge } from './PatientBadges';
 
 export function PatientManagementPage({
@@ -21,7 +20,6 @@ export function PatientManagementPage({
 }) {
   const { session, isPending: sessionPending } = usePhysicianGuard(locale);
   const patientsQuery = usePatients();
-  const createPatientMutation = useCreatePatient();
   const issueCodeMutation = useIssuePatientAccessCode();
   const labels = dictionary.patientManagement;
 
@@ -33,7 +31,6 @@ export function PatientManagementPage({
   // le patient reste visible dans la liste avec son statut « sans code actif ».
   const [confirmationVisible, setConfirmationVisible] = useState(searchParams.get('cree') === '1');
 
-  const [formError, setFormError] = useState<string | null>(null);
   const [generatedCode, setGeneratedCode] = useState<PatientAccessCode | null>(null);
   const [copySuccess, setCopySuccess] = useState(false);
 
@@ -94,76 +91,13 @@ export function PatientManagementPage({
         <SummaryCard label={labels.missingCodes} value={String(missingCodeCount)} tone="slate" />
       </section>
 
-      <section className="mt-8 grid gap-6 xl:grid-cols-[0.9fr_1.1fr]">
-        <Panel title={labels.createPatientTitle}>
-          <form
-            className="grid gap-4"
-            onSubmit={(event) => {
-              event.preventDefault();
-              const form = event.currentTarget;
-              setFormError(null);
-              setCopySuccess(false);
-
-              const formData = new FormData(form);
-              const payload: CreatePatientInput = {
-                firstName: String(formData.get('firstName') ?? ''),
-                lastName: String(formData.get('lastName') ?? ''),
-                sex: normalizeOptionalValue(formData.get('sex')),
-                birthdate: normalizeOptionalValue(formData.get('birthdate')),
-                region: normalizeOptionalValue(formData.get('region')),
-              };
-              const parsed = createPatientSchema.safeParse(payload);
-
-              if (!parsed.success) {
-                setFormError(labels.createValidationError);
-                return;
-              }
-
-              createPatientMutation.mutate(parsed.data, {
-                onSuccess: () => {
-                  form.reset();
-                },
-                onError: () => {
-                  setFormError(labels.createError);
-                },
-              });
-            }}
-          >
-            <FormField
-              label={labels.firstNameLabel}
-              name="firstName"
-              placeholder={labels.firstNamePlaceholder}
-            />
-            <FormField
-              label={labels.lastNameLabel}
-              name="lastName"
-              placeholder={labels.lastNamePlaceholder}
-            />
-            <div className="grid gap-4 md:grid-cols-2">
-              <FormField label={labels.sexLabel} name="sex" placeholder={labels.sexPlaceholder} />
-              <FormField label={labels.birthdateLabel} name="birthdate" type="date" />
-            </div>
-            <FormField
-              label={labels.regionLabel}
-              name="region"
-              placeholder={labels.regionPlaceholder}
-            />
-
-            {formError ? <InlineMessage tone="error" label={formError} /> : null}
-            {createPatientMutation.isSuccess ? (
-              <InlineMessage tone="success" label={labels.createSuccess} />
-            ) : null}
-
-            <button
-              type="submit"
-              disabled={createPatientMutation.isPending}
-              className="mt-2 rounded-full bg-[#178064] px-5 py-3 text-sm font-semibold text-white transition hover:bg-[#25866f] disabled:cursor-not-allowed disabled:opacity-60"
-            >
-              {createPatientMutation.isPending ? labels.creating : labels.createAction}
-            </button>
-          </form>
-        </Panel>
-
+      {/* Le formulaire de creation qui tenait la colonne de gauche a ete
+          retire : la creation d'un patient a sa propre page, /patients/new.
+          Deux formulaires pour une meme action divergent tot ou tard, et le
+          bandeau de confirmation ci-dessus — declenche par `?cree=1` au retour
+          de cette page — designait deja celle-ci comme le chemin nominal.
+          Cette section ne porte donc plus que le code d'acces genere. */}
+      <section className="mt-8">
         <Panel title={labels.generatedCodeTitle}>
           {generatedCode ? (
             <div className="space-y-5">
@@ -341,30 +275,6 @@ function SummaryCard({
   );
 }
 
-function FormField({
-  label,
-  name,
-  placeholder,
-  type = 'text',
-}: {
-  label: string;
-  name: string;
-  placeholder?: string;
-  type?: 'text' | 'date';
-}) {
-  return (
-    <label className="grid gap-2">
-      <span className="text-sm font-medium text-gray-700">{label}</span>
-      <input
-        name={name}
-        type={type}
-        placeholder={placeholder}
-        className="rounded-[18px] border border-black/10 bg-[#FBFAF6] px-4 py-3 text-sm text-gray-900 outline-hidden transition focus:border-[#178064] focus:ring-2 focus:ring-[#178064]/15"
-      />
-    </label>
-  );
-}
-
 function InlineMessage({ tone, label }: { tone: 'error' | 'success'; label: string }) {
   const styles = {
     error: 'border-red-100 bg-red-50 text-red-700',
@@ -387,11 +297,6 @@ function CenteredState({ label }: { label: string }) {
       </div>
     </main>
   );
-}
-
-function normalizeOptionalValue(value: FormDataEntryValue | null): string | null | undefined {
-  const normalized = String(value ?? '').trim();
-  return normalized.length > 0 ? normalized : null;
 }
 
 function formatDateTime(value: string, locale: Locale): string {
