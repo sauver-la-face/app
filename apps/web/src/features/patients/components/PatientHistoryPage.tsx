@@ -3,11 +3,9 @@
 import type { ImageLoaderProps } from 'next/image';
 import Image from 'next/image';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
-import { useEffect } from 'react';
+import { usePhysicianGuard } from '@/features/auth/hooks/usePhysicianGuard';
 import type { Locale } from '@/i18n/config';
 import type { Dictionary } from '@/i18n/dictionaries';
-import { useSession } from '@/lib/authClient';
 import { apiBaseUrl, usePatientHistory } from '../hooks/usePatientHistory';
 
 export function PatientHistoryPage({
@@ -19,16 +17,9 @@ export function PatientHistoryPage({
   patientId: string;
   dictionary: Dictionary;
 }) {
-  const router = useRouter();
-  const { data: session, isPending: sessionPending } = useSession();
+  const { session, isPending: sessionPending } = usePhysicianGuard(locale);
   const historyQuery = usePatientHistory(patientId);
   const labels = dictionary.patients;
-
-  useEffect(() => {
-    if (!sessionPending && !session) {
-      router.replace(`/${locale}/login`);
-    }
-  }, [locale, router, session, sessionPending]);
 
   if (sessionPending || historyQuery.isPending) {
     return <CenteredState label={labels.loadingHistory} />;
