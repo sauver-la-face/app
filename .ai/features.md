@@ -1190,6 +1190,49 @@ Ce job était volontairement différé jusqu'à la séparation des fichiers Comp
 
 ---
 
+### DEVOPS-14 — `WEB_URL` : accorder le format entre CORS et Better Auth
+
+`[ ]` 🟡 Majeur · `apps/backend/src/index.ts` · `apps/backend/src/features/auth/infrastructure/authConfig.ts`
+
+**Contexte :**
+
+La même variable d'environnement est lue à deux endroits, dans deux formats incompatibles :
+
+```ts
+// index.ts — middleware CORS : chaîne simple, une seule origine
+origin: process.env.WEB_URL ?? 'http://localhost:3000'
+
+// authConfig.ts — Better Auth : liste séparée par virgules
+trustedOrigins: (process.env.WEB_URL ?? 'http://localhost:3000').split(',')
+```
+
+Deux conséquences. D'abord, un seul serveur de développement web peut fonctionner à la fois : sur tout autre port que 3000, le préflight est refusé et chaque appel API échoue. Le navigateur affiche « Failed to fetch », symptôme qui ressemble à une panne d'authentification alors que la cause est le CORS — le diagnostic coûte du temps à chaque fois.
+
+Ensuite et surtout, la variable est piégée. Renseigner `WEB_URL="http://localhost:3000,http://localhost:3100"`, ce que la lecture de `authConfig.ts` encourage, fait passer la chaîne entière — virgule comprise — comme origine littérale au middleware CORS. Elle ne correspond alors à aucune origine réelle : on ne gagne pas le second port, on perd le premier.
+
+**Comportement attendu :**
+
+- `WEB_URL` accepte une liste d'origines séparées par des virgules, comprise de la même façon par le middleware CORS et par Better Auth
+- Une valeur unique sans virgule continue de fonctionner à l'identique — aucune configuration existante n'est cassée
+- La valeur par défaut reste `http://localhost:3000` quand la variable est absente
+
+**Règles de code :**
+
+- Le découpage et le nettoyage des espaces se font en un seul endroit, réutilisé par les deux lecteurs — deux `.split(',')` recopiés reproduiraient la divergence qu'il s'agit de supprimer
+- Hono accepte un tableau pour `origin` : la correction ne demande aucune fonction de rappel
+- `.env.example` documente le format liste et la raison — sans quoi le prochain qui posera une seconde origine retombera dans le piège
+- Tester : une origine → comportement inchangé, deux origines → les deux acceptées, variable absente → `http://localhost:3000`, espaces autour des virgules → tolérés
+
+**Le symptôme est trompeur, et il a une seconde cause :**
+
+Une origine refusée par le CORS se manifeste dans le navigateur par un « Failed to fetch ». Le message désigne l'appel réseau, donc l'authentification pour qui le rencontre à la connexion — alors que le défaut est une variable de configuration côté serveur.
+
+Exactement le même message apparaît pour une raison sans rapport, côté client cette fois. `authClient.ts` et `useDashboard.ts` retombent tous deux sur `http://localhost:3001` quand `NEXT_PUBLIC_API_URL` est absente. En développement local, ce repli tombe juste et masque le problème. En conteneur il est faux : `NEXT_PUBLIC_API_URL` est un **argument de build**, pas une variable d'exécution — Next l'inscrit dans le JavaScript à la compilation (`apps/web/Dockerfile`, `docker-compose.prod.yml` la passe comme `build.args`). Une image construite sans elle embarque donc `localhost:3001` en dur, et chaque navigateur qui l'ouvre interroge **sa propre machine** au lieu du serveur. Le symptôme est identique, la cause est ailleurs, et elle ne se voit qu'en production.
+
+Deux conséquences pour ce lot : le repli mérite d'être unique et déclaré à un seul endroit plutôt que recopié dans chaque hook, et l'absence de `NEXT_PUBLIC_API_URL` au build de l'image devrait échouer bruyamment plutôt que produire une image silencieusement inutilisable.
+
+---
+
 ### NOTIF-01 — Notification push patient en cas de retard de suivi
 
 `[ ]` 🟡 Majeur · `apps/backend/src/features/notifications/`

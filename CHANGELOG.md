@@ -62,6 +62,7 @@ Chaque version est marquée par un tag Git annoté (`vX.Y.Z`).
 Travaux en cours ou non démarrés :
 
 - **DEVOPS-02** — Reverse proxy Caddy avec TLS 1.3 (en cours)
+- **DEVOPS-14** — `WEB_URL` est lue en chaîne simple par le middleware CORS et en liste par Better Auth : renseigner une seconde origine, ce que le second format encourage, fait perdre la première au lieu d'en ajouter une (non démarrée)
 - **WEB-04** — Export des données depuis le dashboard (PDF / CSV)
 - **WEB-05** — Envoi d'instructions pictographiques depuis le dashboard
 - **MOB-01 à MOB-07**, **I18N-01** — Application mobile (non démarrée)
