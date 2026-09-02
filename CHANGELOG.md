@@ -8,6 +8,10 @@ Chaque version est marquée par un tag Git annoté (`vX.Y.Z`).
 
 ## [Non publié]
 
+### Sécurité
+
+- **WEB-08** (RGPD, minimisation) — le formulaire de création d'un patient collectait six champs qu'aucune colonne n'accueille : civilité, téléphone, réseau social, adresse, code postal et pays. Ils étaient saisis puis jetés au moment de l'envoi. Au-delà de la collecte sans finalité sur une application de données de santé, le risque était clinique : le formulaire donnait au médecin la conviction d'avoir enregistré un numéro de téléphone. S'il comptait dessus pour joindre la famille d'un patient en alerte, il aurait cherché une donnée qui n'a jamais existé. Le formulaire ne présente plus que ce qui est réellement enregistré
+
 ### Ajouté
 
 - **DEMO-01** — jeu de données de démonstration (`db:seed:demo`). Les seeds existants ne produisaient aucune alerte : `seedMed01` n'insère que le référentiel de symptômes, et `seedSync01` crée un patient dont le symptôme est `triggers_alert: false`, sans `last_synced_at`. Sur une base fraîche, le tableau de bord affichait donc « aucune alerte » — l'inverse de ce que montre le premier écran du parcours médecin. Le script crée six patients couvrant les cinq états de code d'accès et les quatre statuts de synchronisation, dont un signalement de symptômes déclencheurs et une inactivité de onze jours ; trois portent une chronologie photo réellement déposée dans MinIO, à la convention de clé de `S3PhotoStorage`, pour que `GET /photos/:mediaId` les serve comme celles remontées par le mobile. Les clichés sont des illustrations SVG légendées, annonçant explicitement qu'il ne s'agit pas de photos réelles ; `scripts/demoAssets/` permet de les remplacer et reste ignoré par git, des photos de cicatrices étant des données de santé au sens du RGPD. Rejouable : les patients sont retrouvés par nom, une fiche créée à la main est enrichie et non dupliquée, et le script refuse de s'exécuter si `NODE_ENV=production`

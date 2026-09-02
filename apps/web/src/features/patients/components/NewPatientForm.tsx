@@ -17,15 +17,10 @@ export function NewPatientForm({ locale, dictionary }: NewPatientFormProps) {
   const labels = dictionary.newPatient;
   const { mutate, isPending, isError } = useCreatePatient();
 
-  const [civilite, setCivilite] = useState('');
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
   const [sex, setSex] = useState('');
   const [birthdate, setBirthdate] = useState('');
-  const [phone, setPhone] = useState('');
-  const [social, setSocial] = useState('');
-  const [address, setAddress] = useState('');
-  const [postalCode, setPostalCode] = useState('');
   const [city, setCity] = useState('');
 
   if (sessionPending || !session) {
@@ -103,25 +98,8 @@ export function NewPatientForm({ locale, dictionary }: NewPatientFormProps) {
                 {labels.personalInfoSection}
               </h2>
 
-              {/* Row 1 : Civilité / Prénom / Nom */}
-              <div className="mb-4 grid grid-cols-3 gap-4">
-                <div>
-                  <label className={labelClass} htmlFor="civilite">
-                    {labels.civiliteLabel}
-                  </label>
-                  <select
-                    id="civilite"
-                    value={civilite}
-                    onChange={(e) => setCivilite(e.target.value)}
-                    className={selectClass}
-                  >
-                    <option value="">{labels.civiliteSelect}</option>
-                    <option value="M.">{labels.civiliteMr}</option>
-                    <option value="Mme">{labels.civiliteMme}</option>
-                    <option value="Dr">{labels.civiliteDr}</option>
-                    <option value="Pr">{labels.civilitePr}</option>
-                  </select>
-                </div>
+              {/* Row 1 : Prénom / Nom */}
+              <div className="mb-4 grid grid-cols-2 gap-4">
                 <div>
                   <label className={labelClass} htmlFor="firstName">
                     {labels.firstNameLabel} <span className="text-red-500">*</span>
@@ -198,70 +176,8 @@ export function NewPatientForm({ locale, dictionary }: NewPatientFormProps) {
                 </div>
               </div>
 
-              {/* Row 3 : Téléphone / Réseaux sociaux */}
-              <div className="mb-4 grid grid-cols-2 gap-4">
-                <div>
-                  <label className={labelClass} htmlFor="phone">
-                    {labels.phoneLabel}
-                  </label>
-                  <input
-                    id="phone"
-                    type="tel"
-                    maxLength={20}
-                    placeholder={labels.phonePlaceholder}
-                    value={phone}
-                    onChange={(e) => setPhone(e.target.value)}
-                    className={inputClass}
-                  />
-                </div>
-                <div>
-                  <label className={labelClass} htmlFor="social">
-                    {labels.socialLabel}
-                  </label>
-                  <input
-                    id="social"
-                    type="text"
-                    maxLength={500}
-                    placeholder={labels.socialPlaceholder}
-                    value={social}
-                    onChange={(e) => setSocial(e.target.value)}
-                    className={inputClass}
-                  />
-                </div>
-              </div>
-
-              {/* Row 4 : Adresse */}
-              <div className="mb-4">
-                <label className={labelClass} htmlFor="address">
-                  {labels.addressLabel}
-                </label>
-                <input
-                  id="address"
-                  type="text"
-                  maxLength={255}
-                  placeholder={labels.addressPlaceholder}
-                  value={address}
-                  onChange={(e) => setAddress(e.target.value)}
-                  className={inputClass}
-                />
-              </div>
-
-              {/* Row 5 : Code Postal / Ville / Pays */}
-              <div className="grid grid-cols-3 gap-4">
-                <div>
-                  <label className={labelClass} htmlFor="postalCode">
-                    {labels.postalCodeLabel}
-                  </label>
-                  <input
-                    id="postalCode"
-                    type="text"
-                    maxLength={20}
-                    placeholder={labels.postalCodePlaceholder}
-                    value={postalCode}
-                    onChange={(e) => setPostalCode(e.target.value)}
-                    className={inputClass}
-                  />
-                </div>
+              {/* Row 3 : Ville */}
+              <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className={labelClass} htmlFor="city">
                     {labels.cityLabel}
@@ -275,14 +191,6 @@ export function NewPatientForm({ locale, dictionary }: NewPatientFormProps) {
                     onChange={(e) => setCity(e.target.value)}
                     className={inputClass}
                   />
-                </div>
-                <div>
-                  <label className={labelClass} htmlFor="country">
-                    {labels.countryLabel}
-                  </label>
-                  <select id="country" defaultValue="cambodge" className={selectClass}>
-                    <option value="cambodge">{labels.countryDefault}</option>
-                  </select>
                 </div>
               </div>
             </div>
@@ -363,7 +271,7 @@ export function NewPatientForm({ locale, dictionary }: NewPatientFormProps) {
                 <div>
                   <dt className="text-gray-400">{labels.identityLabel}</dt>
                   <dd className="mt-0.5 font-medium text-gray-800">
-                    {[civilite, firstName, lastName].filter(Boolean).join(' ')}
+                    {[firstName, lastName].filter(Boolean).join(' ')}
                   </dd>
                 </div>
                 {birthdate ? (
