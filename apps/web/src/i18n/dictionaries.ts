@@ -254,6 +254,15 @@ const fr = {
     summaryEmpty: 'Les informations saisies apparaitront ici avant la création de la fiche',
     identityLabel: 'Identité',
   },
+  exports: {
+    downloadPdf: 'Exporter le dossier (PDF)',
+    downloadJson: 'Donnees brutes (JSON)',
+    downloadCsv: 'Exporter les patients (CSV anonymise)',
+    preparing: 'Preparation du fichier...',
+    portabilityHint: 'Droit a la portabilite : le patient peut demander ses donnees a tout moment.',
+    csvHint: 'Prenom, nom et date de naissance sont retires du fichier.',
+    error: 'Export impossible pour le moment.',
+  },
 };
 
 /**
@@ -518,6 +527,15 @@ const dictionaries = {
       summaryEmpty: 'Information entered will appear here before creating the file.',
       identityLabel: 'Identity',
     },
+    exports: {
+      downloadPdf: 'Export record (PDF)',
+      downloadJson: 'Raw data (JSON)',
+      downloadCsv: 'Export patients (anonymised CSV)',
+      preparing: 'Preparing file...',
+      portabilityHint: 'Right to portability: the patient may request their data at any time.',
+      csvHint: 'First name, last name and birthdate are removed from the file.',
+      error: 'Export failed for now.',
+    },
   },
   km: {
     metadata: {
@@ -769,6 +787,15 @@ const dictionaries = {
       summaryTitle: 'សង្ខេប',
       summaryEmpty: 'ព័ត៌មានដែលបានបញ្ចូលនឹងបង្ហាញនៅទីនេះ។',
       identityLabel: 'អត្តសញ្ញាណ',
+    },
+    exports: {
+      downloadPdf: 'នាំចេញឯកសារ (PDF)',
+      downloadJson: 'ទិន្នន័យដើម (JSON)',
+      downloadCsv: 'នាំចេញអ្នកជំងឺ (CSV អនាមិក)',
+      preparing: 'កំពុងរៀបចំឯកសារ...',
+      portabilityHint: 'សិទ្ធិយកទិន្នន័យ៖ អ្នកជំងឺអាចស្នើសុំទិន្នន័យរបស់ខ្លួនបានគ្រប់ពេល។',
+      csvHint: 'ឈ្មោះ នាមត្រកូល និងថ្ងៃខែឆ្នាំកំណើត ត្រូវបានដកចេញពីឯកសារ។',
+      error: 'មិនអាចនាំចេញបានទេនៅពេលនេះ។',
     },
   },
 } satisfies Record<Locale, Dictionary>;

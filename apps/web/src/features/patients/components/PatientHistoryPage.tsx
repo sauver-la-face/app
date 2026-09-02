@@ -4,6 +4,7 @@ import type { ImageLoaderProps } from 'next/image';
 import Image from 'next/image';
 import Link from 'next/link';
 import { usePhysicianGuard } from '@/features/auth/hooks/usePhysicianGuard';
+import { PatientExportButtons } from '@/features/exports/components/PatientExportButtons';
 import type { Locale } from '@/i18n/config';
 import type { Dictionary } from '@/i18n/dictionaries';
 import { apiBaseUrl, usePatientHistory } from '../hooks/usePatientHistory';
@@ -84,12 +85,15 @@ export function PatientHistoryPage({
           <h1 className="mt-3 text-4xl font-semibold text-gray-900">{fullName}</h1>
           <p className="mt-2 max-w-2xl text-sm text-gray-600">{labels.historySubtitle}</p>
         </div>
-        <Link
-          href={`/${locale}/patients`}
-          className="rounded-full border border-black/10 bg-white px-5 py-3 text-sm font-medium text-gray-700 shadow-xs transition hover:-translate-y-0.5 hover:shadow-md"
-        >
-          {labels.backToPatients}
-        </Link>
+        <div className="flex flex-col items-stretch gap-3 sm:items-end">
+          <Link
+            href={`/${locale}/patients`}
+            className="rounded-full border border-black/10 bg-white px-5 py-3 text-center text-sm font-medium text-gray-700 shadow-xs transition hover:-translate-y-0.5 hover:shadow-md"
+          >
+            {labels.backToPatients}
+          </Link>
+          <PatientExportButtons patientId={patientId} labels={dictionary.exports} />
+        </div>
       </div>
 
       <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
