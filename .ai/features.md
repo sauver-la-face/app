@@ -1192,7 +1192,7 @@ Ce job était volontairement différé jusqu'à la séparation des fichiers Comp
 
 ### DEVOPS-14 — `WEB_URL` : accorder le format entre CORS et Better Auth
 
-`[ ]` 🟡 Majeur · `apps/backend/src/index.ts` · `apps/backend/src/features/auth/infrastructure/authConfig.ts`
+`[x]` 🟡 Majeur · `apps/backend/src/index.ts` · `apps/backend/src/features/auth/infrastructure/authConfig.ts`
 
 **Contexte :**
 
