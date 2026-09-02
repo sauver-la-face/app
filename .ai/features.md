@@ -1222,6 +1222,14 @@ Ensuite et surtout, la variable est piégée. Renseigner `WEB_URL="http://localh
 - `.env.example` documente le format liste et la raison — sans quoi le prochain qui posera une seconde origine retombera dans le piège
 - Tester : une origine → comportement inchangé, deux origines → les deux acceptées, variable absente → `http://localhost:3000`, espaces autour des virgules → tolérés
 
+**Le symptôme est trompeur, et il a une seconde cause :**
+
+Une origine refusée par le CORS se manifeste dans le navigateur par un « Failed to fetch ». Le message désigne l'appel réseau, donc l'authentification pour qui le rencontre à la connexion — alors que le défaut est une variable de configuration côté serveur.
+
+Exactement le même message apparaît pour une raison sans rapport, côté client cette fois. `authClient.ts` et `useDashboard.ts` retombent tous deux sur `http://localhost:3001` quand `NEXT_PUBLIC_API_URL` est absente. En développement local, ce repli tombe juste et masque le problème. En conteneur il est faux : `NEXT_PUBLIC_API_URL` est un **argument de build**, pas une variable d'exécution — Next l'inscrit dans le JavaScript à la compilation (`apps/web/Dockerfile`, `docker-compose.prod.yml` la passe comme `build.args`). Une image construite sans elle embarque donc `localhost:3001` en dur, et chaque navigateur qui l'ouvre interroge **sa propre machine** au lieu du serveur. Le symptôme est identique, la cause est ailleurs, et elle ne se voit qu'en production.
+
+Deux conséquences pour ce lot : le repli mérite d'être unique et déclaré à un seul endroit plutôt que recopié dans chaque hook, et l'absence de `NEXT_PUBLIC_API_URL` au build de l'image devrait échouer bruyamment plutôt que produire une image silencieusement inutilisable.
+
 ---
 
 ### NOTIF-01 — Notification push patient en cas de retard de suivi
