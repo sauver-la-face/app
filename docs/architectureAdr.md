@@ -179,24 +179,11 @@ Consignées dans [`docs/adr/`](adr/README.md) :
 - [0021](adr/0021-limiter-les-tentatives-d-authentification-a-3-par-15-minutes-et-par-ip.md) — 3 tentatives par 15 minutes et par IP
 - [0022](adr/0022-faire-tourner-les-secrets-de-production-tous-les-90-jours.md) — rotation des secrets de production tous les 90 jours
 
-### Audit OWASP Top 10 (2026-07-23)
+### Audit OWASP
 
-Audit mené directement sur le code (pas sur la documentation) — chaque ligne ci-dessous a été vérifiée dans les fichiers source, pas supposée.
+Le suivi vit dans [`docs/security/owasp.md`](security/owasp.md), seule référence : Top 10 Web et Top 10 Mobile, ligne par ligne, chacune citant le fichier qui porte le contrôle.
 
-| Catégorie | Statut | Détail |
-|---|---|---|
-| A01 — Broken Access Control | ✅ Corrigé | Aucune authentification n'était exigée sur `patientRouter`/`photosRouter`/`exportsRouter`/`sync`/`instructions` — n'importe qui pouvait lire, modifier ou écrire des données au nom de n'importe quel patient (IDOR confirmé). Corrigé en deux temps : session médecin obligatoire côté dashboard (SEC-01), JWT patient vérifié côté mobile (SEC-02). **Complété le 2026-09-01 (SEC-04)** : le périmètre de SEC-01 était une liste écrite à la main où `alertRouter` et `authRouter` ne figuraient pas. `GET /alerts` exposait sans authentification le nom des patients et leurs symptômes, et `POST /auth/patient/generate` fabriquait un code d'accès pour n'importe quel UUID — les deux enchaînés donnaient le contrôle d'un compte patient. La couverture n'est plus affirmée mais **vérifiée par un test** qui parcourt la table de routage réelle. Suivi vivant : [docs/security/owasp.md](security/owasp.md) |
-| A02 — Cryptographic Failures | Conforme | TLS 1.3, SQLCipher AES-256 mobile, stockage HDS — non revérifié techniquement lors de cet audit |
-| A03 — Injection | Conforme | Drizzle ORM (requêtes paramétrées) + validation Zod systématique — aucune requête SQL brute rencontrée dans le code lu |
-| A04 — Insecure Design | Conforme | Clean Architecture + DDD, règles métier isolées et testables |
-| A05 — Security Misconfiguration | Conforme | Biome + CodeRabbit bloquants, protection de branche vérifiée en pratique (impossible de merger sans les 4 checks CI) |
-| A06 — Vulnerable and Outdated Components | ✅ Corrigé | Aucun outil de suivi des dépendances vulnérables n'existait. `.github/dependabot.yml` ajouté (bun, docker, github-actions, scan hebdomadaire) |
-| A07 — Identification and Authentication Failures | ✅ Corrigé | JWT patient (1 an, compromis assumé offline-first) et session médecin (2h) conformes, rate limiting (3 tentatives/15 min) confirmé exact. Point corrigé : le JWT patient était signé mais jamais vérifié côté serveur — `TokenProvider.verify()` implémenté et testé (secret invalide, expiration, malformation, mauvais rôle). **Complété le 2026-08-31 (SEC-03)** : cet audit concluait à tort que la catégorie était couverte. Il ne restait aucun moyen de révoquer une session patient — `revokeActiveCodes()` ne visait que les codes jamais consommés, et la table JWT annonçait à tort une « révocation explicite possible par le médecin ». Le suivi vivant est désormais dans [docs/security/owasp.md](security/owasp.md) |
-| A08 — Software and Data Integrity Failures | Conforme | Checksum SHA-256 sur l'upload photo, vérifié en pratique (rejet réel d'un checksum invalide en test). CI bloquante avant merge |
-| A09 — Security Logging and Monitoring Failures | Conforme | Middleware d'audit sur chaque requête, tentatives d'authentification échouées loguées |
-| A10 — Server-Side Request Forgery | Non applicable | Aucun appel sortant construit à partir d'une entrée utilisateur — les appels S3/MinIO pointent vers un endpoint fixé côté serveur |
-
-**Décision de modèle d'accès associée** : les chirurgiens de Toulouse forment une équipe soignante unique qui suit collectivement les mêmes patients — ce n'est pas une patientèle privée par médecin. Le correctif A01 côté dashboard est donc une authentification obligatoire (401), volontairement sans rattachement patient↔médecin ni contrôle d'appartenance (403). Si plusieurs équipes distinctes doivent un jour partager la plateforme sans se voir, prévoir une table de liaison `patient_physician` (many-to-many) à ce moment-là — pas avant (YAGNI).
+Un tableau daté du 2026-07-23 figurait ici, retiré par DOCS-03. Il employait la numérotation OWASP 2021 quand `owasp.md` emploie la 2025 — le même « A02 » désignait donc deux catégories différentes selon le document consulté — et portait des constats devenus faux, dont « TLS 1.3 conforme » alors que la terminaison TLS n'a existé qu'à partir de `c644315` (DEVOPS-02). La décision de modèle d'accès qui l'accompagnait, équipe soignante unique sans rattachement patient↔médecin, est conservée dans la section « Exceptions assumées » d'`owasp.md`.
 
 ---
 

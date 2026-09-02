@@ -1197,9 +1197,7 @@ Deux tableaux OWASP coexistent par ailleurs, et ils se contredisent. Celui de `d
 - Aucune référence à une branche non mergée : le document décrit le code publié, et une telle référence est fausse à la date où elle est lue
 - Ne pas recopier une affirmation de documentation sans la vérifier dans le code — c'est l'erreur que DOCS-02 relevait déjà sur la table JWT (voir SEC-03), et le tableau de 2026-07-23 la reproduit sur TLS
 
-**Reste à faire :**
-
-- Retrait du tableau « Audit OWASP Top 10 (2026-07-23) » de `docs/architectureAdr.md`, remplacé par un renvoi vers `docs/security/owasp.md`. La décision de modèle d'accès qui le suit (équipe soignante unique, pas de rattachement patient↔médecin) est à conserver : elle n'est pas un constat d'audit et n'a pas d'autre adresse
+- Le tableau « Audit OWASP Top 10 (2026-07-23) » de `docs/architectureAdr.md` est retiré, remplacé par un renvoi vers `docs/security/owasp.md` qui dit aussi pourquoi il est parti — un lecteur qui cherche l'ancien tableau doit comprendre qu'il n'a pas été égaré. La décision de modèle d'accès qui l'accompagnait est reprise dans « Exceptions assumées » d'`owasp.md`, la section « Sécurité » du même fichier conservant par ailleurs ses deux lignes d'autorisation dashboard et mobile
 
 **Hors périmètre, à traiter en DOCS-04 :**
 
