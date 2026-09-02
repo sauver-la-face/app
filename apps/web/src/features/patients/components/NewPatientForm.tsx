@@ -1,9 +1,9 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
+import { usePhysicianGuard } from '@/features/auth/hooks/usePhysicianGuard';
 import type { Dictionary } from '@/i18n/dictionaries';
-import { useSession } from '@/lib/authClient';
 import { useCreatePatient } from '../hooks/useCreatePatient';
 
 interface NewPatientFormProps {
@@ -13,7 +13,7 @@ interface NewPatientFormProps {
 
 export function NewPatientForm({ locale, dictionary }: NewPatientFormProps) {
   const router = useRouter();
-  const { data: session, isPending: sessionPending } = useSession();
+  const { session, isPending: sessionPending } = usePhysicianGuard(locale);
   const labels = dictionary.newPatient;
   const { mutate, isPending, isError } = useCreatePatient();
 
@@ -27,12 +27,6 @@ export function NewPatientForm({ locale, dictionary }: NewPatientFormProps) {
   const [address, setAddress] = useState('');
   const [postalCode, setPostalCode] = useState('');
   const [city, setCity] = useState('');
-
-  useEffect(() => {
-    if (!sessionPending && !session) {
-      router.replace(`/${locale}/login`);
-    }
-  }, [sessionPending, session, router, locale]);
 
   if (sessionPending || !session) {
     return (

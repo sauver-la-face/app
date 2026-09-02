@@ -2,6 +2,7 @@
 
 import type { AlertListResponse, PatientListResponse } from '@sauver-la-face/shared';
 import { useQuery } from '@tanstack/react-query';
+import { assertOk } from '@/lib/apiError';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001';
 
@@ -10,7 +11,7 @@ let previousAlerts: AlertListResponse | null = null;
 
 async function fetchPatients(): Promise<PatientListResponse> {
   const res = await fetch(`${API_URL}/patients`, { credentials: 'include' });
-  if (!res.ok) throw new Error('PATIENTS_FETCH_FAILED');
+  await assertOk(res, 'PATIENTS_FETCH_FAILED');
   return res.json() as Promise<PatientListResponse>;
 }
 
@@ -22,7 +23,7 @@ async function fetchAlerts(): Promise<AlertListResponse> {
   if (etag) alertsEtag = etag;
 
   if (res.status === 304 && previousAlerts) return previousAlerts;
-  if (!res.ok) throw new Error('ALERTS_FETCH_FAILED');
+  await assertOk(res, 'ALERTS_FETCH_FAILED');
 
   const data = (await res.json()) as AlertListResponse;
   previousAlerts = data;

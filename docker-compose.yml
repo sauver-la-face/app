@@ -31,9 +31,14 @@ services:
       timeout: 5s
       retries: 5
 
+  # Confort d'administration, jamais critique. `on-failure` plutot que
+  # `unless-stopped` : sans PGADMIN_EMAIL ni PGADMIN_PASSWORD dans .env.local,
+  # l'image refuse de demarrer, et une relance perpetuelle noyait la vraie cause
+  # dans les journaux. Trois tentatives suffisent a la rendre lisible, puis le
+  # service s'arrete sans gener le reste de la pile.
   pgadmin:
     image: dpage/pgadmin4
-    restart: unless-stopped
+    restart: on-failure:3
     profiles: ["dev"]
     environment:
       PGADMIN_DEFAULT_EMAIL: ${PGADMIN_EMAIL}
