@@ -1173,6 +1173,40 @@ occupait le chemin, le template n'arrivait pas.
 
 ---
 
+### DOCS-03 — Faire de `docs/security/owasp.md` la référence OWASP unique
+
+`[~]` 🟡 Majeur · `docs/security/owasp.md` · `docs/architectureAdr.md`
+
+**Contexte :**
+
+DOCS-02 a créé `docs/security/owasp.md` mais l'a laissé quasi vide : deux lignes renseignées sur vingt, A01 et A07, les huit autres lignes Web et les dix lignes Mobile sans état ni fichier. Un tableau d'audit vide ne prouve rien et se lit comme un aveu.
+
+Deux tableaux OWASP coexistent par ailleurs, et ils se contredisent. Celui de `docs/architectureAdr.md` (« Audit OWASP Top 10 (2026-07-23) ») emploie la numérotation **2021** — A02 Cryptographic Failures, A03 Injection, A05 Security Misconfiguration, A06 Vulnerable Components, A10 SSRF — quand `docs/security/owasp.md` emploie la **2025**, où ces mêmes numéros désignent autre chose. Un lecteur qui rapproche « A02 » des deux tableaux lit deux catégories différentes sans le savoir. Le tableau de 2026-07-23 porte de surcroît des affirmations dépassées : « TLS 1.3 conforme, non revérifié techniquement » alors que DEVOPS-02 a établi que la terminaison TLS n'existait nulle part avant `c644315`.
+
+**Comportement attendu :**
+
+- Chaque ligne du tableau Web porte un état et cite le fichier qui porte le contrôle, jamais une intention
+- Les lignes Mobile non évaluables le disent explicitement plutôt que de rester vides
+- Un seul tableau OWASP dans la documentation — `docs/architectureAdr.md` renvoie vers lui au lieu d'en tenir un second
+- Le document énonce la règle de vérification qui le rend fiable : il décrit le code publié sur `dev`, jamais une instance en cours d'exécution
+
+**Règles de code :**
+
+- Un état `partiel` complète `fait` / `non applicable` / `à faire` : un contrôle monté et testé avec une brèche connue à côté n'est ni l'un ni l'autre, et le forcer dans un état binaire efface soit le contrôle, soit la brèche. Chaque ligne `partiel` nomme ce qui reste après « Reste : »
+- Toute cellule cite un chemin réel, vérifié par `git show origin/dev:<fichier>` ou depuis un worktree créé sur `origin/dev` — jamais depuis un arbre local dont le retard n'a pas été mesuré, jamais par une requête vers une instance
+- Aucune référence à une branche non mergée : le document décrit le code publié, et une telle référence est fausse à la date où elle est lue
+- Ne pas recopier une affirmation de documentation sans la vérifier dans le code — c'est l'erreur que DOCS-02 relevait déjà sur la table JWT (voir SEC-03), et le tableau de 2026-07-23 la reproduit sur TLS
+
+- Le tableau « Audit OWASP Top 10 (2026-07-23) » de `docs/architectureAdr.md` est retiré, remplacé par un renvoi vers `docs/security/owasp.md` qui dit aussi pourquoi il est parti — un lecteur qui cherche l'ancien tableau doit comprendre qu'il n'a pas été égaré. La décision de modèle d'accès qui l'accompagnait est reprise dans « Exceptions assumées » d'`owasp.md`, la section « Sécurité » du même fichier conservant par ailleurs ses deux lignes d'autorisation dashboard et mobile
+
+**Hors périmètre, à traiter en DOCS-04 :**
+
+- Renommage de `docs/architectureAdr.md`, dont le nom annonce des ADR qu'il ne contient plus
+- Remplissage du template des six piliers, aujourd'hui vide
+- Import `@AGENTS.md` en tête de `CLAUDE.md`
+
+---
+
 ## RÈGLES GLOBALES (toutes les features)
 
 - **TDD obligatoire sur toutes les features** : l'agent écrit les tests en premier, génère l'implémentation pour les faire passer, puis le développeur valide. Ne jamais générer du code sans test associé.
