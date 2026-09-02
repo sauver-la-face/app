@@ -6,7 +6,6 @@ import { useSearchParams } from 'next/navigation';
 import { useMemo, useState } from 'react';
 import { usePhysicianGuard } from '@/features/auth/hooks/usePhysicianGuard';
 import { usePatients } from '@/features/dashboard/hooks/useDashboard';
-import { CsvExportButton } from '@/features/exports/components/CsvExportButton';
 import type { Locale } from '@/i18n/config';
 import type { Dictionary } from '@/i18n/dictionaries';
 import { useIssuePatientAccessCode } from '../hooks/usePatientManagement';
@@ -74,7 +73,6 @@ export function PatientManagementPage({
           >
             {dictionary.newPatient.title}
           </Link>
-          <CsvExportButton labels={dictionary.exports} />
           <Link
             href={`/${locale}/dashboard`}
             className="rounded-full border border-black/10 bg-white px-5 py-3 text-sm font-medium text-gray-700 shadow-xs transition hover:-translate-y-0.5 hover:shadow-md"
