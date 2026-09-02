@@ -371,6 +371,34 @@ Le seuil actuel (ALERT-01) est fixe à 7 jours, identique pour tous les patients
 
 ---
 
+### API-02 — Conformité et sécurité du document OpenAPI
+
+`[x]` 🟡 Majeur · `apps/backend/src/index.ts` · `apps/backend/src/shared/openapi.ts` · `apps/backend/src/features/*/presentation/`
+
+**Contexte :**
+
+Le document produit par API-01 était structurellement chargeable — Swagger UI l'affichait — mais le validateur Redocly y relevait 38 erreurs. La plus grave : `security-defined`, quinze fois. Le document ne déclarait aucun schéma d'authentification, ni à la racine ni par opération. Un lecteur y voyait treize chemins qui semblaient tous ouverts, `/patients` et `/alerts` compris, alors que SEC-01 et SEC-04 les protègent. La documentation affirmait l'inverse du code — et c'est ce document qui est servi publiquement en production, `/openapi.json` n'étant pas conditionné par `NODE_ENV`.
+
+Trois autres familles : `operation-summary` (quinze opérations sans résumé), `nullable-type-sibling` (sept schémas avec `nullable: true` sans `type`, invalide en OpenAPI 3.0, issus de `z.any()` et `z.unknown()`), et `no-empty-servers` (aucune URL de base, donc aucun client générable).
+
+**Comportement attendu :**
+
+- Les deux authentifications du projet sont déclarées : session Better Auth par cookie pour le médecin, jeton porteur JWT pour le patient
+- Chaque opération déclare celle qui la protège ; `/auth/patient/validate`, seule route métier publique, déclare `security: []` explicitement
+- Le document passe le validateur Redocly sans erreur
+- Un `servers` reflète l'URL publique du backend
+
+**Règles de code :**
+
+- Les schémas de sécurité sont enregistrés une fois dans `index.ts` via `openAPIRegistry.registerComponent`, jamais redéclarés par routeur
+- Un `security` explicite sur chaque opération, y compris `[]` pour les routes publiques : l'absence de déclaration ne doit jamais servir à signifier « publique »
+- Les réponses décrivent la forme réellement sérialisée — `details` porte un `error.flatten()` de Zod, pas une valeur libre ; `code` porte un Value Object dont le champ `value` sort tel quel faute de `toJSON`
+- Ne jamais réintroduire `z.any()` ni `z.unknown()` dans une réponse documentée : les deux produisent `nullable` sans `type`
+- **Limite connue** : `photosRouter` et `exportsRouter` n'utilisent pas `createRoute` — leurs routes n'apparaissent pas dans le document, qui décrit donc quinze opérations sur un total plus élevé. À traiter séparément.
+- Tester : `bunx @redocly/cli lint` sur le document généré → zéro erreur
+
+---
+
 ### PATIENT-01 — CRUD patients et gestion utilisateurs
 
 `[x]` 🟡 Majeur · `apps/backend/src/features/patients/`
@@ -485,8 +513,8 @@ Le seuil actuel (ALERT-01) est fixe à 7 jours, identique pour tous les patients
 **Comportement attendu :**
 
 - Historique des photos de cicatrices par date
-- Graphique d'évolution de la sévérité des symptômes
 - Timeline des événements médicaux
+- Graphique d'évolution de la sévérité des symptômes — **reporté, voir WEB-08**. Un panneau « Évolution des symptômes » avait été livré à sa place : il comptait les symptômes par événement, ce que la timeline dit déjà en les nommant, et un décompte ne mesure aucune sévérité. Retiré plutôt que laissé comme réponse approximative à une exigence qui demandait autre chose
 
 **Règles de code :**
 
@@ -561,6 +589,33 @@ qui faisait échouer `next build` — sans que la CI le détecte, aucun job ne l
 
 - Toute route publique du dashboard vit sous `app/[locale]/` — pas de page à la racine de
   `app/` en dehors du layout et de `globals.css`
+
+---
+
+### WEB-08 — Graphique d'évolution de la sévérité des symptômes
+
+`[ ]` 🟢 Mineur · `apps/backend/src/infrastructure/schema.ts` · `apps/web/src/features/patients/components/`
+
+**Contexte :**
+
+WEB-02 demandait un graphique d'évolution de la **sévérité**. Le panneau livré comptait les symptômes par événement — deux symptômes n'y paraissaient pas moins graves qu'une suppuration isolée — et répétait la timeline voisine avec moins d'information, puisqu'elle les nomme. Il a été retiré.
+
+La cause n'est pas la mise en œuvre mais le modèle de données : la table `symptom` porte `code`, `label_fr`, `label_km` et `triggers_alert`. Ce booléen distingue les symptômes qui déclenchent une alerte, il ne gradue rien. Aucune sévérité n'est représentable aujourd'hui.
+
+**Comportement attendu :**
+
+- Chaque symptôme du référentiel porte un niveau de gravité (`leger` · `modere` · `severe`)
+- La fiche patient trace ce niveau dans le temps : la courbe monte quand l'état se dégrade, descend quand il s'améliore
+- Les dates sont espacées selon leur écart réel, un patient silencieux laissant un intervalle visible
+
+**Règles de code :**
+
+- Migration additive sur `symptom` avec une valeur par défaut : les lignes existantes restent valides, aucun symptôme ne devient nul
+- Le niveau est une donnée du référentiel, pas une valeur calculée — il se décide avec les chirurgiens, comme la liste elle-même (MED-01)
+- `triggers_alert` reste indépendant : un symptôme sévère ne déclenche pas forcément une alerte, et inversement
+- Ne pas réintroduire un décompte comme substitut : c'est ce qui a été retiré
+- Dépend de **MED-01** pour l'attribution des niveaux
+- Tester : aggravation → courbe montante, amélioration → descendante, patient sans signalement → aucun point
 
 ---
 
@@ -1103,6 +1158,34 @@ Audit de sécurité (revue OWASP A06, 2026-07-23) : aucun outil de suivi des vul
 - Les mises à jour `minor`/`patch` Bun sont groupées dans une seule PR (`groups.minor-and-patch`) pour limiter le bruit — les montées majeures restent individuelles pour revue manuelle
 - Ne pas ajouter d'écosystème pour un fichier qui n'existe pas (ex. pas d'entrée `docker` pour mobile/web tant qu'ils n'ont pas de Dockerfile)
 - Si un nouveau workspace ou Dockerfile est ajouté, ajouter l'entrée correspondante dans `dependabot.yml`
+
+---
+
+### DEVOPS-13 — Job CI de construction des images Docker
+
+`[x]` 🟡 Majeur · `.github/workflows/ci.yml`
+
+**Contexte :**
+
+Les cinq jobs existants valident le code source, jamais les images livrées. Les cibles `prod` des deux `Dockerfile` n'étaient construites que sur le poste de la personne qui les écrivait — celle du backend ne l'avait jamais été du tout, `docker-compose.yml` construisant `target: dev` jusqu'à DEVOPS-02. Une image qui ne démarre pas ne se découvre alors qu'au déploiement.
+
+Ce job était volontairement différé jusqu'à la séparation des fichiers Compose (DEVOPS-02), pour ne pas valider une structure sur le point d'être remplacée.
+
+**Comportement attendu :**
+
+- Construction des deux images en cible `prod` à chaque pull request et à chaque push sur `dev`
+- Chaque image est **démarrée** et interrogée : `/health` pour le backend, `/fr` pour le dashboard
+- Les fichiers statiques du dashboard sont vérifiés séparément — une page peut répondre 200 avec tous ses assets en 404
+- `docker-compose.prod.yml` est validé par `docker compose config`
+
+**Règles de code :**
+
+- Les secrets de démarrage sont générés à la volée (`openssl rand`) — jamais de valeur en dur dans le workflow, même jetable
+- `DATABASE_URL` pointe volontairement dans le vide : `/health` ne touche pas la base, et exiger un Postgres ferait échouer le job pour une raison étrangère à ce qu'il vérifie
+- Vérifier les fichiers statiques, pas seulement le code HTTP de la page : c'est le seul moyen de détecter un `.next/static` non recopié en mode `standalone`
+- Les conteneurs sont supprimés dans une étape `if: always()`
+- Dépend de **DEVOPS-02** (séparation des Compose) et **DEVOPS-12** (Dockerfile web)
+- Tester : image backend qui ne démarre pas → job rouge, `.next/static` absent → job rouge, chemin invalide dans le Compose de production → job rouge
 
 ---
 

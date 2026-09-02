@@ -210,3 +210,108 @@ jobs:
 
       - name: Lancer les tests d'intégration
         run: bun run --cwd apps/backend test:integration
+
+  # DEVOPS-13 — les autres jobs valident le code, jamais les images livrees.
+  # Les cibles `prod` des deux Dockerfile n'etaient construites que sur le poste
+  # de la personne qui les ecrivait : celle du backend ne l'avait jamais ete du
+  # tout, la « production » du compose construisant `target: dev` jusqu'a
+  # DEVOPS-02. Une image qui ne demarre pas ne se voit qu'au deploiement.
+  #
+  # Construire ne suffit pas : une image web peut se construire, repondre 200,
+  # et servir une page dont le CSS et le JavaScript tombent en 404 quand
+  # `.next/static` n'a pas ete recopie. Chaque image est donc demarree et
+  # interrogee.
+  docker:
+    name: Images Docker (cibles prod)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Construire l'image backend (cible prod)
+        run: docker build -f apps/backend/Dockerfile --target prod -t slf-backend:ci .
+
+      # Secrets jetables generes a la volee : ils ne servent qu'a franchir les
+      # gardes de demarrage de ce conteneur, detruit a la fin du job. Rien n'est
+      # ecrit en dur, et BETTER_AUTH_SECRET depasse les 32 caracteres exiges.
+      #
+      # DATABASE_URL pointe volontairement dans le vide : `/health` ne touche pas
+      # la base, et exiger un Postgres ici ferait echouer le job pour une raison
+      # etrangere a ce qu'il verifie.
+      - name: Démarrer le backend et vérifier /health
+        run: |
+          docker run -d --name slf-backend-ci -p 3001:3001 \
+            -e NODE_ENV=production \
+            -e DATABASE_URL=postgresql://ci:ci@127.0.0.1:5432/absente \
+            -e JWT_SECRET="$(openssl rand -hex 32)" \
+            -e BETTER_AUTH_SECRET="$(openssl rand -base64 48)" \
+            -e BETTER_AUTH_URL=http://localhost:3001 \
+            slf-backend:ci
+
+          for _ in $(seq 1 30); do
+            if curl -sf -o /dev/null http://localhost:3001/health; then
+              echo "Backend prêt"
+              exit 0
+            fi
+            sleep 1
+          done
+
+          echo "Le backend n'a pas répondu sur /health"
+          docker logs slf-backend-ci
+          exit 1
+
+      - name: Construire l'image web (cible prod)
+        run: |
+          docker build -f apps/web/Dockerfile --target prod \
+            --build-arg NEXT_PUBLIC_API_URL=http://localhost:3001 \
+            -t slf-web:ci .
+
+      - name: Démarrer le dashboard web
+        run: |
+          docker run -d --name slf-web-ci -p 3000:3000 slf-web:ci
+
+          for _ in $(seq 1 60); do
+            if curl -sf -o /dev/null http://localhost:3000/fr; then
+              echo "Dashboard prêt"
+              exit 0
+            fi
+            sleep 1
+          done
+
+          echo "Le dashboard n'a pas répondu sur /fr"
+          docker logs slf-web-ci
+          exit 1
+
+      # Le piege du mode standalone : `.next/static` et `public/` ne sont pas
+      # traces par Next et se recopient a part dans le Dockerfile. Les oublier
+      # donne une page en 200 dont tous les assets sont en 404 — invisible sans
+      # cette verification.
+      - name: Vérifier que les fichiers statiques sont servis
+        run: |
+          curl -sf http://localhost:3000/fr -o /tmp/page.html
+
+          assets=$(grep -oE '/_next/static/[^"]+\.(css|js)' /tmp/page.html | sort -u | head -3)
+
+          if [ -z "$assets" ]; then
+            echo "Aucun fichier statique référencé dans la page — vérification impossible"
+            exit 1
+          fi
+
+          for asset in $assets; do
+            code=$(curl -s -o /dev/null -w '%{http_code}' "http://localhost:3000$asset")
+            echo "$code  $asset"
+            [ "$code" = "200" ] || exit 1
+          done
+
+      # `config` resout les variables et les fichiers references : une faute de
+      # frappe dans un chemin ou un service inconnu echoue ici plutot qu'au
+      # deploiement. CADDY_DOMAIN_* n'est pas defini sur le runner — sans valeur,
+      # Compose avertit sans echouer, ce qui n'apprend rien : on en fournit une.
+      - name: Vérifier que le fichier Compose de production est valide
+        run: docker compose -f docker-compose.yml -f docker-compose.prod.yml config --quiet
+        env:
+          CADDY_DOMAIN_API: api.exemple.test
+          CADDY_DOMAIN_WEB: web.exemple.test
+
+      - name: Arrêter les conteneurs
+        if: always()
+        run: docker rm -f slf-backend-ci slf-web-ci || true

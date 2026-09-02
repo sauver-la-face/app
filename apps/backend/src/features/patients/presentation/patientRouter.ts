@@ -25,6 +25,10 @@ import {
 const listPatientsRoute = createRoute({
   method: 'get',
   path: '/patients',
+  summary: 'Lister les patients suivis',
+  description:
+    "Alimente le tableau de bord : statut de synchronisation, etat du code d'acces et date de derniere nouvelle pour chaque patient.",
+  security: [{ sessionMedecin: [] }],
   responses: {
     200: {
       content: {
@@ -41,6 +45,10 @@ const listPatientsRoute = createRoute({
 const createPatientRoute = createRoute({
   method: 'post',
   path: '/patients',
+  summary: 'Creer une fiche patient',
+  description:
+    "La fiche seule ne donne aucun acces : le patient ne peut se connecter qu'apres emission d'un code a six chiffres.",
+  security: [{ sessionMedecin: [] }],
   request: {
     body: {
       content: {
@@ -75,6 +83,8 @@ const createPatientRoute = createRoute({
 const getPatientRoute = createRoute({
   method: 'get',
   path: '/patients/{patientId}',
+  summary: 'Consulter la fiche d un patient',
+  security: [{ sessionMedecin: [] }],
   request: {
     params: uuidParamSchema,
   },
@@ -102,6 +112,10 @@ const getPatientRoute = createRoute({
 const getPatientHistoryRoute = createRoute({
   method: 'get',
   path: '/patients/{patientId}/history',
+  summary: 'Consulter la chronologie de suivi post-operatoire',
+  description:
+    'Interventions, evenements medicaux, symptomes signales et photos de cicatrice, par ordre chronologique.',
+  security: [{ sessionMedecin: [] }],
   request: {
     params: uuidParamSchema,
   },
@@ -129,6 +143,8 @@ const getPatientHistoryRoute = createRoute({
 const updatePatientRoute = createRoute({
   method: 'patch',
   path: '/patients/{patientId}',
+  summary: 'Modifier une fiche patient',
+  security: [{ sessionMedecin: [] }],
   request: {
     body: {
       content: {
@@ -172,6 +188,10 @@ const updatePatientRoute = createRoute({
 const issueAccessCodeRoute = createRoute({
   method: 'post',
   path: '/patients/{patientId}/access-code',
+  summary: 'Emettre un code d acces a six chiffres',
+  description:
+    'Valable 48 heures pour la premiere connexion. Revoque les codes encore en attente, mais laisse ouverte une session deja etablie — la couper releve de la suppression de session.',
+  security: [{ sessionMedecin: [] }],
   request: {
     params: uuidParamSchema,
   },
@@ -209,6 +229,10 @@ const issueAccessCodeRoute = createRoute({
 const revokeSessionRoute = createRoute({
   method: 'delete',
   path: '/patients/{patientId}/session',
+  summary: 'Couper la session mobile en cours d un patient',
+  description:
+    'SEC-03 : telephone perdu ou vole. Pose `revoked_at` sur le code consomme, relu a chaque requete patient.',
+  security: [{ sessionMedecin: [] }],
   request: {
     params: uuidParamSchema,
   },

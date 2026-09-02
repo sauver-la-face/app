@@ -70,15 +70,6 @@ export function PatientHistoryPage({
   const procedures = [...history.procedures].sort((left, right) =>
     right.date.localeCompare(left.date),
   );
-  const symptomPoints = [...history.events]
-    .sort((left, right) => left.createdAt.localeCompare(right.createdAt))
-    .map((event) => ({
-      id: event.eventId,
-      date: formatDate(event.createdAt, locale),
-      totalSymptoms: event.symptoms.length,
-      alertSymptoms: event.symptoms.filter((symptom) => symptom.triggersAlert).length,
-    }));
-
   const totalSymptoms = history.events.reduce((sum, event) => sum + event.symptoms.length, 0);
   const totalAlertSymptoms = history.events.reduce(
     (sum, event) => sum + event.symptoms.filter((symptom) => symptom.triggersAlert).length,
@@ -190,48 +181,14 @@ export function PatientHistoryPage({
         </Panel>
       </section>
 
-      <section className="mt-8 grid gap-6 xl:grid-cols-[0.9fr_1.1fr]">
-        <Panel title={labels.symptomsTitle}>
-          {symptomPoints.length === 0 ? (
-            <EmptyState label={labels.noEvents} />
-          ) : (
-            <div className="space-y-4">
-              {symptomPoints.map((point) => {
-                const totalWidth = `${Math.max(point.totalSymptoms, 1) * 16}%`;
-                const alertWidth = `${Math.max(point.alertSymptoms, 0) * 16}%`;
-
-                return (
-                  <div key={point.id}>
-                    <div className="mb-2 flex items-center justify-between gap-3 text-sm">
-                      <span className="font-medium text-gray-700">{point.date}</span>
-                      <span className="text-gray-500">
-                        {point.totalSymptoms} / {point.alertSymptoms}
-                      </span>
-                    </div>
-                    <div className="rounded-full bg-[#EAE6DD] p-1">
-                      <div
-                        className="h-3 rounded-full bg-[#178064]"
-                        style={{
-                          width: totalWidth,
-                          minWidth: point.totalSymptoms > 0 ? '1rem' : 0,
-                        }}
-                      />
-                    </div>
-                    {point.alertSymptoms > 0 ? (
-                      <div className="mt-2 rounded-full bg-[#FCE2E2] p-1">
-                        <div
-                          className="h-2 rounded-full bg-[#D45D5D]"
-                          style={{ width: alertWidth, minWidth: '0.5rem' }}
-                        />
-                      </div>
-                    ) : null}
-                  </div>
-                );
-              })}
-            </div>
-          )}
-        </Panel>
-
+      {/* La timeline occupe seule la largeur : le panneau « Evolution des
+          symptomes » qui tenait la colonne de gauche a ete retire. Il comptait
+          les symptomes par evenement, ce que la timeline dit deja en les
+          nommant, et un decompte ne mesure aucune severite — deux symptomes ne
+          sont pas plus graves qu'un. Le graphique de severite attendu par
+          WEB-02 reste a faire : il suppose un niveau de gravite sur la table
+          `symptom`, qui n'en porte aujourd'hui qu'un booleen `triggers_alert`. */}
+      <section className="mt-8">
         <Panel title={labels.timelineTitle}>
           {events.length === 0 ? (
             <EmptyState label={labels.noEvents} />
