@@ -2,9 +2,10 @@
 
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { useEffect, useMemo } from 'react';
+import { useMemo } from 'react';
+import { usePhysicianGuard } from '@/features/auth/hooks/usePhysicianGuard';
 import type { Dictionary } from '@/i18n/dictionaries';
-import { signOut, useSession } from '@/lib/authClient';
+import { signOut } from '@/lib/authClient';
 import { useAlerts, usePatients } from '../hooks/useDashboard';
 import { AlertBanner } from './AlertBanner';
 import { PatientList } from './PatientList';
@@ -15,27 +16,11 @@ interface DashboardPageProps {
 }
 
 export function DashboardPage({ locale, dictionary }: DashboardPageProps) {
-  const { data: session, isPending: sessionPending } = useSession();
   const router = useRouter();
+  const { session, isPending: sessionPending } = usePhysicianGuard(locale);
 
   const { data: patientsData, isPending: patientsPending } = usePatients();
   const { data: alertsData, isPending: alertsPending } = useAlerts();
-
-  useEffect(() => {
-    if (sessionPending) return;
-
-    if (!session) {
-      router.replace(`/${locale}/login`);
-      return;
-    }
-
-    // AUTH-02 : le second facteur est obligatoire pour un medecin. Tant qu'il
-    // n'est pas enrole, l'acces au dossier patient reste ferme et l'utilisateur
-    // est renvoye vers l'enrolement.
-    if (!session.user.twoFactorEnabled) {
-      router.replace(`/${locale}/mfa/setup`);
-    }
-  }, [sessionPending, session, router, locale]);
 
   const alertPatientIds = useMemo(
     () => new Set((alertsData?.alerts ?? []).map((a) => a.patientId)),

@@ -3,12 +3,12 @@
 import type { CreatePatientInput, PatientAccessCode } from '@sauver-la-face/shared';
 import { createPatientSchema } from '@sauver-la-face/shared';
 import Link from 'next/link';
-import { useRouter, useSearchParams } from 'next/navigation';
-import { useEffect, useMemo, useState } from 'react';
+import { useSearchParams } from 'next/navigation';
+import { useMemo, useState } from 'react';
+import { usePhysicianGuard } from '@/features/auth/hooks/usePhysicianGuard';
 import { usePatients } from '@/features/dashboard/hooks/useDashboard';
 import type { Locale } from '@/i18n/config';
 import type { Dictionary } from '@/i18n/dictionaries';
-import { useSession } from '@/lib/authClient';
 import { useCreatePatient, useIssuePatientAccessCode } from '../hooks/usePatientManagement';
 import { PatientCodeBadge } from './PatientBadges';
 
@@ -19,8 +19,7 @@ export function PatientManagementPage({
   locale: Locale;
   dictionary: Dictionary;
 }) {
-  const router = useRouter();
-  const { data: session, isPending: sessionPending } = useSession();
+  const { session, isPending: sessionPending } = usePhysicianGuard(locale);
   const patientsQuery = usePatients();
   const createPatientMutation = useCreatePatient();
   const issueCodeMutation = useIssuePatientAccessCode();
@@ -37,12 +36,6 @@ export function PatientManagementPage({
   const [formError, setFormError] = useState<string | null>(null);
   const [generatedCode, setGeneratedCode] = useState<PatientAccessCode | null>(null);
   const [copySuccess, setCopySuccess] = useState(false);
-
-  useEffect(() => {
-    if (!sessionPending && !session) {
-      router.replace(`/${locale}/login`);
-    }
-  }, [locale, router, session, sessionPending]);
 
   const patients = patientsQuery.data?.patients ?? [];
   const activeCodeCount = useMemo(

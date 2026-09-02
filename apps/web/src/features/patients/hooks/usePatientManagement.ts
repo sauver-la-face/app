@@ -2,6 +2,7 @@
 
 import type { CreatePatientInput, PatientAccessCode, PatientDetails } from '@sauver-la-face/shared';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { assertOk } from '@/lib/apiError';
 
 const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001';
 
@@ -15,9 +16,7 @@ async function createPatient(input: CreatePatientInput): Promise<PatientDetails>
     body: JSON.stringify(input),
   });
 
-  if (!response.ok) {
-    throw new Error('PATIENT_CREATE_FAILED');
-  }
+  await assertOk(response, 'PATIENT_CREATE_FAILED');
 
   return response.json() as Promise<PatientDetails>;
 }
@@ -28,9 +27,7 @@ async function issuePatientAccessCode(patientId: string): Promise<PatientAccessC
     credentials: 'include',
   });
 
-  if (!response.ok) {
-    throw new Error('PATIENT_CODE_ISSUE_FAILED');
-  }
+  await assertOk(response, 'PATIENT_CODE_ISSUE_FAILED');
 
   return response.json() as Promise<PatientAccessCode>;
 }
