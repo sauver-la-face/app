@@ -104,19 +104,24 @@ Deux conséquences, l'une pour la lecture, l'autre pour le code :
 
 ### À revoir avant prod
 
-- **Le serveur distingue 401 et 403, le client non.** Depuis qu'AUTH-02 exige le
-  second facteur, un médecin non enrôlé reçoit `403 MFA_REQUIRED` sur toutes les
-  routes de données. Or aucun des hooks du dashboard ne lit ce statut :
+- **La garde d'enrôlement existe sur le dashboard et manque sur les deux pages
+  patient.** Depuis qu'AUTH-02 exige le second facteur, un médecin non enrôlé
+  reçoit `403 MFA_REQUIRED` sur toutes les routes de données. Le parcours
+  nominal le prend en charge : `DashboardPage.tsx` teste
+  `session.user.twoFactorEnabled` et redirige vers `/[locale]/mfa/setup`, si
+  bien qu'un compte fraîchement inscrit arrive bien sur l'enrôlement.
+  `PatientManagementPage.tsx` et `PatientHistoryPage.tsx` ne testent en revanche
+  que la présence de session (`!sessionPending && !session` → `/login`) : un
+  médecin non enrôlé qui ouvre directement `/[locale]/patients` ou une fiche
+  patient obtient une page rendue dont tous les appels renvoient 403, sans
+  jamais être orienté vers l'enrôlement. Trois lignes à recopier depuis
+  `DashboardPage.tsx`, pas un défaut d'architecture.
+  Le fond reste néanmoins vrai et déborde ces deux pages : **le serveur
+  distingue 401 et 403, le client non.** Aucun hook ne lit ce statut —
   `useDashboard` lève `PATIENTS_FETCH_FAILED` et `ALERTS_FETCH_FAILED` sur un
-  simple `!res.ok`, `usePatientHistory` ne distingue que le 404, et aucun ne lit
-  le corps de la réponse. Un compte fraîchement inscrit atterrit donc sur un
-  écran vide avec un message d'échec générique, sans lien vers
-  `/[locale]/mfa/setup` — la page existe et fonctionne, elle n'est atteignable
-  qu'en tapant l'URL. Le `LoginForm` gère bien `twoFactorRedirect`, mais ce
-  chemin ne s'ouvre que pour un compte **déjà** enrôlé, vers `/mfa/verify`.
-  Ce n'est pas une impasse définitive, c'est un cul-de-sac d'interface : le
-  serveur dit précisément ce qui manque, l'interface ne le répète pas.
-  Le correctif touche trois hooks et la logique de redirection.
+  simple `!res.ok`, `usePatientHistory` ne distingue que le 404, aucun ne lit le
+  corps de la réponse. Toute cause future de 403 produira donc le même message
+  d'échec indifférencié, quelle que soit la garde posée en amont.
 - **`/openapi.json` public et muet sur l'authentification.** La route est servie
   sans condition sur `NODE_ENV`, contrairement à `/docs`, et ne déclare aucun
   schéma de sécurité : le document publié présente des chemins protégés comme
