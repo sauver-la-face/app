@@ -8,6 +8,10 @@ Chaque version est marquée par un tag Git annoté (`vX.Y.Z`).
 
 ## [Non publié]
 
+### Corrigé
+
+- **WEB-06** — le bouton « Annuler » du formulaire de création d'un patient renvoyait vers `/[locale]`, qui n'est pas une destination mais une page de transit redirigeant vers la connexion. Renoncer à une création menait donc à un écran vide au lieu du point de départ. Il ramène désormais au tableau de bord
+
 ### Ajouté
 
 - **DEMO-01** — jeu de données de démonstration (`db:seed:demo`). Les seeds existants ne produisaient aucune alerte : `seedMed01` n'insère que le référentiel de symptômes, et `seedSync01` crée un patient dont le symptôme est `triggers_alert: false`, sans `last_synced_at`. Sur une base fraîche, le tableau de bord affichait donc « aucune alerte » — l'inverse de ce que montre le premier écran du parcours médecin. Le script crée six patients couvrant les cinq états de code d'accès et les quatre statuts de synchronisation, dont un signalement de symptômes déclencheurs et une inactivité de onze jours ; trois portent une chronologie photo réellement déposée dans MinIO, à la convention de clé de `S3PhotoStorage`, pour que `GET /photos/:mediaId` les serve comme celles remontées par le mobile. Les clichés sont des illustrations SVG légendées, annonçant explicitement qu'il ne s'agit pas de photos réelles ; `scripts/demoAssets/` permet de les remplacer et reste ignoré par git, des photos de cicatrices étant des données de santé au sens du RGPD. Rejouable : les patients sont retrouvés par nom, une fiche créée à la main est enrichie et non dupliquée, et le script refuse de s'exécuter si `NODE_ENV=production`
