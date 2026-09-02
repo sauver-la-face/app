@@ -60,12 +60,26 @@ export function PatientManagementPage({
           <h1 className="mt-3 text-4xl font-semibold text-gray-900">{labels.title}</h1>
           <p className="mt-2 max-w-3xl text-sm text-gray-600">{labels.subtitle}</p>
         </div>
-        <Link
-          href={`/${locale}/dashboard`}
-          className="rounded-full border border-black/10 bg-white px-5 py-3 text-sm font-medium text-gray-700 shadow-xs transition hover:-translate-y-0.5 hover:shadow-md"
-        >
-          {labels.backToDashboard}
-        </Link>
+        <div className="flex flex-wrap items-center gap-3">
+          {/* Action principale, placee avant le lien de retour : la creation
+              d'un patient a sa propre page et n'etait atteignable depuis cette
+              liste que par la sidebar. Fond #178064 et non #2EAC8E :
+              docs/accessibilite.md mesure ce dernier a 2.83:1 en texte blanc,
+              sous le minimum AA de 4.5:1 exige par WCAG 2.2 (1.4.3).
+              #178064 atteint 4.87:1. */}
+          <Link
+            href={`/${locale}/patients/new`}
+            className="rounded-full bg-[#178064] px-5 py-3 text-sm font-semibold text-white shadow-xs transition hover:-translate-y-0.5 hover:bg-[#126650] hover:shadow-md"
+          >
+            {dictionary.newPatient.title}
+          </Link>
+          <Link
+            href={`/${locale}/dashboard`}
+            className="rounded-full border border-black/10 bg-white px-5 py-3 text-sm font-medium text-gray-700 shadow-xs transition hover:-translate-y-0.5 hover:shadow-md"
+          >
+            {labels.backToDashboard}
+          </Link>
+        </div>
       </div>
 
       {confirmationVisible && (

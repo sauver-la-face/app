@@ -43,6 +43,17 @@ export function DashboardPage({ locale, dictionary }: DashboardPageProps) {
         <div className="mb-6 flex items-center justify-between">
           <h1 className="text-2xl font-semibold text-gray-900">{dictionary.dashboard.title}</h1>
           <div className="flex items-center gap-4">
+            {/* Action principale : la creation d'un patient a sa propre page
+                (/patients/new) et n'etait atteignable que par la sidebar, absente
+                du dashboard. Fond #178064 et non #2EAC8E : docs/accessibilite.md
+                mesure ce dernier a 2.83:1 en texte blanc, sous le minimum AA de
+                4.5:1 exige par WCAG 2.2 (1.4.3). #178064 atteint 4.87:1. */}
+            <Link
+              href={`/${locale}/patients/new`}
+              className="rounded-md bg-[#178064] px-3 py-1.5 text-sm font-semibold text-white transition-colors hover:bg-[#126650]"
+            >
+              {dictionary.newPatient.title}
+            </Link>
             <Link
               href={`/${locale}/patients`}
               className="rounded-md border border-[#178064]/20 bg-[#EAF7F2] px-3 py-1.5 text-sm font-medium text-[#1F6A57] hover:bg-[#def2ea]"
