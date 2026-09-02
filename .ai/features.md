@@ -568,7 +568,7 @@ Trois autres familles : `operation-summary` (quinze opérations sans résumé), 
 
 ### WEB-04 — Export données (PDF / CSV)
 
-`[ ]` 🟢 Mineur · `apps/web/src/app/exports/`
+`[~]` 🟢 Mineur · `apps/web/src/app/exports/`
 
 **Comportement attendu :**
 
