@@ -1175,7 +1175,7 @@ occupait le chemin, le template n'arrivait pas.
 
 ### DOCS-03 — Faire de `docs/security/owasp.md` la référence OWASP unique
 
-`[~]` 🟡 Majeur · `docs/security/owasp.md` · `docs/architectureAdr.md`
+`[x]` 🟡 Majeur · `docs/security/owasp.md` · `docs/architectureAdr.md`
 
 **Contexte :**
 
