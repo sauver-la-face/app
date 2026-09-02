@@ -20,6 +20,80 @@ const fr = {
     privacy: 'Données personnelles et confidentialité',
     sitemap: 'Plan du site',
   },
+  legal: {
+    updatedAt: 'Dernière mise à jour : 2 septembre 2026',
+    notices: {
+      title: "Mentions légales et conditions d'utilisation",
+      intro:
+        'Sauver la Face est une application de suivi post-opératoire destinée aux patients opérés lors de missions humanitaires de chirurgie maxillo-faciale au Cambodge, et aux équipes soignantes qui assurent ce suivi à distance.',
+      editorTitle: 'Éditeur',
+      editorBody:
+        "Sauver la Face est une association d'aide humanitaire. Sa forme juridique, son numéro d'enregistrement, l'adresse de son siège, le nom de son directeur de la publication et son adresse de contact restent à compléter par l'éditeur.",
+      hostingTitle: 'Hébergement',
+      hostingBody:
+        "L'application n'est pas déployée : elle fonctionne aujourd'hui en environnement de développement, en conteneurs, sur un poste local. Aucun hébergeur n'est donc à mentionner à ce jour. Une mise en production supposerait un hébergeur agréé pour les données de santé, et cette mention serait alors renseignée ici.",
+      purposeTitle: 'Objet du service',
+      purposeBody:
+        'Le service permet à un patient de transmettre des photographies et des relevés de symptômes après son opération, et à son équipe soignante de les consulter, de repérer les signalements préoccupants et de répondre par des consignes. Il ne remplace pas une consultation et ne délivre aucun diagnostic automatique.',
+      contactTitle: 'Contact',
+      contactBody:
+        'Toute question relative au service ou aux présentes mentions peut être adressée à la structure porteuse du projet, dont les coordonnées figurent ci-dessus une fois renseignées.',
+    },
+    privacy: {
+      title: 'Données personnelles et confidentialité',
+      intro:
+        "Cette page décrit les données que l'application traite réellement, telles qu'elles figurent dans son schéma de base et dans son code.",
+      collectedTitle: 'Données traitées',
+      collectedIntro: "L'application enregistre :",
+      collectedIdentity: "l'identité du patient : prénom, nom, sexe, date de naissance et région ;",
+      collectedMedical:
+        'le suivi médical : interventions, événements de suivi, symptômes signalés et consignes du chirurgien ;',
+      collectedPhotos:
+        'les photographies transmises par le patient, ainsi que leur date de prise de vue ;',
+      collectedPhysician:
+        "l'identité du soignant : prénom, nom, adresse électronique, numéro de téléphone et, le cas échéant, une photo de profil ;",
+      collectedTechnical:
+        'des journaux techniques recensant les consultations, pour la traçabilité des accès.',
+      purposeTitle: 'Finalité',
+      purposeBody:
+        'Ces données servent exclusivement au suivi post-opératoire du patient par son équipe soignante. Elles ne sont ni vendues, ni cédées à des tiers, ni utilisées à des fins publicitaires.',
+      retentionTitle: 'Durées de conservation',
+      retentionBody:
+        "Les données médicales ne sont jamais effacées : elles relèvent de la durée légale de conservation des dossiers de santé. Un code d'accès patient qui n'a pas été utilisé expire au bout de quarante-huit heures. C'est la seule suppression automatique en place à ce jour : aucune purge ne s'applique encore aux autres données, dont les durées de conservation sont décidées mais pas implémentées.",
+      erasureTitle: "Droit à l'effacement",
+      erasureBody:
+        "Le règlement général sur la protection des données prévoit un droit à l'effacement, assorti d'une exception pour les données de santé (article 17.3.c). Les données médicales ne sont donc pas supprimées.",
+      erasureDetail:
+        "À la demande du patient, les informations permettant de l'identifier (prénom, nom, date de naissance) sont effacées. L'historique médical demeure, rattaché au même identifiant technique, mais il n'est plus rattachable à une personne nommée.",
+      securityTitle: 'Sécurité',
+      securityBody:
+        "L'accès au tableau de bord exige une authentification à deux facteurs. Les échanges entre le navigateur et le service sont chiffrés. Chaque consultation est journalisée. Le patient accède à ses seules données au moyen d'un code à six chiffres, que son chirurgien peut révoquer à tout moment, notamment en cas de perte de son téléphone.",
+      rightsTitle: 'Exercer ses droits',
+      rightsBody:
+        "Le patient peut demander l'accès à ses données, leur rectification, leur portabilité (son dossier lui est alors remis en PDF, en JSON ou en CSV) ou l'effacement de son identité, en s'adressant à l'équipe soignante qui assure son suivi.",
+    },
+    sitemap: {
+      title: 'Plan du site',
+      intro:
+        'Les pages servies par cette application. Les écrans de suivi requièrent une authentification.',
+      accessTitle: 'Accès au compte',
+      linkHome: 'Accueil',
+      linkLogin: 'Connexion',
+      linkRegister: 'Créer un compte',
+      linkMfaSetup: 'Enrôlement du second facteur',
+      careTitle: 'Suivi des patients',
+      linkDashboard: 'Tableau de bord',
+      linkPatients: 'Liste des patients',
+      linkNewPatient: 'Nouveau patient',
+      legalTitle: 'Informations légales',
+      linkNotices: 'Mentions légales et CGU',
+      linkPrivacy: 'Données personnelles et confidentialité',
+      linkSitemap: 'Plan du site',
+      restrictedTitle: 'Pages non listées',
+      restrictedBody:
+        "Les fiches patient ne figurent pas dans ce plan : leur adresse contient l'identifiant d'un patient et n'a pas vocation à être publiée. L'écran de vérification du second facteur n'y figure pas non plus : c'est une étape de connexion, pas une destination.",
+    },
+  },
   login: {
     eyebrow: 'Portail medecin - connexion securisee',
     title: 'Connexion',
@@ -293,6 +367,78 @@ const dictionaries = {
       privacy: 'Personal data and privacy',
       sitemap: 'Site map',
     },
+    legal: {
+      updatedAt: 'Last updated: 2 September 2026',
+      notices: {
+        title: 'Legal notices and terms of use',
+        intro:
+          'Sauver la Face is a post-operative follow-up application for patients operated on during humanitarian maxillofacial surgery missions in Cambodia, and for the care teams following them remotely.',
+        editorTitle: 'Publisher',
+        editorBody:
+          'These details remain to be completed by the organisation running the project: legal name, legal form, registered address, publication director and contact address.',
+        hostingTitle: 'Hosting',
+        hostingBody:
+          'The application runs in containers behind a server providing end-to-end TLS encryption. The hosting provider remains to be named before any production release: health data requires a certified health-data host.',
+        purposeTitle: 'Purpose of the service',
+        purposeBody:
+          'The service lets a patient send photographs and symptom reports after surgery, and lets their care team review them, spot concerning reports and reply with instructions. It does not replace a consultation and issues no automated diagnosis.',
+        contactTitle: 'Contact',
+        contactBody:
+          'Any question about the service or about these notices may be addressed to the organisation running the project, whose details appear above once filled in.',
+      },
+      privacy: {
+        title: 'Personal data and privacy',
+        intro:
+          'This page describes the data the application actually processes, as it appears in its database schema and its code.',
+        collectedTitle: 'Data processed',
+        collectedIntro: 'The application records:',
+        collectedIdentity:
+          'patient identity: first name, last name, sex, date of birth and region;',
+        collectedMedical:
+          'medical follow-up: procedures, follow-up events, reported symptoms and surgeon instructions;',
+        collectedPhotos: 'photographs sent by the patient, together with the date they were taken;',
+        collectedPhysician:
+          'clinician identity: first name, last name, email address, phone number and, where provided, a profile picture;',
+        collectedTechnical: 'technical logs recording accesses, for traceability.',
+        purposeTitle: 'Purpose',
+        purposeBody:
+          'This data serves only the post-operative follow-up of the patient by their care team. It is never sold, transferred to third parties, or used for advertising.',
+        retentionTitle: 'Retention periods',
+        retentionBody:
+          'Medical data is never erased: it falls under the legal retention period for health records. An unused patient access code expires after forty-eight hours. That is the only automatic deletion in place today: no purge applies to the other data yet, and retention periods are decided but not implemented.',
+        erasureTitle: 'Right to erasure',
+        erasureBody:
+          'The General Data Protection Regulation grants a right to erasure, with an exception for health data (article 17.3.c). Medical data is therefore not deleted.',
+        erasureDetail:
+          'At the patient request, the details identifying them (first name, last name, date of birth) are erased. The medical history remains, attached to the same technical identifier, but can no longer be linked to a named person.',
+        securityTitle: 'Security',
+        securityBody:
+          'Access to the dashboard requires two-factor authentication. Exchanges between the browser and the service are encrypted. Every consultation is logged. The patient reaches their own data through a six-digit code, which their surgeon can revoke at any time, notably if their phone is lost.',
+        rightsTitle: 'Exercising your rights',
+        rightsBody:
+          'A patient may request access to their data, its correction, its portability (their record is then provided as PDF, JSON or CSV), or the erasure of their identity, by contacting the care team following them.',
+      },
+      sitemap: {
+        title: 'Site map',
+        intro: 'The pages served by this application. Follow-up screens require authentication.',
+        accessTitle: 'Account access',
+        linkHome: 'Home',
+        linkLogin: 'Sign in',
+        linkRegister: 'Create an account',
+        linkMfaSetup: 'Second factor enrolment',
+        careTitle: 'Patient follow-up',
+        linkDashboard: 'Dashboard',
+        linkPatients: 'Patient list',
+        linkNewPatient: 'New patient',
+        legalTitle: 'Legal information',
+        linkNotices: 'Legal notices and T&C',
+        linkPrivacy: 'Personal data and privacy',
+        linkSitemap: 'Site map',
+        restrictedTitle: 'Pages not listed',
+        restrictedBody:
+          'Patient records do not appear in this map: their address contains a patient identifier and is not meant to be published. The second-factor verification screen is not listed either: it is a step in signing in, not a destination.',
+      },
+    },
     login: {
       eyebrow: 'Physician portal - secure sign in',
       title: 'Sign in',
@@ -556,6 +702,83 @@ const dictionaries = {
       legal: 'ច្បាប់​និង​លក្ខខណ្ឌ',
       privacy: 'ទិន្នន័យ​ផ្ទាល់ខ្លួន​និង​ភាព​ឯកជន',
       sitemap: 'ផែនទី​គេហទំព័រ',
+    },
+    // Le texte juridique n'est pas traduit en khmer : il demande un locuteur
+    // natif, pas une traduction automatique. L'anglais est repris tel quel, et
+    // chaque page le signale dans son introduction plutot que de laisser croire
+    // a un oubli. Dette assumee, a lever avant toute mise en production.
+    legal: {
+      updatedAt: 'Last updated: 2 September 2026',
+      notices: {
+        title: 'Legal notices and terms of use',
+        intro:
+          'អត្ថបទ​ច្បាប់​នេះ​មាន​ជា​ភាសា​អង់គ្លេស​ប៉ុណ្ណោះ​សម្រាប់​ពេល​នេះ។ This legal text is currently available in English only. Sauver la Face is a post-operative follow-up application for patients operated on during humanitarian maxillofacial surgery missions in Cambodia, and for the care teams following them remotely.',
+        editorTitle: 'Publisher',
+        editorBody:
+          'These details remain to be completed by the organisation running the project: legal name, legal form, registered address, publication director and contact address.',
+        hostingTitle: 'Hosting',
+        hostingBody:
+          'The application runs in containers behind a server providing end-to-end TLS encryption. The hosting provider remains to be named before any production release: health data requires a certified health-data host.',
+        purposeTitle: 'Purpose of the service',
+        purposeBody:
+          'The service lets a patient send photographs and symptom reports after surgery, and lets their care team review them, spot concerning reports and reply with instructions. It does not replace a consultation and issues no automated diagnosis.',
+        contactTitle: 'Contact',
+        contactBody:
+          'Any question about the service or about these notices may be addressed to the organisation running the project, whose details appear above once filled in.',
+      },
+      privacy: {
+        title: 'Personal data and privacy',
+        intro:
+          'អត្ថបទ​ច្បាប់​នេះ​មាន​ជា​ភាសា​អង់គ្លេស​ប៉ុណ្ណោះ​សម្រាប់​ពេល​នេះ។ This legal text is currently available in English only. This page describes the data the application actually processes, as it appears in its database schema and its code.',
+        collectedTitle: 'Data processed',
+        collectedIntro: 'The application records:',
+        collectedIdentity:
+          'patient identity: first name, last name, sex, date of birth and region;',
+        collectedMedical:
+          'medical follow-up: procedures, follow-up events, reported symptoms and surgeon instructions;',
+        collectedPhotos: 'photographs sent by the patient, together with the date they were taken;',
+        collectedPhysician:
+          'clinician identity: first name, last name, email address, phone number and, where provided, a profile picture;',
+        collectedTechnical: 'technical logs recording accesses, for traceability.',
+        purposeTitle: 'Purpose',
+        purposeBody:
+          'This data serves only the post-operative follow-up of the patient by their care team. It is never sold, transferred to third parties, or used for advertising.',
+        retentionTitle: 'Retention periods',
+        retentionBody:
+          'Medical data is never erased: it falls under the legal retention period for health records. An unused patient access code expires after forty-eight hours. That is the only automatic deletion in place today: no purge applies to the other data yet, and retention periods are decided but not implemented.',
+        erasureTitle: 'Right to erasure',
+        erasureBody:
+          'The General Data Protection Regulation grants a right to erasure, with an exception for health data (article 17.3.c). Medical data is therefore not deleted.',
+        erasureDetail:
+          'At the patient request, the details identifying them (first name, last name, date of birth) are erased. The medical history remains, attached to the same technical identifier, but can no longer be linked to a named person.',
+        securityTitle: 'Security',
+        securityBody:
+          'Access to the dashboard requires two-factor authentication. Exchanges between the browser and the service are encrypted. Every consultation is logged. The patient reaches their own data through a six-digit code, which their surgeon can revoke at any time, notably if their phone is lost.',
+        rightsTitle: 'Exercising your rights',
+        rightsBody:
+          'A patient may request access to their data, its correction, its portability (their record is then provided as PDF, JSON or CSV), or the erasure of their identity, by contacting the care team following them.',
+      },
+      sitemap: {
+        title: 'ផែនទី​គេហទំព័រ',
+        intro:
+          'អត្ថបទ​ច្បាប់​នេះ​មាន​ជា​ភាសា​អង់គ្លេស​ប៉ុណ្ណោះ​សម្រាប់​ពេល​នេះ។ The pages served by this application. Follow-up screens require authentication.',
+        accessTitle: 'Account access',
+        linkHome: 'Home',
+        linkLogin: 'Sign in',
+        linkRegister: 'Create an account',
+        linkMfaSetup: 'Second factor enrolment',
+        careTitle: 'Patient follow-up',
+        linkDashboard: 'Dashboard',
+        linkPatients: 'Patient list',
+        linkNewPatient: 'New patient',
+        legalTitle: 'Legal information',
+        linkNotices: 'Legal notices and T&C',
+        linkPrivacy: 'Personal data and privacy',
+        linkSitemap: 'Site map',
+        restrictedTitle: 'Pages not listed',
+        restrictedBody:
+          'Patient records do not appear in this map: their address contains a patient identifier and is not meant to be published. The second-factor verification screen is not listed either: it is a step in signing in, not a destination.',
+      },
     },
     login: {
       eyebrow: 'វិបផតថលវេជ្ជបណ្ឌិត - ការចូលប្រើប្រាស់ដោយសុវត្ថិភាព',

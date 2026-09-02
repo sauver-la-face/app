@@ -618,6 +618,49 @@ qui faisait échouer `next build` — sans que la CI le détecte, aucun job ne l
 
 ---
 
+### WEB-07 — Pages légales
+
+`[ ]` 🟡 Majeur · `apps/web/src/app/[locale]/mentions-legales/` · `apps/web/src/app/[locale]/confidentialite/` · `apps/web/src/app/[locale]/plan-du-site/`
+
+**Contexte :**
+
+Le pied de page défini dans `app/[locale]/layout.tsx` est rendu sous chaque écran de
+l'application et pointe vers trois adresses qui n'existaient nulle part : `/mentions-legales`,
+`/confidentialite` et `/plan-du-site` répondaient toutes les trois 404, y compris depuis la page
+de connexion.
+
+Le défaut n'est pas le lien mort mais ce que le lien annonce. Un pied de page qui écrit
+« Données personnelles et confidentialité » sous chaque écran d'une application de santé prend un
+engagement ; un 404 derrière cet engagement déplace la question d'un évaluateur du lien vers le
+reste du dossier.
+
+**Comportement attendu :**
+
+- Les trois adresses répondent 200 dans les trois locales
+- Le contenu décrit ce que l'application traite réellement — les champs du schéma, les durées du
+  cahier des charges, les mécanismes implémentés — et non un texte type
+- Le plan du site n'énumère que des pages réellement servies : annoncer une page inexistante
+  reproduirait le défaut corrigé
+- Les fiches patient sont volontairement absentes du plan : leur adresse contient un identifiant
+  de patient
+
+**Règles de code :**
+
+- Aucune donnée n'est listée sans être vérifiée dans `infrastructure/schema.ts` : la page décrit
+  le traitement réel, pas le traitement souhaité
+- L'identité de l'éditeur et celle de l'hébergeur ne sont pas inventées — elles engagent
+  juridiquement et restent explicitement à compléter par la structure porteuse
+- Les trois pages partagent un gabarit unique (`features/legal/components/LegalPage.tsx`) pour
+  qu'elles ne divergent pas visuellement au fil des modifications
+- **Le khmer n'est pas traduit** : le bloc `legal` de la locale `km` reprend l'anglais, et chaque
+  page le signale dans son introduction plutôt que de laisser croire à un oubli. Du texte
+  juridique demande un locuteur natif. Dette assumée, à lever avant toute mise en production —
+  elle s'ajoute aux 69 valeurs anglaises déjà présentes dans `patients` et `patientManagement`
+- Tester : les trois adresses en `fr`, `en` et `km`, et le pied de page depuis un écran non
+  authentifié
+
+---
+
 ### WEB-08 — Graphique d'évolution de la sévérité des symptômes
 
 `[ ]` 🟢 Mineur · `apps/backend/src/infrastructure/schema.ts` · `apps/web/src/features/patients/components/`
