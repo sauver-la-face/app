@@ -14,10 +14,6 @@ Chaque version est marquée par un tag Git annoté (`vX.Y.Z`).
 - **DOCS-02** — structure documentaire : `docs/adr/` avec les 13 décisions techniques consignées une par fichier, `docs/security/owasp.md`, template d'architecture des six piliers, `docs/README.md`, dossiers `design/` et `brief/`
 - **DOCS-02** — template de pull request et job CI `changelog` vérifiant qu'une entrée accompagne chaque PR
 
-### Corrigé
-
-- **DOCKER-01** — `bun.lock` était listé dans `.dockerignore` : le `COPY package.json bun.lock* ./` du Dockerfile backend ne trouvait aucun verrou et, le glob tolérant l'absence, le build se poursuivait en silence. `bun install` résolvait alors chaque plage `^x.y.z` vers la dernière version publiée au lieu des versions verrouillées — l'image embarquait par exemple zod 4.5.4 quand le verrou fixe 4.4.3. Le glob est retiré pour que l'absence du verrou fasse échouer le build au lieu de le laisser dériver.
-
 ### Modifié
 
 - **DEVOPS-02** — séparation des fichiers Compose. `docker-compose.prod.yml` n'existait pas : la séquence de déploiement documentée au rapport de certification échouait sur un fichier introuvable, aucun profil `prod` n'était déclaré, et le backend construisait `target: dev` en dur — la « production » livrait donc l'image de développement, avec le code de l'hôte monté par-dessus. Le développement vit maintenant dans `docker-compose.override.yml`, chargé automatiquement en local et ignoré dès qu'on passe des `-f` explicites
@@ -29,6 +25,8 @@ Chaque version est marquée par un tag Git annoté (`vX.Y.Z`).
 
 - **DEVOPS-10** — resynchronisation du snapshot Drizzle. `drizzle-kit generate` ne se connecte jamais à la base : il compare `schema.ts` au dernier snapshot. Or les migrations `0004` et `0005`, écrites à la main, n'en avaient jamais régénéré, laissant cette mémoire figée à l'état `0003`. Toute génération réémettait donc leurs opérations — un `ADD COLUMN last_synced_at` qui aurait échoué sur toute base déjà migrée. La migration `0006` est volontairement vide : elle ne porte que le snapshot à jour. `db:generate` répond désormais « No schema changes »
 - **DEVOPS-10** — `patient_code_uuid_patient_idx` est déclaré dans `schema.ts`. L'index existait en base depuis `0000` sans y figurer, et Drizzle proposait de le supprimer à chaque génération alors que `getLatestCodes`, `revokeActiveCodes` et `revokeSession` s'appuient dessus
+- **DOCKER-01** — `bun.lock` était listé dans `.dockerignore` : le `COPY package.json bun.lock* ./` du Dockerfile backend ne trouvait aucun verrou et, le glob tolérant l'absence, le build se poursuivait en silence. `bun install` résolvait alors chaque plage `^x.y.z` vers la dernière version publiée au lieu des versions verrouillées — l'image embarquait par exemple zod 4.5.4 quand le verrou fixe 4.4.3. Le glob est retiré pour que l'absence du verrou fasse échouer le build au lieu de le laisser dériver.
+- **DOCKER-01** — `apps/web/Dockerfile`, arrivé depuis avec DEVOPS-12, reprenait le même `COPY package.json bun.lock* ./`. Retirer `bun.lock` du `.dockerignore` suffisait à remettre le verrou dans son contexte de build, mais le glob y tolérait toujours l'absence : les deux images sont désormais alignées et échouent au build si le verrou manque, au lieu de résoudre les plages vers la dernière version publiée
 
 ### Sécurité
 
