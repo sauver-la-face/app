@@ -10,7 +10,11 @@ import {
   requirePatientAuth,
 } from '@shared/middleware/patientAuthMiddleware';
 import { requirePhysicianAuth } from '@shared/middleware/physicianAuthMiddleware';
-import { forbiddenErrorSchema, validationErrorSchema } from '@shared/openapi';
+import {
+  forbiddenErrorSchema,
+  unauthorizedErrorSchema,
+  validationErrorSchema,
+} from '@shared/openapi';
 import type { MiddlewareHandler } from 'hono';
 
 import type { TokenProvider } from '../../auth/application/tokenProvider';
@@ -68,6 +72,10 @@ const createInstructionRoute = createRoute({
     400: {
       content: { 'application/json': { schema: validationErrorSchema } },
       description: 'Erreur de validation',
+    },
+    401: {
+      content: { 'application/json': { schema: unauthorizedErrorSchema } },
+      description: 'Session medecin requise',
     },
     404: {
       content: { 'application/json': { schema: medicalProcedureNotFoundErrorSchema } },
@@ -163,8 +171,23 @@ export function createInstructionsRouter(
       );
     }
 
+    // L'auteur vient de la session, jamais du corps de la requete. Le middleware
+    // garantit deja la presence de l'utilisateur ; la garde reste explicite pour
+    // que la regle soit lisible ici plutot que supposee ailleurs.
+    const user = context.get('user');
+
+    if (!user) {
+      return context.json(
+        { code: 'UNAUTHORIZED' as const, message: 'Session medecin requise' },
+        401,
+      );
+    }
+
     try {
-      const response = await instructionsUsecase.createInstruction(parsed.data);
+      const response = await instructionsUsecase.createInstruction({
+        ...parsed.data,
+        physicianId: user.id,
+      });
       return context.json(response, 201);
     } catch (error) {
       if (error instanceof MedicalProcedureNotFoundError) {

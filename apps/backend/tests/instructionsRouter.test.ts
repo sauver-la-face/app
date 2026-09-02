@@ -98,6 +98,30 @@ describe('instructions.router', () => {
     expect(body.acknowledgedAt).toBeNull();
   });
 
+  // SEC-05. Le corps de la requete porte l'identifiant d'un confrere ; la
+  // session porte celui de l'auteur reel. La consigne doit etre signee par la
+  // session, sinon un medecin authentifie peut attribuer un acte medical a
+  // quelqu'un qui ne l'a pas pose — et le dossier de sante ment sur son auteur.
+  test('POST /instructions ignore un physicianId envoye dans le corps', async () => {
+    const { app } = createTestApp();
+    const confrere = '22222222-2222-4222-8222-222222222222';
+
+    const response = await app.request('/instructions', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({
+        medicalProcedureId,
+        physicianId: confrere,
+        content: 'Consigne signee par la session, pas par le client.',
+      }),
+    });
+
+    expect(response.status).toBe(201);
+    const body = (await response.json()) as Record<string, unknown>;
+    expect(body.physicianId).toBe(physicianId);
+    expect(body.physicianId).not.toBe(confrere);
+  });
+
   test('POST /instructions retourne 400 si le payload est invalide', async () => {
     const { app } = createTestApp();
 
