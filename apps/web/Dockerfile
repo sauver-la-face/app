@@ -32,10 +32,16 @@ RUN apt-get update \
 
 WORKDIR /app
 
-COPY package.json bun.lock* ./
+COPY package.json bun.lock ./
 COPY apps/web/package.json ./apps/web/
 COPY packages/ ./packages/
 
+# Meme contrainte que pour l'image backend : bun.lock doit etre present dans le
+# contexte de build (voir .dockerignore) pour que les versions resolues ici soient
+# celles du verrou. Le glob a ete retire volontairement — son absence doit faire
+# echouer le build plutot que de le laisser resoudre chaque plage ^x.y.z vers la
+# derniere version publiee. --frozen-lockfile reste inutilisable : le Dockerfile ne
+# copie que apps/web et packages, alors que le verrou decrit tout le workspace.
 RUN bun install
 
 COPY apps/web/ ./apps/web/

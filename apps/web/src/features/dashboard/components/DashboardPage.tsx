@@ -22,8 +22,18 @@ export function DashboardPage({ locale, dictionary }: DashboardPageProps) {
   const { data: alertsData, isPending: alertsPending } = useAlerts();
 
   useEffect(() => {
-    if (!sessionPending && !session) {
+    if (sessionPending) return;
+
+    if (!session) {
       router.replace(`/${locale}/login`);
+      return;
+    }
+
+    // AUTH-02 : le second facteur est obligatoire pour un medecin. Tant qu'il
+    // n'est pas enrole, l'acces au dossier patient reste ferme et l'utilisateur
+    // est renvoye vers l'enrolement.
+    if (!session.user.twoFactorEnabled) {
+      router.replace(`/${locale}/mfa/setup`);
     }
   }, [sessionPending, session, router, locale]);
 

@@ -1,10 +1,10 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import type { Locale } from '@/i18n/config';
 import type { Dictionary } from '@/i18n/dictionaries';
-import { signIn } from '@/lib/authClient';
+import { signIn, useSession } from '@/lib/authClient';
 
 function UserIcon() {
   return (
@@ -90,12 +90,41 @@ function EyeIcon({ open }: { open: boolean }) {
   );
 }
 
+// Le limiteur de tentatives est un middleware Hono, pas une erreur Better Auth :
+// selon les cas il renvoie un code, un statut 429, ou un message deja formate.
+// On teste les trois, et on retombe sur un message traduit plutot que d'afficher
+// un texte serveur code en dur en francais.
+function messageDErreur(
+  erreur: { message?: string; status?: number; code?: string },
+  login: Dictionary['login'],
+): string {
+  const bloque =
+    erreur.status === 429 ||
+    erreur.code === 'TOO_MANY_ATTEMPTS' ||
+    (erreur.message ?? '').toUpperCase().includes('TOO_MANY_ATTEMPTS');
+
+  if (bloque) {
+    return login.tooManyAttempts;
+  }
+
+  return erreur.message && erreur.message.trim().length > 0 ? erreur.message : login.genericError;
+}
+
 export function LoginForm({ locale, dictionary }: { locale: Locale; dictionary: Dictionary }) {
   const router = useRouter();
+  const { data: session, isPending: sessionPending } = useSession();
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const { login } = dictionary;
+
+  // Arriver sur la connexion avec une session valide n'a pas de sens : on renvoie
+  // vers le tableau de bord, qui appliquera lui-meme la garde du second facteur.
+  useEffect(() => {
+    if (!sessionPending && session) {
+      router.replace(`/${locale}/dashboard`);
+    }
+  }, [sessionPending, session, router, locale]);
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -109,8 +138,13 @@ export function LoginForm({ locale, dictionary }: { locale: Locale; dictionary: 
         password: data.get('password') as string,
       },
       {
-        onSuccess: () => router.push(`/${locale}/dashboard`),
-        onError: (ctx) => setError(ctx.error.message),
+        onSuccess: (ctx) => {
+          // Better Auth ne delivre pas de session quand un second facteur est
+          // actif : il repond twoFactorRedirect et attend la verification TOTP.
+          const suite = ctx.data as { twoFactorRedirect?: boolean } | undefined;
+          router.push(suite?.twoFactorRedirect ? `/${locale}/mfa/verify` : `/${locale}/dashboard`);
+        },
+        onError: (ctx) => setError(messageDErreur(ctx.error, login)),
       },
     );
 

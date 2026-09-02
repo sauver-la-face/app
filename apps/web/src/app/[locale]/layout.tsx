@@ -2,7 +2,9 @@ import type { Metadata } from 'next';
 import Image from 'next/image';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
+import { UserGreeting } from '@/features/auth/components/UserGreeting';
 import { LocaleSwitcher } from '@/features/i18n/components/LocaleSwitcher';
+import { SearchBar } from '@/features/layout/components/SearchBar';
 import { isLocale, type Locale, locales } from '@/i18n/config';
 import { getDictionary } from '@/i18n/dictionaries';
 
@@ -45,24 +47,32 @@ export default async function LocaleLayout(props: {
   return (
     <div className="flex min-h-screen flex-col bg-white">
       <header className="sticky top-0 z-10 border-b border-black/10 bg-white shadow-[0px_4px_4px_rgba(0,0,0,0.25)]">
-        <div className="mx-auto flex max-w-6xl items-center justify-between px-8 py-3">
-          <div className="flex items-center gap-3">
+        <div className="flex items-center gap-6 px-8 py-3">
+          {/* Logo aligné à gauche */}
+          <div className="flex shrink-0 items-center">
             <Image
               src="/logo.jpg"
               alt={dictionary.common.brand}
-              width={56}
-              height={56}
+              width={88}
+              height={88}
               className="rounded-lg object-contain"
               priority
             />
-            <span className="text-lg font-semibold text-gray-900">{dictionary.common.brand}</span>
           </div>
-          <LocaleSwitcher currentLocale={locale} />
+          {/* Barre de recherche */}
+          <div className="flex flex-1 justify-center">
+            <SearchBar placeholder={dictionary.common.searchPlaceholder} />
+          </div>
+          {/* Greeting + LocaleSwitcher */}
+          <div className="flex shrink-0 items-center gap-6">
+            <LocaleSwitcher currentLocale={locale} />
+            <UserGreeting />
+          </div>
         </div>
       </header>
       <div className="flex flex-1 flex-col">{children}</div>
       <footer className="bg-[#D9D9D9] px-8 py-6">
-        <div className="mx-auto flex max-w-6xl flex-wrap items-center gap-x-10 gap-y-2">
+        <div className="flex flex-wrap items-center gap-x-10 gap-y-2 px-8">
           <Link
             href={`/${locale}/mentions-legales`}
             className="text-sm text-black underline hover:opacity-70"
