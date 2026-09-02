@@ -8,6 +8,9 @@ Chaque version est marquée par un tag Git annoté (`vX.Y.Z`).
 
 ## [Non publié]
 
+### Sécurité
+
+- **WEB-08** (RGPD, minimisation) — le formulaire de création d'un patient collectait six champs qu'aucune colonne n'accueille : civilité, téléphone, réseau social, adresse, code postal et pays. Ils étaient saisis puis jetés au moment de l'envoi. Au-delà de la collecte sans finalité sur une application de données de santé, le risque était clinique : le formulaire donnait au médecin la conviction d'avoir enregistré un numéro de téléphone. S'il comptait dessus pour joindre la famille d'un patient en alerte, il aurait cherché une donnée qui n'a jamais existé. Le formulaire ne présente plus que ce qui est réellement enregistré
 ### Corrigé
 
 - **WEB-06** — le bouton « Annuler » du formulaire de création d'un patient renvoyait vers `/[locale]`, qui n'est pas une destination mais une page de transit redirigeant vers la connexion. Renoncer à une création menait donc à un écran vide au lieu du point de départ. Il ramène désormais au tableau de bord
