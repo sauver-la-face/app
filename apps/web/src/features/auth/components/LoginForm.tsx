@@ -16,7 +16,6 @@ function UserIcon() {
       className="h-5 w-5"
       aria-hidden
     >
-      <title>Utilisateur</title>
       <path
         strokeLinecap="round"
         strokeLinejoin="round"
@@ -36,7 +35,6 @@ function LockIcon() {
       className="h-5 w-5"
       aria-hidden
     >
-      <title>Mot de passe</title>
       <path
         strokeLinecap="round"
         strokeLinejoin="round"
@@ -57,7 +55,6 @@ function EyeIcon({ open }: { open: boolean }) {
         className="h-5 w-5"
         aria-hidden
       >
-        <title>Afficher le mot de passe</title>
         <path
           strokeLinecap="round"
           strokeLinejoin="round"
@@ -80,7 +77,6 @@ function EyeIcon({ open }: { open: boolean }) {
       className="h-5 w-5"
       aria-hidden
     >
-      <title>Masquer le mot de passe</title>
       <path
         strokeLinecap="round"
         strokeLinejoin="round"
@@ -194,7 +190,7 @@ export function LoginForm({ locale, dictionary }: { locale: Locale; dictionary: 
             type="button"
             onClick={() => setShowPassword((v) => !v)}
             className="absolute right-3 top-1/2 flex h-7 w-7 -translate-y-1/2 items-center justify-center text-gray-500 hover:text-gray-700"
-            aria-label={showPassword ? 'Masquer le mot de passe' : 'Afficher le mot de passe'}
+            aria-label={showPassword ? login.hidePassword : login.showPassword}
           >
             <EyeIcon open={showPassword} />
           </button>

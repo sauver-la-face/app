@@ -117,7 +117,7 @@ export function PatientHistoryPage({
                   <Image
                     loader={passthroughImageLoader}
                     src={`${apiBaseUrl}/photos/${photo.mediaId}`}
-                    alt={photo.description ?? `Photo ${photo.mediaId}`}
+                    alt={photo.description ?? `${labels.photoAlt} ${photo.mediaId}`}
                     className="h-56 w-full object-cover"
                     width={640}
                     height={448}
@@ -247,7 +247,7 @@ export function PatientHistoryPage({
                             key={photo.mediaId}
                             loader={passthroughImageLoader}
                             src={`${apiBaseUrl}/photos/${photo.mediaId}`}
-                            alt={photo.description ?? photo.fileType}
+                            alt={photo.description ?? `${labels.photoAlt} ${photo.mediaId}`}
                             className="h-24 w-24 rounded-2xl object-cover"
                             width={96}
                             height={96}
