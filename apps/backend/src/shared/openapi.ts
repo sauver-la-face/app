@@ -13,10 +13,19 @@ export const uuidParamSchema = z.object({
     }),
 });
 
+// `details` recoit toujours le resultat de `error.flatten()` de Zod, jamais une
+// forme libre. Le decrire tel quel corrige deux defauts a la fois : le document
+// annoncait une valeur de type inconnu la ou la structure est parfaitement
+// stable, et `z.unknown()` produisait `nullable: true` sans `type` — invalide
+// en OpenAPI 3.0, ou `nullable` doit accompagner un `type`.
+export const zodFlattenedErrorSchema = z.object({
+  formErrors: z.array(z.string()),
+  fieldErrors: z.record(z.string(), z.array(z.string())),
+});
+
 export const validationErrorSchema = z.object({
   code: z.literal('VALIDATION_ERROR'),
-  // zod 4 exige la cle ET la valeur ; zod 3 sous-entendait des cles string
-  details: z.record(z.string(), z.unknown()),
+  details: zodFlattenedErrorSchema,
 });
 
 export const notFoundErrorSchema = z.object({

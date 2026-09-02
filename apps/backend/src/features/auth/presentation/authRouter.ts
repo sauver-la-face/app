@@ -112,6 +112,22 @@ const renewSchema = z.object({
   uuid_patient: z.string().uuid(),
 });
 
+// `PatientCode` tel qu'il ressort en JSON. Trois routes le renvoyaient sous
+// `z.any()`, qui produit `nullable: true` sans `type` — invalide en OpenAPI 3.0
+// — et n'apprenait rien au lecteur. `code` porte un Value Object serialise :
+// `PatientCodeValue` expose un champ `value` public et ne definit pas de
+// `toJSON`, l'objet sort donc sous la forme `{ "value": "123456" }`.
+const patientCodeResponseSchema = z.object({
+  uuid_patient_code: z.string().uuid(),
+  uuid_patient: z.string().uuid(),
+  code: z.object({ value: patientCodeSchema }),
+  created_at: z.string().datetime(),
+  used_at: z.string().datetime().nullable(),
+  deleted_at: z.string().datetime().nullable(),
+  is_active: z.boolean(),
+  revoked_at: z.string().datetime().nullable(),
+});
+
 // Export de la factory du routeur patient (qui nécessite l'injection du usecase)
 //
 // SEC-04/A01 : `generate` et `renew` fabriquaient un code d'acces a six
@@ -148,6 +164,13 @@ export const createAuthRouter = (
     createRoute({
       method: 'post',
       path: '/patient/validate',
+      summary: "Valider un code d'acces patient et ouvrir une session",
+      description:
+        "Login patient. Seule route metier publique : elle ne peut pas exiger d'etre deja authentifie. Protegee par un rate limiting de trois tentatives par quart d'heure.",
+      tags: ['Auth patient'],
+      // Tableau vide : la route est publique, et le dire explicitement vaut
+      // mieux que de laisser le lecteur le deduire d'une absence.
+      security: [],
       request: {
         body: {
           content: {
@@ -164,8 +187,8 @@ export const createAuthRouter = (
             'application/json': {
               schema: z.object({
                 success: z.literal(true),
-                patientCode: z.any(), // On pourra affiner le schéma plus tard
-                token: z.string().optional(),
+                patientCode: patientCodeResponseSchema,
+                token: z.string(),
               }),
             },
           },
@@ -199,6 +222,11 @@ export const createAuthRouter = (
     createRoute({
       method: 'post',
       path: '/patient/generate',
+      summary: "Emettre un code d'acces a six chiffres pour un patient",
+      description:
+        "SEC-04 : emettre un code est une action de medecin. Sans ce garde, la route fabriquait un code pour n'importe quel identifiant de patient fourni dans le corps et le renvoyait en clair.",
+      tags: ['Auth patient'],
+      security: [{ sessionMedecin: [] }],
       request: {
         body: {
           content: {
@@ -213,7 +241,7 @@ export const createAuthRouter = (
           description: 'Code généré',
           content: {
             'application/json': {
-              schema: z.any(),
+              schema: patientCodeResponseSchema,
             },
           },
         },
@@ -230,6 +258,11 @@ export const createAuthRouter = (
     createRoute({
       method: 'post',
       path: '/patient/renew',
+      summary: "Renouveler le code d'acces d'un patient",
+      description:
+        "Invalide le code actif puis en emet un nouveau. Comme l'emission, c'est une action de medecin (SEC-04).",
+      tags: ['Auth patient'],
+      security: [{ sessionMedecin: [] }],
       request: {
         body: {
           content: {
@@ -244,7 +277,7 @@ export const createAuthRouter = (
           description: 'Code renouvelé',
           content: {
             'application/json': {
-              schema: z.any(),
+              schema: patientCodeResponseSchema,
             },
           },
         },
