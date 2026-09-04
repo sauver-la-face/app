@@ -1303,7 +1303,7 @@ Deux conséquences pour ce lot : le repli mérite d'être unique et déclaré à
 
 ### DEVOPS-15 — Faire échouer le suivi de features au lieu de le laisser passer
 
-`[~]` 🟡 Majeur · `.github/workflows/ci.yml` · `.github/workflows/update-feature-status.yml`
+`[~]` 🟡 Majeur · `.github/workflows/ci.yml` · `.github/workflows/update-feature-status.yml` · `.github/workflows/feature-in-progress.yml`
 
 **Contexte :**
 
@@ -1317,10 +1317,12 @@ Un second trou double le premier : le workflow ne se déclenche que sur `feature
 
 - [x] Les deux `exit 0` de `update-feature-status` deviennent `exit 1`, avec une annotation `::error::` qui remonte en tête du run
 - [x] Un job `Entrée de suivi` dans `ci.yml`, exécuté sur les PR, qui refuse une branche `feature/` ou `fix/` dont l'identifiant est illisible ou sans section dans `features.md`
+- [x] Les deux `exit 0` de `feature-in-progress` deviennent `exit 1` de la même façon. Ce job est le seul des trois à lire `features.md` **sur `dev`** — il fait `checkout` avec `ref: dev` — donc son échec dit précisément que l'entrée n'y est pas encore
 
 **Règles :**
 
 - Le blocage appartient à la CI de PR, pas à `update-feature-status` : ce dernier tourne sur `pull_request: closed`, donc après le merge — le faire échouer produit une alarme, jamais une barrière. Les deux sont utiles, ils ne jouent pas le même rôle
+- Les trois workflows disent trois choses différentes et aucun ne remplace les autres. `feature-in-progress` (création de branche) : l'entrée est-elle sur `dev` ? `Entrée de suivi` (PR) : le travail est-il spécifié quelque part ? `update-feature-status` (après merge) : le statut a-t-il pu être posé ? Le premier alerte au démarrage, le deuxième bloque, le troisième constate
 - Le job ne juge que les branches `feature/` et `fix/`. Une branche hors convention sort en succès : elle ne prétend rien suivre, et faire échouer une branche de maintenance apprendrait surtout à contourner le job
 
 **Hors périmètre :**
