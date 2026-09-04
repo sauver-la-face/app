@@ -1438,6 +1438,34 @@ Deux tableaux OWASP coexistent par ailleurs, et ils se contredisent. Celui de `d
 
 ---
 
+### DOCS-04 — Solder la dette documentaire laissée par DOCS-02 et DOCS-03
+
+`[~]` 🟡 Majeur · `docs/architecture.md` · `CLAUDE.md` · `AGENTS.md` · `docs/architecture-systeme.md`
+
+**Contexte :**
+
+DOCS-02 et DOCS-03 ont chacun renvoyé trois éléments en « hors périmètre » sans leur ouvrir d'entrée. Ils ont été livrés quand même — le renommage d'`architectureAdr.md` d'abord, puis le reste — sur des branches `feature/DOCS-04-*` dont l'identifiant ne correspondait à aucune section de ce fichier. Le workflow `update-feature-status` extrait bien l'ID du nom de branche, ne trouve pas de `### DOCS-04`, et sort en succès : son `|| true` sur le `grep` transforme l'absence en silence. Trois lots de travail ont donc traversé le suivi sans y laisser de trace.
+
+Cette entrée existe pour que le suivi redevienne vrai. Elle est écrite après coup, ce qui est l'anomalie qu'elle corrige.
+
+**Périmètre :**
+
+- [x] Renommage de `docs/architectureAdr.md` en `docs/architecture-systeme.md`, et mise à jour des neuf fichiers qui y renvoient
+- [x] Remplissage du template des six piliers de `docs/architecture.md` : par pilier, l'exigence chiffrée, le mécanisme qui y répond avec l'ADR ou le fichier qui le porte, et ce qui est écarté avec son motif
+- [x] Import `@AGENTS.md` en tête de `CLAUDE.md`, précédé de la réconciliation des deux fichiers — ils étaient dupliqués à 90 % et se contredisaient sur le workflow Git
+
+**Règles :**
+
+- Aucun pilier n'est rempli avec un mécanisme existant s'il ne répond pas à une exigence écrite. « À décider » et « il n'y en a pas » sont des réponses valides, à condition de porter leur motif — le template le pose lui-même
+- `AGENTS.md` est la source unique après l'import : aucune règle projet ne se remet dans `CLAUDE.md`, et rien de propre à un assistant particulier n'entre dans `AGENTS.md`
+
+**Hors périmètre :**
+
+- La supervision, signalée comme le principal écart du pilier « excellence opérationnelle » : le CDC exige 4 h de résolution sur incident critique alors qu'aucun seuil, canal ni astreinte n'est défini. Le document le consigne, il ne le corrige pas — cela demande une décision, pas de la documentation
+- Le budget mensuel et son validateur, absents du CDC, qui relèvent de la même décision
+
+---
+
 ## RÈGLES GLOBALES (toutes les features)
 
 - **TDD obligatoire sur toutes les features** : l'agent écrit les tests en premier, génère l'implémentation pour les faire passer, puis le développeur valide. Ne jamais générer du code sans test associé.
