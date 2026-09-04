@@ -37,17 +37,24 @@ jobs:
         run: |
           FEATURE_ID="${{ steps.feature.outputs.id }}"
 
+          BRANCH="${{ github.ref_name }}"
+
+          # Ce job lit features.md sur dev (checkout ref: dev), pas sur la branche créée.
+          # Son échec dit donc exactement une chose : l'entrée n'est pas encore sur dev,
+          # et le statut [~] ne pourra pas être posé. Rien n'est bloqué — il n'y a pas
+          # encore de PR — mais l'alerte tombe au démarrage, quand la corriger coûte
+          # une entrée à écrire plutôt qu'un suivi à reconstituer après coup.
           if [ -z "$FEATURE_ID" ]; then
-            echo "Aucun ID de feature détecté dans le nom de branche — rien à faire"
-            exit 0
+            echo "::error::Aucun identifiant extrait de la branche '$BRANCH'. Format attendu : feature/XXX-00-nom-court."
+            exit 1
           fi
 
           # Trouve la ligne du header de la feature
           LINE=$(grep -n "### ${FEATURE_ID}" .ai/features.md | head -1 | cut -d: -f1)
 
           if [ -z "$LINE" ]; then
-            echo "Feature $FEATURE_ID non trouvée dans features.md — rien à faire"
-            exit 0
+            echo "::error::Aucune section '### $FEATURE_ID' dans .ai/features.md sur dev. L'entrée doit être mergée sur dev avant la création de la branche, sinon le statut reste [ ] pendant tout le développement."
+            exit 1
           fi
 
           # Met à jour le statut sur la ligne +2 (header → ligne vide → statut)

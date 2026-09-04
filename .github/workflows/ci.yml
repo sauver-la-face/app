@@ -7,6 +7,41 @@ on:
     branches: [dev]
 
 jobs:
+  suivi:
+    name: Entrée de suivi
+    # Seules les PR sont concernées : sur un push direct il n'y a plus rien à empêcher.
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Vérifier que la branche est rattachée à une entrée de features.md
+        run: |
+          BRANCH="${{ github.event.pull_request.head.ref }}"
+
+          # Hors convention feature/ ou fix/ : rien à rattacher, on laisse passer.
+          # Les branches de maintenance (chore/, deps/, release/) n'ont pas d'entrée
+          # de suivi et n'en attendent pas.
+          case "$BRANCH" in
+            feature/*|fix/*) ;;
+            *) echo "Branche '$BRANCH' hors convention feature/ ou fix/ — rien à vérifier"; exit 0 ;;
+          esac
+
+          PREFIXE="${BRANCH%%/*}"
+          ID=$(echo "${BRANCH#*/}" | grep -oE '^[A-Z][A-Z0-9]*(-[A-Z][A-Z0-9]*)*-[0-9]+' || true)
+
+          if [ -z "$ID" ]; then
+            echo "::error::La branche '$BRANCH' ne porte pas d'identifiant lisible. Format attendu : $PREFIXE/XXX-00-nom-court, par exemple $PREFIXE/AUTH-01-jwt-patients."
+            exit 1
+          fi
+
+          if ! grep -q "^### ${ID}\b" .ai/features.md; then
+            echo "::error::Aucune section '### $ID' dans .ai/features.md. Une branche décrit un travail spécifié : ajouter l'entrée sur dev avant d'ouvrir cette PR, sinon le suivi ne verra jamais ce travail passer."
+            exit 1
+          fi
+
+          echo "$ID rattaché à son entrée dans .ai/features.md"
+
   lint:
     name: Lint & Format (Biome)
     runs-on: ubuntu-latest
