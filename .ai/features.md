@@ -1471,7 +1471,7 @@ Deux tableaux OWASP coexistent par ailleurs, et ils se contredisent. Celui de `d
 
 ### DOCS-04 — Solder la dette documentaire laissée par DOCS-02 et DOCS-03
 
-`[~]` 🟡 Majeur · `docs/architecture.md` · `CLAUDE.md` · `AGENTS.md` · `docs/architecture-systeme.md`
+`[x]` 🟡 Majeur · `docs/architecture.md` · `CLAUDE.md` · `AGENTS.md` · `docs/architecture-systeme.md`
 
 **Contexte :**
 
