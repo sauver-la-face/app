@@ -20,6 +20,8 @@ Chaque version est marquée par un tag Git annoté (`vX.Y.Z`).
 
 ### Corrigé
 
+- **DEVOPS-15** — le suivi des features sortait en succès quand il ne trouvait rien. `update-feature-status` extrait l'identifiant du nom de branche puis cherche `### <ID>` dans `features.md` ; identifiant illisible ou section absente, il affichait « rien à faire » et rendait la main en vert. Le message dormait dans les logs d'un job réussi. Trois lots de `DOCS-04` et la PR #109 de `SEC-05` ont traversé le suivi sans y laisser de trace, et `DEVENV-01`, `DOCKER-01` et `API-03` sont dans le même angle mort. Les deux sorties deviennent des échecs annotés `::error::`. Comme ce workflow tourne sur `pull_request: closed`, donc après le merge, il ne peut qu'alerter : le blocage est porté par un nouveau job `Entrée de suivi` dans `ci.yml`, exécuté sur les PR et exigé avant merge, qui refuse une branche `feature/` ou `fix/` sans identifiant lisible ou sans entrée correspondante. Les branches hors convention passent sans contrôle — elles ne prétendent rien suivre, et les faire échouer apprendrait à contourner le job
+
 - **WEB-06** — le bouton « Annuler » du formulaire de création d'un patient renvoyait vers `/[locale]`, qui n'est pas une destination mais une page de transit redirigeant vers la connexion. Renoncer à une création menait donc à un écran vide au lieu du point de départ. Il ramène désormais au tableau de bord
 
 ### Ajouté

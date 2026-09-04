@@ -39,17 +39,23 @@ jobs:
         run: |
           FEATURE_ID="${{ steps.feature.outputs.id }}"
 
+          BRANCH="${{ github.event.pull_request.head.ref }}"
+
+          # Ces deux cas sortaient en succès : une PR mergée pouvait ne rien mettre à jour
+          # sans que personne en soit averti. Ils échouent maintenant. L'échec est
+          # post-merge, donc c'est une alarme et non un blocage — le blocage est assuré
+          # par le job « Entrée de suivi » de ci.yml, exigé avant merge.
           if [ -z "$FEATURE_ID" ]; then
-            echo "Aucun ID de feature détecté dans le nom de branche — rien à faire"
-            exit 0
+            echo "::error::Aucun identifiant extrait de la branche '$BRANCH'. Le format attendu est feature/XXX-00-nom — cette PR a été mergée sans mettre à jour features.md."
+            exit 1
           fi
 
           # Trouve la ligne du header de la feature
           LINE=$(grep -n "### ${FEATURE_ID}" .ai/features.md | head -1 | cut -d: -f1)
 
           if [ -z "$LINE" ]; then
-            echo "Feature $FEATURE_ID non trouvée dans features.md — rien à faire"
-            exit 0
+            echo "::error::Aucune section '### $FEATURE_ID' dans .ai/features.md. La branche '$BRANCH' a été mergée sans que le suivi en garde trace — ajouter l'entrée, puis remettre son statut à la main."
+            exit 1
           fi
 
           # Met à jour le statut sur la ligne +2 (header → ligne vide → statut)
