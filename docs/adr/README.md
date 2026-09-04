@@ -27,6 +27,9 @@ Une décision = un fichier. Voir `0000-template.md` pour le format.
 | [0021](0021-limiter-les-tentatives-d-authentification-a-3-par-15-minutes-et-par-ip.md) | Limiter les tentatives d'authentification à 3 par 15 minutes et par IP | Accepté | 2026-08-31 |
 | [0022](0022-faire-tourner-les-secrets-de-production-tous-les-90-jours.md) | Faire tourner les secrets de production tous les 90 jours | Accepté | 2026-08-31 |
 | [0023](0023-couper-une-session-patient-en-revoquant-le-code-porteur.md) | Couper une session patient en révoquant le code porteur | Accepté | 2026-08-31 |
+| [0024](0024-faire-d-agents-md-la-source-unique-des-instructions-d-agent.md) | Faire d'AGENTS.md la source unique des instructions d'agent | Accepté | 2026-09-04 |
+| [0025](0025-placer-le-controle-du-suivi-de-features-dans-la-ci-de-pull-request.md) | Placer le contrôle du suivi de features dans la CI de pull request | Accepté | 2026-09-04 |
+| [0026](0026-proteger-dev-par-un-ruleset-exigeant-la-ci-sans-approbation.md) | Protéger dev par un ruleset exigeant la CI, sans approbation | Accepté | 2026-09-04 |
 
 Les ADR 0002 à 0022 consignent des décisions prises avant la mise en place de ce
 dossier. Elles ont été reprises depuis `../architecture-systeme.md` — sections

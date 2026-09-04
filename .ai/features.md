@@ -1515,10 +1515,10 @@ Aucune des trois n'est écrite ailleurs que dans un CHANGELOG, qui dit ce qui a 
 
 **Périmètre :**
 
-- [ ] `0024` sur la source unique des instructions d'agent
-- [ ] `0025` sur l'emplacement du contrôle de suivi
-- [ ] `0026` sur la protection de `dev` par ruleset et l'exemption accordée
-- [ ] Les trois lignes correspondantes dans `docs/adr/README.md`
+- [x] `0024` sur la source unique des instructions d'agent
+- [x] `0025` sur l'emplacement du contrôle de suivi
+- [x] `0026` sur la protection de `dev` par ruleset et l'exemption accordée
+- [x] Les trois lignes correspondantes dans `docs/adr/README.md`
 
 **Règles :**
 
