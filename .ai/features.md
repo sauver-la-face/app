@@ -1534,7 +1534,7 @@ Aucune des trois n'est écrite ailleurs que dans un CHANGELOG, qui dit ce qui a 
 
 ### DEVOPS-16 — Automatiser le chemin spec-first par un skill
 
-`[ ]` 🟡 Majeur · `.claude/skills/feature-new/SKILL.md` · `AGENTS.md`
+`[~]` 🟡 Majeur · `.claude/skills/feature-new/SKILL.md` · `AGENTS.md`
 
 **Contexte :**
 
