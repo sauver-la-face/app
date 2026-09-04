@@ -1532,6 +1532,38 @@ Aucune des trois n'est écrite ailleurs que dans un CHANGELOG, qui dit ce qui a 
 
 ---
 
+### DEVOPS-16 — Rendre la CI bon marché sur les pull requests sans code
+
+`[ ]` 🟡 Majeur · `.github/workflows/ci.yml`
+
+**Contexte :**
+
+DEVOPS-15 a rendu le suivi de features fiable, au prix d'une pull request de spécification par feature : l'entrée doit être sur `dev` avant la création de la branche pour que `feature-in-progress` puisse poser `[~]`.
+
+Cette pull request supplémentaire ne touche que deux fichiers texte, `.ai/features.md` et `CHANGELOG.md`. Elle déclenche pourtant les huit checks requis, dont la vérification TypeScript, le build Next.js, les tests d'intégration qui montent une base de données, et la construction des images Docker de production. Plusieurs minutes de CI pour valider qu'un paragraphe est bien écrit.
+
+Le coût n'est pas théorique : il se paie à chaque feature, il décourage la discipline qu'il est censé servir, et une discipline coûteuse finit contournée par un renommage de branche.
+
+**Décision de périmètre :** le statut `[~]` est conservé. C'est le mécanisme qui le porte qu'on rend supportable, pas le suivi qu'on abandonne.
+
+**Périmètre :**
+
+- [ ] Un job `Périmètre` qui détermine si la pull request touche autre chose que de la documentation, et expose le résultat en sortie
+- [ ] Les quatre jobs lourds (`Vérification TypeScript`, `Build Next.js (web)`, `Tests d'intégration (bun:test)`, `Images Docker (cibles prod)`) conditionnent leurs étapes à cette sortie, sans conditionner le job lui-même
+- [ ] Les jobs rapides (`Lint & Format`, `Tests unitaires`, `verifie`, `Entrée de suivi`) restent inconditionnels : ils coûtent moins de vingt secondes chacun et donnent une base verte
+
+**Règles :**
+
+- **Ne jamais sauter un job requis.** Un job neutralisé par un `if` au niveau du job est rapporté comme `skipped` et ne satisfait pas un check requis : la pull request resterait bloquée en attente d'un statut qui n'arrivera jamais. Le job doit tourner et réussir, ce sont ses étapes qui sont conditionnelles. C'est le motif déjà employé par `Entrée de suivi` pour les branches hors convention
+- **La détection est conservatrice.** Est considéré comme documentation ce qui est explicitement listé : `docs/`, `.ai/`, `design/`, `brief/`, et les fichiers `.md` à la racine. Tout le reste, y compris `.github/`, `package.json` et les `Dockerfile`, déclenche la CI complète. En cas de doute la CI tourne : une CI inutile coûte des minutes, une CI sautée à tort laisse passer une régression
+
+**Hors périmètre :**
+
+- La suppression du statut `[~]`, qui supprimerait le besoin de la pull request de spécification. Écartée : le suivi `en cours` est voulu
+- Le déplacement du suivi hors de `features.md` vers un label ou un projet GitHub, qui rendrait aussi l'exemption de `0026` inutile. Chantier distinct, déjà consigné comme dette
+
+---
+
 ## RÈGLES GLOBALES (toutes les features)
 
 - **TDD obligatoire sur toutes les features** : l'agent écrit les tests en premier, génère l'implémentation pour les faire passer, puis le développeur valide. Ne jamais générer du code sans test associé.
