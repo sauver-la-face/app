@@ -75,6 +75,7 @@ apps/web/src/
 
 - `expo-secure-store` ne stocke que des **strings** — toujours sérialiser les objets avec `JSON.stringify` avant stockage et `JSON.parse` à la lecture
 - Jamais stocker de token dans `AsyncStorage` (non chiffré) — uniquement `expo-secure-store`
+- **Accessibilité — cibles tactiles** : toute zone cliquable (`Pressable`, `TouchableOpacity`, bouton, icône interactive) doit mesurer au moins **48 × 48 dp** de surface cliquable (recommandation Material Design / Android), au besoin via `hitSlop` ou du padding sans réduire la zone visible. Ne pas confondre avec le minimum web WCAG 2.5.8 (24 px) — voir `docs/accessibilite.md`.
 
 ## Règles features
 
@@ -145,22 +146,33 @@ docker restart sauverlaface-backend-1
 
 ---
 
-## Workflow Git
+## Workflow Git — obligatoire avant toute feature
+
+Chaque feature se développe dans un **git worktree isolé**, jamais directement sur `dev`. Plusieurs sessions coexistent : changer de branche dans le clone principal casse le travail des autres.
+
+**Démarrage :**
 
 ```bash
-# Démarrer une feature
-git checkout dev && git pull origin dev
-git checkout -b feature/XXX-00-nom-de-la-feature
+git fetch origin dev
+git worktree add ../sauverLaFace-XXX-00 -b feature/XXX-00-nom origin/dev
+git -C ../sauverLaFace-XXX-00 push -u origin HEAD
+```
 
-# Soumettre une PR quand la feature est terminée et testée
-gh pr create --base dev --title "feat: XXX-00 nom"
+Le statut passe automatiquement de `[ ]` à `[~]` via GitHub Actions dès la création de la branche.
+
+**Clôture (feature terminée et testée) :**
+
+```bash
+gh pr create --base dev --title "feat: XXX-00 nom" --body "..."
 ```
 
 **Règles absolues :**
-- Jamais de push direct sur `dev` — toujours passer par une PR
+- Aucun push direct sur `dev` — toujours passer par une PR
 - Format de branche obligatoire : `feature/XXX-00-nom` (ex: `feature/AUTH-01-authentification-patient`)
-- La PR est créée uniquement quand la feature est terminée et que `bun run lint` + `bun test` passent
+- La PR est créée uniquement quand la feature est terminée et que `bun run lint` + `bun test` passent — pas avant
 - La branche de production est `master` — merges humains uniquement, jamais via agent
+- Une fois la PR mergée, le statut passe automatiquement de `[~]` à `[x]` via GitHub Actions
+- Une fois la PR mergée, supprimer le worktree : `git worktree remove ../sauverLaFace-XXX-00`
 
 ---
 
@@ -175,6 +187,9 @@ gh pr create --base dev --title "feat: XXX-00 nom"
 ## Autres commandes
 
 ```bash
+# Lancer le backend hors Docker
+bun run dev:backend
+
 # Tests unitaires (rapide, aucune dépendance externe)
 bun run --cwd apps/backend test:unit
 
@@ -188,6 +203,7 @@ bun run format
 # Compiler le package shared (obligatoire avant typecheck)
 bun run build:shared
 
-# Générer une migration Drizzle après changement de schéma
+# Migrations Drizzle
 bun run --cwd apps/backend db:generate
+bun run --cwd apps/backend db:migrate
 ```
