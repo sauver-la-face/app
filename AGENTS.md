@@ -150,7 +150,13 @@ docker restart sauverlaface-backend-1
 
 Chaque feature se développe dans un **git worktree isolé**, jamais directement sur `dev`. Plusieurs sessions coexistent : changer de branche dans le clone principal casse le travail des autres.
 
-**Démarrage :**
+**Démarrage, en deux temps.**
+
+*1. L'entrée de suivi arrive sur `dev`.* Une feature commence par sa spécification : une section `### XXX-00` dans `.ai/features.md`, amenée sur `dev` par une pull request portée par une branche `chore/`.
+
+Cet ordre n'est pas ajustable. Le workflow qui pose le statut `[~]` lit `.ai/features.md` **sur `dev`** au moment de la création de branche ; l'entrée doit donc y être avant, et `dev` n'accepte que des pull requests. Une branche `chore/` est le véhicule parce qu'elle ne déclenche pas ce workflow et n'est pas jugée par le job `Entrée de suivi`, qui exigerait justement l'entrée qu'on est en train de créer.
+
+*2. La branche de travail.*
 
 ```bash
 git fetch origin dev
@@ -158,7 +164,7 @@ git worktree add ../sauverLaFace-XXX-00 -b feature/XXX-00-nom origin/dev
 git -C ../sauverLaFace-XXX-00 push -u origin HEAD
 ```
 
-Le statut passe automatiquement de `[ ]` à `[~]` via GitHub Actions dès la création de la branche.
+Le statut passe automatiquement de `[ ]` à `[~]` via GitHub Actions dès la création de la branche. S'il ne bascule pas, c'est que l'entrée n'est pas sur `dev` : le workflow échoue et le dit.
 
 **Clôture (feature terminée et testée) :**
 
