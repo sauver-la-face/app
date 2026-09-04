@@ -11,7 +11,7 @@
 
 ## BACKEND
 
-### AUTH-01 — Authentification patients (codes 6 chiffres)
+### AUTH-01 - Authentification patients (codes 6 chiffres)
 
 `[x]` 🔴 Critique · `apps/backend/src/features/auth/`
 
@@ -37,7 +37,7 @@
 
 ---
 
-### AUTH-02 — Authentification médecins (MFA TOTP)
+### AUTH-02 - Authentification médecins (MFA TOTP)
 
 `[x]` 🔴 Critique · `apps/backend/src/features/auth/`
 
@@ -56,7 +56,7 @@
 
 ---
 
-### SEC-01 — Authentification médecin obligatoire sur les routes dashboard (A01)
+### SEC-01 - Authentification médecin obligatoire sur les routes dashboard (A01)
 
 `[x]` 🔴 Critique · `apps/backend/src/features/patients/` · `apps/backend/src/features/photos/` · `apps/backend/src/features/exports/`
 
@@ -80,7 +80,7 @@ Audit de sécurité (revue OWASP A01, 2026-07-23) : aucun middleware d'authentif
 
 ---
 
-### SEC-02 — Vérification JWT patient côté serveur (A01/A07)
+### SEC-02 - Vérification JWT patient côté serveur (A01/A07)
 
 `[x]` 🔴 Critique · `apps/backend/src/features/sync/` · `apps/backend/src/features/photos/` · `apps/backend/src/features/instructions/` · `apps/backend/src/features/auth/`
 
@@ -107,7 +107,7 @@ Suite à SEC-01 : le JWT patient est signé (`jwtTokenProvider.ts`) mais aucune 
 
 ---
 
-### SEC-03 — Révocation de session patient (A07)
+### SEC-03 - Révocation de session patient (A07)
 
 `[x]` 🔴 Critique · `apps/backend/src/shared/middleware/` · `apps/backend/src/features/patients/` · `apps/backend/src/infrastructure/schema.ts`
 
@@ -146,7 +146,7 @@ déjà `uuid_patient_code`, la vérification est donc possible sans changer le f
 - Tester : token valide avant révocation → 200, même token après révocation → 401, révocation d'un patient sans session active, non-régression de `issueAccessCode()` qui ne doit toujours révoquer que les codes en attente
 
 ---
-### SEC-04 — Routes non protégées : alertes et génération de codes (A01)
+### SEC-04 - Routes non protégées : alertes et génération de codes (A01)
 
 `[x]` 🔴 Critique · `apps/backend/src/features/alerts/` · `apps/backend/src/features/auth/` · `apps/backend/tests/`
 
@@ -193,7 +193,7 @@ complète.
 ---
 
 
-### SYNC-01 — Réception et résolution des conflits (server-wins)
+### SYNC-01 - Réception et résolution des conflits (server-wins)
 
 `[x]` 🔴 Critique · `apps/backend/src/features/sync/`
 
@@ -235,7 +235,7 @@ Mobile (SQLite) → Hono sync.usecase.ts → compare avec PostgreSQL
 
 ---
 
-### ALERT-01 — Système d'alertes automatiques
+### ALERT-01 - Système d'alertes automatiques
 
 `[x]` 🟡 Majeur · `apps/backend/src/features/alerts/`
 
@@ -254,7 +254,7 @@ Mobile (SQLite) → Hono sync.usecase.ts → compare avec PostgreSQL
 
 ---
 
-### ALERT-02 — Seuil d'alerte d'inactivité paramétrable
+### ALERT-02 - Seuil d'alerte d'inactivité paramétrable
 
 `[ ]` 🟡 Majeur · `apps/backend/src/features/alerts/`
 
@@ -278,7 +278,7 @@ Le seuil actuel (ALERT-01) est fixe à 7 jours, identique pour tous les patients
 
 ---
 
-### ALERT-03 — Alerte d'inactivité pour un patient enrôlé qui n'a jamais synchronisé
+### ALERT-03 - Alerte d'inactivité pour un patient enrôlé qui n'a jamais synchronisé
 
 `[ ]` 🟢 Mineur · `apps/backend/src/features/alerts/`
 
@@ -303,7 +303,7 @@ Le comportement actuel est correct pour le cas inverse — fiche créée, code j
 
 ---
 
-### PHOTO-01 — Stockage et validation des photos
+### PHOTO-01 - Stockage et validation des photos
 
 `[x]` 🟡 Majeur · `apps/backend/src/features/photos/`
 
@@ -323,7 +323,7 @@ Le comportement actuel est correct pour le cas inverse — fiche créée, code j
 
 ---
 
-### EXPORT-01 — Export PDF / CSV RGPD
+### EXPORT-01 - Export PDF / CSV RGPD
 
 `[x]` 🟢 Mineur · `apps/backend/src/features/exports/`
 
@@ -342,7 +342,7 @@ Le comportement actuel est correct pour le cas inverse — fiche créée, code j
 
 ---
 
-### AUDIT-01 — Middleware d'audit logs
+### AUDIT-01 - Middleware d'audit logs
 
 `[x]` 🟡 Majeur · `apps/backend/src/shared/middleware/audit.middleware.ts`
 
@@ -375,7 +375,7 @@ Le comportement actuel est correct pour le cas inverse — fiche créée, code j
 
 ---
 
-### API-01 — Documentation OpenAPI auto-générée (Swagger UI)
+### API-01 - Documentation OpenAPI auto-générée (Swagger UI)
 
 `[x]` 🟢 Mineur · `apps/backend/src/index.ts`
 
@@ -396,7 +396,7 @@ Le comportement actuel est correct pour le cas inverse — fiche créée, code j
 
 ---
 
-### API-02 — Conformité et sécurité du document OpenAPI
+### API-02 - Conformité et sécurité du document OpenAPI
 
 `[x]` 🟡 Majeur · `apps/backend/src/index.ts` · `apps/backend/src/shared/openapi.ts` · `apps/backend/src/features/*/presentation/`
 
@@ -424,7 +424,7 @@ Trois autres familles : `operation-summary` (quinze opérations sans résumé), 
 
 ---
 
-### PATIENT-01 — CRUD patients et gestion utilisateurs
+### PATIENT-01 - CRUD patients et gestion utilisateurs
 
 `[x]` 🟡 Majeur · `apps/backend/src/features/patients/`
 
@@ -441,7 +441,7 @@ Trois autres familles : `operation-summary` (quinze opérations sans résumé), 
 
 ---
 
-### INSTRUCTION-01 — Envoi d'instructions médicales
+### INSTRUCTION-01 - Envoi d'instructions médicales
 
 `[x]` 🟡 Majeur · `apps/backend/src/features/instructions/`
 
@@ -460,7 +460,7 @@ Trois autres familles : `operation-summary` (quinze opérations sans résumé), 
 
 ## DASHBOARD WEB
 
-### WEB-00 — Page de connexion médecin
+### WEB-00 - Page de connexion médecin
 
 `[x]` 🔴 Critique · `apps/web/src/app/[locale]/login/`
 
@@ -481,7 +481,7 @@ Trois autres familles : `operation-summary` (quinze opérations sans résumé), 
 
 ---
 
-### WEB-I18N-01 — Internationalisation du dashboard web (français / anglais / khmer)
+### WEB-I18N-01 - Internationalisation du dashboard web (français / anglais / khmer)
 
 `[x]` 🔴 Critique · `apps/web/src/i18n/`
 
@@ -513,7 +513,7 @@ Trois autres familles : `operation-summary` (quinze opérations sans résumé), 
 
 ---
 
-### WEB-01 — Tableau de bord médecin
+### WEB-01 - Tableau de bord médecin
 
 `[x]` 🟡 Majeur · `apps/web/src/app/dashboard/`
 
@@ -531,7 +531,7 @@ Trois autres familles : `operation-summary` (quinze opérations sans résumé), 
 
 ---
 
-### WEB-02 — Visualisation chronologique patient
+### WEB-02 - Visualisation chronologique patient
 
 `[x]` 🟡 Majeur · `apps/web/src/app/patients/[id]/`
 
@@ -548,7 +548,7 @@ Trois autres familles : `operation-summary` (quinze opérations sans résumé), 
 
 ---
 
-### WEB-03 — Gestion des utilisateurs et codes d'accès
+### WEB-03 - Gestion des utilisateurs et codes d'accès
 
 `[x]` 🟡 Majeur · `apps/web/src/app/patients/`
 
@@ -566,7 +566,7 @@ Trois autres familles : `operation-summary` (quinze opérations sans résumé), 
 
 ---
 
-### WEB-04 — Export données (PDF / CSV)
+### WEB-04 - Export données (PDF / CSV)
 
 `[x]` 🟢 Mineur · `apps/web/src/app/exports/`
 
@@ -582,7 +582,7 @@ Trois autres familles : `operation-summary` (quinze opérations sans résumé), 
 
 ---
 
-### WEB-05 — Envoi d'instructions pictographiques
+### WEB-05 - Envoi d'instructions pictographiques
 
 `[ ]` 🟡 Majeur · `apps/web/src/app/patients/[id]/instructions/`
 
@@ -593,7 +593,7 @@ Trois autres familles : `operation-summary` (quinze opérations sans résumé), 
 
 ---
 
-### WEB-06 — Suppression de la page racine morte
+### WEB-06 - Suppression de la page racine morte
 
 `[x]` 🟢 Mineur · `apps/web/src/app/page.tsx`
 
@@ -618,7 +618,7 @@ qui faisait échouer `next build` — sans que la CI le détecte, aucun job ne l
 
 ---
 
-### WEB-07 — Pages légales
+### WEB-07 - Pages légales
 
 `[x]` 🟡 Majeur · `apps/web/src/app/[locale]/mentions-legales/` · `apps/web/src/app/[locale]/confidentialite/` · `apps/web/src/app/[locale]/plan-du-site/`
 
@@ -661,7 +661,7 @@ reste du dossier.
 
 ---
 
-### WEB-08 — Graphique d'évolution de la sévérité des symptômes
+### WEB-08 - Graphique d'évolution de la sévérité des symptômes
 
 `[ ]` 🟢 Mineur · `apps/backend/src/infrastructure/schema.ts` · `apps/web/src/features/patients/components/`
 
@@ -688,7 +688,7 @@ La cause n'est pas la mise en œuvre mais le modèle de données : la table `sym
 
 ---
 
-### A11Y-01 — Corrections d'accessibilité WCAG 2.2 AA (dashboard)
+### A11Y-01 - Corrections d'accessibilité WCAG 2.2 AA (dashboard)
 
 `[x]` 🟡 Majeur · `apps/web/src/features/` · `docs/architectureAdr.md`
 
@@ -714,7 +714,7 @@ L'audit a révélé 4 violations sur 3 pages (login 92/100, dashboard 95/100, pa
 
 ---
 
-### A11Y-02 — Rédaction critère 3 + standard cibles tactiles mobile (48 dp)
+### A11Y-02 - Rédaction critère 3 + standard cibles tactiles mobile (48 dp)
 
 `[x]` 🟢 Mineur · `docs/architectureAdr.md` · `CLAUDE.md`
 
@@ -742,7 +742,7 @@ tactiles mobile (Material Design), distinct du minimum web WCAG 2.5.8 (24 px).
 
 ## APPLICATION MOBILE
 
-### MOB-02 — Authentification patient (code 6 chiffres)
+### MOB-02 - Authentification patient (code 6 chiffres)
 
 `[ ]` 🔴 Critique · `apps/mobile/src/features/auth/`
 
@@ -760,7 +760,7 @@ tactiles mobile (Material Design), distinct du minimum web WCAG 2.5.8 (24 px).
 
 ---
 
-### MOB-03 — Questionnaire symptômes (offline)
+### MOB-03 - Questionnaire symptômes (offline)
 
 `[ ]` 🟡 Majeur · `apps/mobile/src/features/questionnaire/`
 
@@ -778,7 +778,7 @@ tactiles mobile (Material Design), distinct du minimum web WCAG 2.5.8 (24 px).
 
 ---
 
-### MOB-04 — Capture et compression de photos
+### MOB-04 - Capture et compression de photos
 
 `[ ]` 🟡 Majeur · `apps/mobile/src/features/photos/`
 
@@ -798,7 +798,7 @@ tactiles mobile (Material Design), distinct du minimum web WCAG 2.5.8 (24 px).
 
 ---
 
-### MOB-05 — Queue de synchronisation (offline → backend)
+### MOB-05 - Queue de synchronisation (offline → backend)
 
 `[ ]` 🔴 Critique · `apps/mobile/src/features/sync/`
 
@@ -816,7 +816,7 @@ tactiles mobile (Material Design), distinct du minimum web WCAG 2.5.8 (24 px).
 
 ---
 
-### MOB-01 — Consentement RGPD première connexion
+### MOB-01 - Consentement RGPD première connexion
 
 `[ ]` 🔴 Critique · `apps/mobile/src/features/consent/`
 
@@ -840,7 +840,7 @@ tactiles mobile (Material Design), distinct du minimum web WCAG 2.5.8 (24 px).
 
 ---
 
-### MOB-06 — Consultation des instructions médicales
+### MOB-06 - Consultation des instructions médicales
 
 `[ ]` 🟢 Mineur · `apps/mobile/src/features/instructions/`
 
@@ -857,7 +857,7 @@ tactiles mobile (Material Design), distinct du minimum web WCAG 2.5.8 (24 px).
 
 ---
 
-### MOB-07 — Notifications (locales et push)
+### MOB-07 - Notifications (locales et push)
 
 `[ ]` 🟢 Mineur · `apps/mobile/src/features/notifications/`
 
@@ -885,7 +885,7 @@ tactiles mobile (Material Design), distinct du minimum web WCAG 2.5.8 (24 px).
 
 ## INTERNATIONALISATION
 
-### I18N-01 — Internationalisation de l'application mobile (khmer / français)
+### I18N-01 - Internationalisation de l'application mobile (khmer / français)
 
 `[ ]` 🟡 Majeur · `apps/mobile/src/i18n/`
 
@@ -916,7 +916,7 @@ tactiles mobile (Material Design), distinct du minimum web WCAG 2.5.8 (24 px).
 
 ## MÉDICAL
 
-### MED-01 — Définition des pictogrammes de symptômes
+### MED-01 - Définition des pictogrammes de symptômes
 
 `[x]` 🔴 Critique · `apps/backend/src/infrastructure/schema.ts` · à valider avec les chirurgiens toulousains
 
@@ -947,7 +947,7 @@ Le patient évalue ses symptômes via des pictogrammes visuels — pas de chiffr
 
 ## DEVOPS
 
-### DEVOPS-03 — Automatisation statut features (workflows + authentification bot)
+### DEVOPS-03 - Automatisation statut features (workflows + authentification bot)
 
 `[x]` 🔴 Critique · `.github/workflows/feature-in-progress.yml` · `.github/workflows/update-feature-status.yml`
 
@@ -985,7 +985,7 @@ Une GitHub App n'appartient à aucune personne — elle est rattachée au repo. 
 
 ---
 
-### DEVOPS-02 — Reverse proxy Caddy avec TLS 1.3
+### DEVOPS-02 - Reverse proxy Caddy avec TLS 1.3
 
 `[x]` 🟡 Majeur · `Caddyfile.prod` · `docker-compose.yml` · `docker-compose.override.yml` · `docker-compose.prod.yml`
 
@@ -1033,7 +1033,7 @@ introuvable —, aucun profil `prod` n'était déclaré, et le backend construis
 - Tester : `docker compose -f docker-compose.yml -f docker-compose.prod.yml --profile prod config` résout `target: prod` sans montage de code, et `caddy validate` accepte le `Caddyfile.prod`
 
 ---
-### DEVOPS-12 — Conteneuriser le dashboard web
+### DEVOPS-12 - Conteneuriser le dashboard web
 
 `[x]` 🟡 Majeur · `apps/web/Dockerfile` · `docker-compose.prod.yml` · `Caddyfile.prod`
 
@@ -1063,7 +1063,7 @@ fichier Compose : le dashboard n'était pas déployable.
 ---
 
 
-### DEVOPS-04 — Réparation du système de migrations Drizzle
+### DEVOPS-04 - Réparation du système de migrations Drizzle
 
 `[x]` 🔴 Critique · `apps/backend/drizzle/` · `apps/backend/src/shared/db.ts`
 
@@ -1102,7 +1102,7 @@ fichier Compose : le dashboard n'était pas déployable.
 
 ---
 
-### DEVOPS-05 — Tests d'intégration backend (Postgres réel) + CI dédiée
+### DEVOPS-05 - Tests d'intégration backend (Postgres réel) + CI dédiée
 
 `[x]` 🟡 Majeur · `.github/workflows/ci.yml` · `apps/backend/tests/`
 
@@ -1127,7 +1127,7 @@ La couverture `bun test --coverage` montrait un `% Lines` très faible sur `infr
 
 ---
 
-### DEVOPS-07 — Alias TypeScript `@infrastructure/*` (backend)
+### DEVOPS-07 - Alias TypeScript `@infrastructure/*` (backend)
 
 `[x]` 🟢 Mineur · `apps/backend/tsconfig.json` · `apps/backend/src/`
 
@@ -1150,7 +1150,7 @@ La couverture `bun test --coverage` montrait un `% Lines` très faible sur `infr
 
 ---
 
-### DEVOPS-08 — Mise à jour de la doc suite au split tests unitaires/intégration
+### DEVOPS-08 - Mise à jour de la doc suite au split tests unitaires/intégration
 
 `[x]` 🟢 Mineur · `README.md` · `CLAUDE.md` · `AGENTS.md` · `docs/onboarding.md` · `apps/backend/.env.example`
 
@@ -1170,7 +1170,7 @@ DEVOPS-05 a introduit `bun run test:unit` / `bun run test:integration` et la var
 
 ---
 
-### DEVOPS-09 — Mettre à jour le workflow Git dans CLAUDE.md (worktree)
+### DEVOPS-09 - Mettre à jour le workflow Git dans CLAUDE.md (worktree)
 
 `[x]` 🟢 Mineur · `CLAUDE.md`
 
@@ -1190,7 +1190,7 @@ DEVOPS-05 a introduit `bun run test:unit` / `bun run test:integration` et la var
 
 ---
 
-### DEVOPS-01 — Interface d'administration PostgreSQL (pgAdmin)
+### DEVOPS-01 - Interface d'administration PostgreSQL (pgAdmin)
 
 `[x]` 🟢 Mineur · `docker-compose.yml`
 
@@ -1208,7 +1208,7 @@ DEVOPS-05 a introduit `bun run test:unit` / `bun run test:integration` et la var
 
 ---
 
-### DEVOPS-06 — Suivi automatisé des dépendances vulnérables (Dependabot)
+### DEVOPS-06 - Suivi automatisé des dépendances vulnérables (Dependabot)
 
 `[x]` 🔴 Critique · `.github/dependabot.yml`
 
@@ -1230,7 +1230,7 @@ Audit de sécurité (revue OWASP A06, 2026-07-23) : aucun outil de suivi des vul
 
 ---
 
-### DEVOPS-13 — Job CI de construction des images Docker
+### DEVOPS-13 - Job CI de construction des images Docker
 
 `[x]` 🟡 Majeur · `.github/workflows/ci.yml`
 
@@ -1258,7 +1258,7 @@ Ce job était volontairement différé jusqu'à la séparation des fichiers Comp
 
 ---
 
-### DEVOPS-14 — `WEB_URL` : accorder le format entre CORS et Better Auth
+### DEVOPS-14 - `WEB_URL` : accorder le format entre CORS et Better Auth
 
 `[x]` 🟡 Majeur · `apps/backend/src/index.ts` · `apps/backend/src/features/auth/infrastructure/authConfig.ts`
 
@@ -1301,7 +1301,7 @@ Deux conséquences pour ce lot : le repli mérite d'être unique et déclaré à
 
 ---
 
-### DEVOPS-15 — Faire échouer le suivi de features au lieu de le laisser passer
+### DEVOPS-15 - Faire échouer le suivi de features au lieu de le laisser passer
 
 `[x]` 🟡 Majeur · `.github/workflows/ci.yml` · `.github/workflows/update-feature-status.yml` · `.github/workflows/feature-in-progress.yml`
 
@@ -1332,7 +1332,7 @@ Un second trou double le premier : le workflow ne se déclenche que sur `feature
 
 ---
 
-### DEMO-01 — Jeu de données de démonstration
+### DEMO-01 - Jeu de données de démonstration
 
 `[x]` 🟡 Majeur · `apps/backend/scripts/seedDemo.ts`
 
@@ -1365,7 +1365,7 @@ Le dossier patient (WEB-03) souffre du même vide : `seedSync01` insère une lig
 
 ---
 
-### NOTIF-01 — Notification push patient en cas de retard de suivi
+### NOTIF-01 - Notification push patient en cas de retard de suivi
 
 `[ ]` 🟡 Majeur · `apps/backend/src/features/notifications/`
 
@@ -1392,7 +1392,7 @@ Idée de Mathieu Baro (revue Bloc 2) : le système actuel (ALERT-01) notifie uni
 
 ## DOCUMENTATION
 
-### DOCS-02 — Structure documentaire : ADR, OWASP et accessibilité séparés
+### DOCS-02 - Structure documentaire : ADR, OWASP et accessibilité séparés
 
 `[x]` 🟢 Mineur · `docs/` · `.ai/` · `README.md` · `CLAUDE.md` · `.github/`
 
@@ -1435,7 +1435,7 @@ occupait le chemin, le template n'arrivait pas.
 
 ---
 
-### DOCS-03 — Faire de `docs/security/owasp.md` la référence OWASP unique
+### DOCS-03 - Faire de `docs/security/owasp.md` la référence OWASP unique
 
 `[x]` 🟡 Majeur · `docs/security/owasp.md` · `docs/architectureAdr.md`
 
@@ -1469,7 +1469,7 @@ Deux tableaux OWASP coexistent par ailleurs, et ils se contredisent. Celui de `d
 
 ---
 
-### DOCS-04 — Solder la dette documentaire laissée par DOCS-02 et DOCS-03
+### DOCS-04 - Solder la dette documentaire laissée par DOCS-02 et DOCS-03
 
 `[x]` 🟡 Majeur · `docs/architecture.md` · `CLAUDE.md` · `AGENTS.md` · `docs/architecture-systeme.md`
 
@@ -1497,7 +1497,7 @@ Cette entrée existe pour que le suivi redevienne vrai. Elle est écrite après 
 
 ---
 
-### DOCS-05 — Consigner en ADR les trois décisions structurantes prises hors ADR
+### DOCS-05 - Consigner en ADR les trois décisions structurantes prises hors ADR
 
 `[x]` 🟡 Majeur · `docs/adr/`
 
@@ -1532,7 +1532,7 @@ Aucune des trois n'est écrite ailleurs que dans un CHANGELOG, qui dit ce qui a 
 
 ---
 
-### DEVOPS-16 — Automatiser le chemin spec-first par un skill
+### DEVOPS-16 - Automatiser le chemin spec-first par un skill
 
 `[x]` 🟡 Majeur · `.claude/skills/feature-new/SKILL.md` · `AGENTS.md`
 
