@@ -1565,6 +1565,75 @@ Or aucun de ces gestes ne demande de jugement une fois l'identifiant, le nom et 
 
 ---
 
+### DOCKER-01 : Restaurer bun.lock dans le contexte de build des deux images
+
+`[x]` 🟡 Majeur · `.dockerignore` · `apps/backend/Dockerfile` · `apps/web/Dockerfile`
+
+> Entrée écrite après coup. Le travail a été livré par la pull request 85, mergée le 2026-09-02, sous un identifiant qui n'avait pas de section ici. Le workflow de suivi n'a donc rien pu enregistrer, et son échec est resté silencieux jusqu'à DEVOPS-15.
+
+**Contexte :**
+
+`bun.lock` figurait dans `.dockerignore`, donc absent du contexte de build. Les deux Dockerfile le copiaient avec un glob tolérant, `bun.lock*` : le build se poursuivait sans verrou et `bun install` résolvait chaque plage `^x.y.z` vers la dernière version publiée au lieu des versions verrouillées. Les images ne correspondaient pas au verrou du dépôt, et rien ne le disait.
+
+**Périmètre livré :**
+
+- [x] `bun.lock` retiré de la liste d'exclusion de `.dockerignore`
+- [x] Glob retiré des deux Dockerfile : l'absence du verrou fait désormais échouer le build au lieu de le laisser dériver en silence
+
+**Règles :**
+
+- `--frozen-lockfile` n'est pas utilisable ici : chaque Dockerfile ne copie que son app et `packages/`, alors que le verrou décrit tout le workspace, web et mobile compris. Bun le considère alors modifié et refuse
+
+---
+
+### API-03 : Ne pas servir le schéma OpenAPI en production
+
+`[x]` 🟡 Majeur · `apps/backend/src/index.ts` · `apps/backend/tests/apiDocs.test.ts`
+
+> Entrée écrite après coup. Le travail a été livré par la pull request 90, mergée le 2026-09-02, dans le même angle mort que DOCKER-01.
+
+**Contexte :**
+
+`/docs` était masqué hors développement depuis toujours, mais `app.doc('/openapi.json')` restait monté sans condition. Masquer l'interface Swagger sans masquer la spécification qu'elle affiche ne protège rien : `/openapi.json` est le contenu, `/docs` n'en est que la vue. Le document décrit les treize chemins de l'API, leurs schémas et leurs codes d'erreur.
+
+Ce qui rendait l'écart difficile à voir : le commentaire de `tests/routesProtegees.test.ts` justifiait l'ouverture des deux routes par « servie uniquement hors production ». Exact pour `/docs`, faux pour `/openapi.json`, qu'aucun test ne conditionnait. Une justification écrite de décision de sécurité ne correspondait donc pas au code pour l'une des deux routes qu'elle couvrait.
+
+**Périmètre livré :**
+
+- [x] `app.doc()` passe sous la même garde `NODE_ENV !== 'production'` que `/docs`
+- [x] Un test vérifie le 404 en production, ce qui rend exact sans le modifier le commentaire du test des routes protégées
+
+**Règles :**
+
+- Aucun consommateur en production : seuls les tests et les scripts `generate:api-types` des applications web et mobile utilisent cette route, tous contre `localhost` en développement
+
+---
+
+### DEVENV-01 : Rendre l'installation à froid fonctionnelle
+
+`[x]` 🟡 Majeur · `apps/backend/scripts/seedMed01.ts` · `docker-compose.yml`
+
+> Entrée écrite après coup. Le travail a été livré par la pull request 91, mergée le 2026-09-02, dans le même angle mort que DOCKER-01 et API-03.
+
+**Contexte :**
+
+Deux défauts que personne ne pouvait voir sur un poste déjà monté, découverts en montant un PostgreSQL jetable pour rejouer le parcours d'installation complet.
+
+Le seed MED-01 était inexécutable. L'unicité de `symptom.code` est portée par un index fonctionnel sur `lower(code)` (voir ADR 0016), tandis que le script visait la colonne nue dans son `ON CONFLICT`. PostgreSQL exige une correspondance exacte avec l'index et rejetait la requête. Une décision d'architecture posée après coup avait cassé un script écrit avant elle, sans que rien ne le signale : le seed ne se joue que sur une base vierge, et personne n'en avait créé depuis.
+
+pgadmin bouclait en redémarrage. Sans `PGADMIN_EMAIL` ni `PGADMIN_PASSWORD` dans `.env.local`, l'image refuse de démarrer ; avec `restart: unless-stopped`, elle se relançait indéfiniment et noyait la cause réelle dans les journaux. Les deux variables étaient déjà documentées dans `.env.example` : le défaut n'était pas la configuration mais l'illisibilité du diagnostic.
+
+**Périmètre livré :**
+
+- [x] Upsert remplacé par une lecture insensible à la casse suivie d'une insertion ou d'une mise à jour, l'API Drizzle n'acceptant qu'une colonne comme cible et non une expression
+- [x] Politique de redémarrage de pgadmin passée à `on-failure:3`, trois tentatives suffisant à rendre le message lisible avant que le service s'arrête sans gêner le reste de la pile
+
+**Règles :**
+
+- Sur huit lignes, la lecture suivie d'une écriture reste plus lisible qu'un upsert en SQL brut, et demeure dans l'API typée
+
+---
+
 ## RÈGLES GLOBALES (toutes les features)
 
 - **TDD obligatoire sur toutes les features** : l'agent écrit les tests en premier, génère l'implémentation pour les faire passer, puis le développeur valide. Ne jamais générer du code sans test associé.
