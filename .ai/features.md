@@ -1303,7 +1303,7 @@ Deux conséquences pour ce lot : le repli mérite d'être unique et déclaré à
 
 ### DEVOPS-15 — Faire échouer le suivi de features au lieu de le laisser passer
 
-`[~]` 🟡 Majeur · `.github/workflows/ci.yml` · `.github/workflows/update-feature-status.yml` · `.github/workflows/feature-in-progress.yml`
+`[x]` 🟡 Majeur · `.github/workflows/ci.yml` · `.github/workflows/update-feature-status.yml` · `.github/workflows/feature-in-progress.yml`
 
 **Contexte :**
 
