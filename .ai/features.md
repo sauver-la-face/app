@@ -1499,7 +1499,7 @@ Cette entrée existe pour que le suivi redevienne vrai. Elle est écrite après 
 
 ### DOCS-05 — Consigner en ADR les trois décisions structurantes prises hors ADR
 
-`[ ]` 🟡 Majeur · `docs/adr/`
+`[~]` 🟡 Majeur · `docs/adr/`
 
 **Contexte :**
 
