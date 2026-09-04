@@ -1532,6 +1532,39 @@ Aucune des trois n'est écrite ailleurs que dans un CHANGELOG, qui dit ce qui a 
 
 ---
 
+### DEVOPS-16 — Automatiser le chemin spec-first par un skill
+
+`[ ]` 🟡 Majeur · `.claude/skills/feature-new/SKILL.md` · `AGENTS.md`
+
+**Contexte :**
+
+DEVOPS-15 a rendu le suivi fiable, au prix d'un ordre à respecter. `feature-in-progress` lit `features.md` **sur `dev`** au moment de la création de branche ; l'entrée doit donc y être avant. Et comme `dev` n'accepte que des pull requests, elle ne peut y arriver que par une pull request préalable.
+
+L'ordre n'est pas un choix qu'on pourrait ajuster : il découle de trois faits qui se cumulent. Le statut est un fichier de la branche d'intégration, le marqueur est posé à la création de branche, et la branche d'intégration n'accepte que des pull requests. Cinq gestes en découlent, avant d'avoir écrit une ligne de la feature.
+
+Ce n'est pas la CI qui pèse : mesurée sur la pull request 112, une pull request de spécification prend 65 secondes, les jobs tournant en parallèle. Ce sont les gestes et le changement de contexte qu'ils imposent.
+
+Or aucun de ces gestes ne demande de jugement une fois l'identifiant, le nom et le contenu de l'entrée connus. La chaîne est mécanique, donc automatisable telle quelle.
+
+**Périmètre :**
+
+- [ ] Un skill `/feature-new XXX-00 "nom"` qui écrit l'entrée, l'amène sur `dev` par une branche `chore/` et une pull request, attend la CI, merge, nettoie, puis enchaîne la séquence de `/feature-start`
+- [ ] `AGENTS.md` décrit le chemin en deux temps et la raison de l'ordre, sans nommer le skill
+
+**Règles :**
+
+- Le skill ne supprime pas la double pull request, il en supprime le coût humain. L'historique gardera deux pull requests par feature, ce qui est voulu : spécifier et réaliser sont deux actes distincts, et c'est la trace du premier qui manquait jusqu'ici
+- Rien de propre à un assistant n'entre dans `AGENTS.md` (voir ADR 0024). Le fichier décrit l'ordre à respecter ; le skill n'est qu'un raccourci pour celui qui en dispose
+- Le skill s'arrête et rend la main si la CI de la pull request de spécification échoue. Il ne merge jamais en forçant, et ne contourne aucun check
+- L'entrée écrite suit le format des autres : statut, priorité, fichiers, puis Contexte, Périmètre, Règles et Hors périmètre. Une entrée squelette serait pire que pas d'entrée, puisqu'elle ferait passer le contrôle sans rien spécifier
+
+**Hors périmètre :**
+
+- La réduction du coût CI de la pull request de spécification, mesurée à 45 secondes de gain. Écartée comme non prioritaire une fois les gestes automatisés
+- Le déplacement du suivi hors de `features.md`, qui supprimerait à la fois l'ordre à respecter et l'exemption de l'ADR 0026. C'est la sortie de fond, et elle reste un chantier distinct
+
+---
+
 ## RÈGLES GLOBALES (toutes les features)
 
 - **TDD obligatoire sur toutes les features** : l'agent écrit les tests en premier, génère l'implémentation pour les faire passer, puis le développeur valide. Ne jamais générer du code sans test associé.
