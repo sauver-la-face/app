@@ -43,12 +43,12 @@ git worktree add ../sauverLaFace-[ID]-spec -b chore/[ID]-spec origin/dev
 ```
 
 Dans ce worktree, écris l'entrée dans `.ai/features.md`, avant la section
-`## RÈGLES GLOBALES`, en copiant la mise en forme d'une entrée voisine. Le titre
-sépare l'identifiant du libellé par le même caractère que les entrées
-existantes. La structure attendue :
+`## RÈGLES GLOBALES`. Le titre sépare l'identifiant du libellé par un trait
+d'union entouré d'espaces, la même convention que les titres d'ADR. La structure
+attendue :
 
 ```text
-### XXX-00 : Titre à l'infinitif
+### XXX-00 - Titre à l'infinitif
 
 `[ ]` 🟡 Majeur · `chemin/du/fichier` · `autre/fichier`
 
