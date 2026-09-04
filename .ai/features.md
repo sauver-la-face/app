@@ -1497,6 +1497,41 @@ Cette entrée existe pour que le suivi redevienne vrai. Elle est écrite après 
 
 ---
 
+### DOCS-05 — Consigner en ADR les trois décisions structurantes prises hors ADR
+
+`[ ]` 🟡 Majeur · `docs/adr/`
+
+**Contexte :**
+
+Trois décisions engageant tout le projet ont été prises et appliquées sans ADR, alors que `docs/adr/` existe justement pour ça.
+
+La première : `AGENTS.md` devient la source unique des instructions d'agent, `CLAUDE.md` se réduisant à un import. Elle a tranché une contradiction entre les deux fichiers sur le workflow Git, où l'un imposait un worktree par feature et l'autre un `git checkout -b` dans le clone principal.
+
+La deuxième : le contrôle du suivi de features est placé dans la CI de PR plutôt que dans les workflows de statut, parce que ces derniers s'exécutent hors du cycle d'une PR ouverte et ne peuvent qu'alerter.
+
+La troisième : `dev` passe d'une protection classique à un ruleset, sans approbation requise mais avec huit checks, et l'application `sauver-la-face-ci` en acteur de contournement. Celle-ci a une histoire : la protection de `dev` exigeait une approbation que personne ne pouvait donner et n'exigeait aucun check. Elle était restée sans effet tant que le dépôt était privé sur le plan gratuit, le passage en public l'a activée, et le remplacement de l'approbation par des checks a bloqué les workflows de statut qui poussent directement sur `dev`.
+
+Aucune des trois n'est écrite ailleurs que dans un CHANGELOG, qui dit ce qui a changé et non pourquoi ni contre quoi.
+
+**Périmètre :**
+
+- [ ] `0024` sur la source unique des instructions d'agent
+- [ ] `0025` sur l'emplacement du contrôle de suivi
+- [ ] `0026` sur la protection de `dev` par ruleset et l'exemption accordée
+- [ ] Les trois lignes correspondantes dans `docs/adr/README.md`
+
+**Règles :**
+
+- La section « Alternatives écartées » porte la valeur de l'ADR : ce qui a été envisagé et refusé, avec le motif. Un ADR qui n'énonce que la décision retenue ne sert à rien dans six mois
+- Statut « Accepté » : les trois décisions sont déjà appliquées en production du dépôt, les consigner comme « Proposé » serait faux
+
+**Hors périmètre :**
+
+- La dette laissée par `0026` : tant que le statut des features vit dans un fichier de `dev`, une exemption d'écriture reste nécessaire. La sortir vers un label ou un projet GitHub rendrait l'exemption inutile, ce qui est un chantier distinct
+- Les entrées manquantes de `DEVENV-01`, `DOCKER-01` et `API-03`, qui demandent de lire ce que ces branches font
+
+---
+
 ## RÈGLES GLOBALES (toutes les features)
 
 - **TDD obligatoire sur toutes les features** : l'agent écrit les tests en premier, génère l'implémentation pour les faire passer, puis le développeur valide. Ne jamais générer du code sans test associé.
