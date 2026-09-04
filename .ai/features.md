@@ -1548,8 +1548,8 @@ Or aucun de ces gestes ne demande de jugement une fois l'identifiant, le nom et 
 
 **Périmètre :**
 
-- [ ] Un skill `/feature-new XXX-00 "nom"` qui écrit l'entrée, l'amène sur `dev` par une branche `chore/` et une pull request, attend la CI, merge, nettoie, puis enchaîne la séquence de `/feature-start`
-- [ ] `AGENTS.md` décrit le chemin en deux temps et la raison de l'ordre, sans nommer le skill
+- [x] Un skill `/feature-new XXX-00 "nom"` qui écrit l'entrée, l'amène sur `dev` par une branche `chore/` et une pull request, attend la CI, merge, nettoie, puis enchaîne la séquence de `/feature-start`
+- [x] `AGENTS.md` décrit le chemin en deux temps et la raison de l'ordre, sans nommer le skill
 
 **Règles :**
 
