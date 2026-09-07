@@ -10,15 +10,15 @@
     "test": "bun test"
   },
   "dependencies": {
-    "expo": "~57.0.17",
+    "expo": "~57.0.20",
     "react": "^19.2.8",
     "react-native": "0.86.3",
     "expo-sqlite": "~57.0.2",
-    "expo-secure-store": "~57.0.2",
-    "expo-notifications": "~57.0.15",
+    "expo-secure-store": "~57.0.3",
+    "expo-notifications": "~57.0.17",
     "expo-localization": "~57.0.1",
-    "i18next": "^26.3.6",
-    "react-i18next": "^17.0.11",
+    "i18next": "^26.4.2",
+    "react-i18next": "^17.0.13",
     "@sauver-la-face/shared": "workspace:*"
   },
   "devDependencies": {}
