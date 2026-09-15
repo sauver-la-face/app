@@ -1632,6 +1632,59 @@ pgadmin bouclait en redémarrage. Sans `PGADMIN_EMAIL` ni `PGADMIN_PASSWORD` dan
 
 - Sur huit lignes, la lecture suivie d'une écriture reste plus lisible qu'un upsert en SQL brut, et demeure dans l'API typée
 
+### SEC-06 - Durcir l'extraction d'IP du rate limiter d'authentification (A07)
+
+`[ ]` 🟡 Majeur · `apps/backend/src/shared/middleware/rateLimiter.ts` · `apps/backend/src/features/auth/presentation/authRouter.ts` · `apps/backend/src/shared/middleware/auditMiddleware.ts` · `Caddyfile.prod` · `docs/security/owasp.md` · `docs/adr/`
+
+**Contexte :**
+
+La limitation des tentatives sur `POST /auth/patient/validate` (code patient à
+six chiffres, porte d'entrée vers des données de santé) prend comme clé la valeur
+brute de l'en-tête `X-Forwarded-For`, que le client contrôle. `rateLimiter.ts`
+lit la chaîne entière ; `authRouter.ts` (`getClientIp`) et `auditMiddleware.ts`
+en prennent la première entrée (`split(',')[0]`). Trois extractions divergentes,
+toutes fondées sur une valeur non fiable.
+
+Test d'exploitation mené le 2026-09-15 sur la pile dev. En frappant le backend
+directement (port 3001) avec un `X-Forwarded-For` différent à chaque appel, six
+tentatives échouées renvoient six `401` et aucun `429` : le compteur repart de
+zéro à chaque requête, le code est énumérable sans limite.
+
+Le défaut n'est pas exploitable aujourd'hui. Caddy, sans `trusted_proxies`, ne
+fait pas confiance au `X-Forwarded-For` reçu et le remplace par l'IP réelle du
+connectant. À travers Caddy (port 80), les mêmes six tentatives se bloquent au
+quatrième (`429`), et le backend logue toujours la même IP. La protection tient
+donc entièrement à un comportement par défaut de Caddy, non écrit et non voulu.
+Elle saute si un `trusted_proxies` est ajouté sans corriger le code (Caddy
+ajouterait alors l'en-tête client au lieu de l'écraser), si un second proxy est
+placé devant, ou si le backend est atteint autrement que par Caddy.
+
+Défaut voisin : l'option `windowMs` de `rateLimiter` est déclarée mais jamais
+lue. Il n'y a pas de fenêtre glissante, les échecs ne se périment pas tant
+qu'aucun succès ne les remet à zéro, ce que l'ADR 0021 (« 3 tentatives par 15
+minutes ») décrit pourtant.
+
+**Périmètre :**
+
+- [ ] Un extracteur d'IP client unique et partagé, prenant l'entrée fiable du `X-Forwarded-For` pour un unique proxy de confiance, avec repli documenté
+- [ ] Les trois appelants (`rateLimiter.ts`, `authRouter.ts`, `auditMiddleware.ts`) branchés dessus, plus aucune extraction locale
+- [ ] `windowMs` effectivement appliqué : le compteur se réinitialise quand la fenêtre est écoulée
+- [ ] `trusted_proxies` explicite dans `Caddyfile.prod`, pour que le contrat « Caddy détermine l'IP client » soit écrit
+- [ ] Test de non-régression : faire varier le `X-Forwarded-For` ne remet plus le compteur à zéro
+- [ ] ADR 0027 sur la frontière de confiance pour l'IP client, complétant l'ADR 0021
+- [ ] Ligne A07 de `docs/security/owasp.md` mise à jour avec la posture mesurée
+
+**Règles :**
+
+- L'extracteur suppose exactement un proxy de confiance (Caddy) et le dit en commentaire : changer le nombre de sauts est une décision d'architecture, pas un ajustement silencieux
+- Code et configuration Caddy se corrigent ensemble, corriger l'un sans l'autre laisse ou rouvre le trou
+- Le test frappe le comportement mesuré (variation du `X-Forwarded-For`), pas une reformulation de l'implémentation
+
+**Hors périmètre :**
+
+- Le stockage des compteurs reste en mémoire de processus (`Map`) : le passage en base ou cache partagé pour un backend répliqué est un autre sujet, déjà noté dans les exceptions de `owasp.md`
+- La limitation sur `/api/auth/sign-in/email` (connexion médecin) conserve sa double protection Better Auth plus maison, l'unification d'IP la touche par le partage de l'extracteur mais on ne refond pas sa logique de blocage ici
+
 ---
 
 ## RÈGLES GLOBALES (toutes les features)
