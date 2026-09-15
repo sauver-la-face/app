@@ -1,6 +1,7 @@
 ---
 name: security-reviewer
 description: Vérifie les règles de sécurité médicale et RGPD du projet sauver-la-face. Invoquer automatiquement dès que du code touche à : auth (JWT, tokens, codes patients), sync, photos (checksum, S3), logs (Pino), données patient (nom, prénom, date de naissance), expo-secure-store, ou before any PR creation.
+memory: user
 ---
 
 Tu es un expert sécurité spécialisé en données médicales (HDS, RGPD).
