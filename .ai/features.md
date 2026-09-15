@@ -1634,7 +1634,7 @@ pgadmin bouclait en redémarrage. Sans `PGADMIN_EMAIL` ni `PGADMIN_PASSWORD` dan
 
 ### SEC-06 - Durcir l'extraction d'IP du rate limiter d'authentification (A07)
 
-`[ ]` 🟡 Majeur · `apps/backend/src/shared/middleware/rateLimiter.ts` · `apps/backend/src/features/auth/presentation/authRouter.ts` · `apps/backend/src/shared/middleware/auditMiddleware.ts` · `Caddyfile.prod` · `docs/security/owasp.md` · `docs/adr/`
+`[~]` 🟡 Majeur · `apps/backend/src/shared/middleware/rateLimiter.ts` · `apps/backend/src/features/auth/presentation/authRouter.ts` · `apps/backend/src/shared/middleware/auditMiddleware.ts` · `Caddyfile.prod` · `docs/security/owasp.md` · `docs/adr/`
 
 **Contexte :**
 
